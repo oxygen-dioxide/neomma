@@ -14,7 +14,9 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+#lib/
+# temporarily unignore lib/ because neomma/lib stores pattern files in original project,
+# but this may need to be removed in the future if we start storing built distributions here
 lib64/
 parts/
 sdist/
