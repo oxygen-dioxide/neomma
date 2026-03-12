@@ -29,10 +29,10 @@ import sys
 import copy
 import subprocess
 
-import MMA.midi
-import MMA.lyric
+import neomma.MMA.midi
+import neomma.MMA.lyric
 from . import gbl
-from   MMA.common import *
+from   neomma.MMA.common import *
 
 splitOutput = None
 
@@ -59,7 +59,7 @@ def createMIDI(outfile):
     except IOError:
         error("Can't open file '%s' for writing" % outfile)
 
-    MMA.midi.writeTracks(out)
+    neomma.MMA.midi.writeTracks(out)
     out.close()
 
 def createOutName(name, subname):
@@ -89,7 +89,7 @@ def channelSplit(outfile):
     gbl.mtrks = copy.copy(tempMtrk)
     
 def trackSplit(outfile):
-    """ Write midi files split by trackname. Recursively calls MMA. """
+    """ Write midi files split by trackname. Recursively calls neomma.MMA. """
     
     if len(sys.argv) > 3:
         error("Command line arguments are not permitted using '-xTsplit'.")
@@ -106,12 +106,12 @@ def maker():
     """ Called from the main loop to create the midi, etc.
         returns: Name of output file
     """
-    import MMA.debug   # here! avoid circular import
+    import neomma.MMA.debug   # here! avoid circular import
 
     ####################################
     # Dry run, no output
 
-    if MMA.debug.noOutput:
+    if neomma.MMA.debug.noOutput:
         gbl.lineno = -1
         warning("Input file parsed successfully. No midi file generated")
         sys.exit(0)
@@ -137,7 +137,7 @@ def maker():
     #   a ".", "/" or "\ " then it is inserted at the start of the path;
     #   otherwise it is inserted before the filename portion.
 
-    outfile = MMA.paths.outfile
+    outfile = neomma.MMA.paths.outfile
 
     if (not outfile.startswith('/')) and gbl.outPath \
             and not gbl.outfile and not gbl.playFile:
@@ -173,8 +173,8 @@ def maker():
             trackCount += 1
     
     if gbl.printProcessed:
-        import MMA.rangeify
-        print ("Bars processed: %s" % MMA.rangeify.rangeify(gbl.barLabels))
+        import neomma.MMA.rangeify
+        print ("Bars processed: %s" % neomma.MMA.rangeify.rangeify(gbl.barLabels))
 
     if trackCount == 1:  # only meta track
         if fileExist:
@@ -184,7 +184,7 @@ def maker():
             print("Existing file '%s' has not been modified." % outfile)
         sys.exit(1)
 
-    MMA.lyric.lyric.leftovers()
+    neomma.MMA.lyric.lyric.leftovers()
 
     # go and write file (or files if splitting)
 
@@ -196,7 +196,7 @@ def maker():
         createMIDI(outfile)
     
     if gbl.playFile:
-        import MMA.player
-        MMA.player.playMidi(outfile)
+        import neomma.MMA.player
+        neomma.MMA.player.playMidi(outfile)
 
     return(outfile)

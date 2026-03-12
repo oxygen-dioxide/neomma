@@ -31,47 +31,47 @@ are completely handled here.
 import random
 
 from . import gbl
-from MMA.common import *
+from neomma.MMA.common import *
 
-import MMA.debug
-import MMA.notelen
-import MMA.chords
-import MMA.file
-import MMA.midi
-import MMA.midifuncs
-import MMA.midiIn
-import MMA.midinote
-import MMA.grooves
-import MMA.docs
-import MMA.auto
-import MMA.func
-import MMA.translate
-import MMA.patSolo
-import MMA.mdefine
-import MMA.volume
-import MMA.seqrnd
-import MMA.patch
-import MMA.paths
-import MMA.player
-import MMA.sequence
-import MMA.swing
-import MMA.sync
-import MMA.truncate
-import MMA.ornament
-import MMA.trigger
-import MMA.tempo
-import MMA.tweaks
-import MMA.options
-import MMA.rpitch
-import MMA.regplug
-import MMA.after
-import MMA.lyric
+import neomma.MMA.debug
+import neomma.MMA.notelen
+import neomma.MMA.chords
+import neomma.MMA.file
+import neomma.MMA.midi
+import neomma.MMA.midifuncs
+import neomma.MMA.midiIn
+import neomma.MMA.midinote
+import neomma.MMA.grooves
+import neomma.MMA.docs
+import neomma.MMA.auto
+import neomma.MMA.func
+import neomma.MMA.translate
+import neomma.MMA.patSolo
+import neomma.MMA.mdefine
+import neomma.MMA.volume
+import neomma.MMA.seqrnd
+import neomma.MMA.patch
+import neomma.MMA.paths
+import neomma.MMA.player
+import neomma.MMA.sequence
+import neomma.MMA.swing
+import neomma.MMA.sync
+import neomma.MMA.truncate
+import neomma.MMA.ornament
+import neomma.MMA.trigger
+import neomma.MMA.tempo
+import neomma.MMA.tweaks
+import neomma.MMA.options
+import neomma.MMA.rpitch
+import neomma.MMA.regplug
+import neomma.MMA.after
+import neomma.MMA.lyric
 
-from MMA.timesig import timeSig
-from MMA.parseCL import parseChordLine
-from MMA.macro import macros
-from MMA.alloc import trackAlloc
-from MMA.keysig import keySig
+from neomma.MMA.timesig import timeSig
+from neomma.MMA.parseCL import parseChordLine
+from neomma.MMA.macro import macros
+from neomma.MMA.alloc import trackAlloc
+from neomma.MMA.keysig import keySig
 
 beginData = []      # Current data set by a BEGIN statement
 beginPoints = []    # since BEGINs can be nested, we need ptrs for backing out of BEGINs
@@ -91,12 +91,12 @@ def parseFile(n, depth=[0]):
         
     fp = gbl.inpath
 
-    f = MMA.file.ReadFile(n)
+    f = neomma.MMA.file.ReadFile(n)
 
     parse(f)
     gbl.inpath = fp
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("File '%s' closed." % n)
 
     depth[0] -= 1
@@ -110,7 +110,7 @@ def parse(inpath):
     curline = None
 
     while 1:
-        MMA.after.check()
+        neomma.MMA.after.check()
         
         curline = inpath.read()
 
@@ -158,7 +158,7 @@ def parse(inpath):
             l = beginData + l
             action = l[0].upper()
 
-        if MMA.debug.showExpand and action != 'REPEAT':
+        if neomma.MMA.debug.showExpand and action != 'REPEAT':
             dPrint(l)
 
         if action in simpleFuncs:
@@ -229,13 +229,13 @@ def parse(inpath):
         # The solo data is pushed into RIFFs and discarded from
         # the current line.
         l = ' '.join(l)
-        l = MMA.patSolo.extractSolo(l, rptcount)
+        l = neomma.MMA.patSolo.extractSolo(l, rptcount)
 
         # set lyrics from [stuff] in the current line.
         # NOTE: lyric.extract() inserts previously created
         #       data from LYRICS SET and inserts the chord names
         #       if that flag is active.
-        l, lyrics = MMA.lyric.lyric.extract(l, rptcount)
+        l, lyrics = neomma.MMA.lyric.lyric.extract(l, rptcount)
         l = l.split()
 
         # At this point we have only chord info. A number
@@ -262,17 +262,17 @@ def parse(inpath):
         for rpt in range(rptcount):   # for each bar in the repeat count ( Cm * 3)
             """ Handle global (de)cresc by popping a new volume off stack. """
 
-            if MMA.volume.futureVol:
-                MMA.volume.volume = MMA.volume.futureVol.pop(0)
-            if MMA.volume.futureVol:
-                MMA.volume.nextVolume = MMA.volume.futureVol[0]
+            if neomma.MMA.volume.futureVol:
+                neomma.MMA.volume.volume = neomma.MMA.volume.futureVol.pop(0)
+            if neomma.MMA.volume.futureVol:
+                neomma.MMA.volume.nextVolume = neomma.MMA.volume.futureVol[0]
             else:
-                MMA.volume.nextVolume = None
+                neomma.MMA.volume.nextVolume = None
 
             # Set up for rnd seq. This may set the current seq point.
             # If return is >=0 then we're doing track rnd.
 
-            rsq, seqlist = MMA.seqrnd.setseq()
+            rsq, seqlist = neomma.MMA.seqrnd.setseq()
 
             """ Process each track. It is important that the track classes
                 are written so that the ctable passed to them IS NOT MODIFIED.
@@ -297,9 +297,9 @@ def parse(inpath):
                 when -b or -B is set to limit output.
             """
 
-            if MMA.truncate.length:
-                nextOffset = MMA.truncate.length
-                MMA.truncate.countDown()
+            if neomma.MMA.truncate.length:
+                nextOffset = neomma.MMA.truncate.length
+                neomma.MMA.truncate.countDown()
             else:
                 nextOffset = gbl.barLen
 
@@ -324,11 +324,11 @@ def parse(inpath):
                 error("Capacity exceeded. Maxbar setting is %s. Use -m option"
                       % gbl.maxBars)
 
-            MMA.grooves.nextGroove()   # using groove list? Advance.
+            neomma.MMA.grooves.nextGroove()   # using groove list? Advance.
 
             # Enabled with the -r command line option
 
-            if MMA.debug.showrun:
+            if neomma.MMA.debug.showrun:
                 if lyrics:       # we print lyric as a list 
                     ly = lyrics  # with the []s
                 else:
@@ -340,15 +340,15 @@ def parse(inpath):
             # chord to the midi file again. A real lyric is
             # just ignored ... 2 reasons: the lyric is mangled and
             # and it makes sense to only have it once!
-            if rptcount>1 and MMA.lyric.lyric.dupchords:
-                _,lyrics = MMA.lyric.lyric.extract(' '.join(l), 0)
+            if rptcount>1 and neomma.MMA.lyric.lyric.dupchords:
+                _,lyrics = neomma.MMA.lyric.lyric.extract(' '.join(l), 0)
 
             # The barNum and other pointers have been incremented
             # and a bar of data has been processed. If we are repeating
             # due to a "*" we do a AGAIN test. Without a rpt this would
             # be done at the start of a data line. 
-            if rptcount>1 and  MMA.after.needed():
-                MMA.after.check(recurse=True)
+            if rptcount>1 and  neomma.MMA.after.needed():
+                neomma.MMA.after.check(recurse=True)
 
 ##################################################################
 
@@ -587,7 +587,7 @@ def include(ln):
     if len(ln) != 1:
         error("Use: Include FILE")
 
-    fn = MMA.paths.findIncFile(ln[0])
+    fn = neomma.MMA.paths.findIncFile(ln[0])
 
     if not fn:
         error("Could not find include file '%s'" % ln[0])
@@ -605,7 +605,7 @@ def usefile(ln):
     if len(ln) != 1:
         error("Use: Use FILE")
 
-    fn = MMA.paths.findLibFile(ln[0])
+    fn = neomma.MMA.paths.findLibFile(ln[0])
 
     if not fn:
         error("Unable to locate library file '%s'" % ln[0])
@@ -615,9 +615,9 @@ def usefile(ln):
         a defgroove ('cause it's an integer). Save, read, restore.
     """
 
-    MMA.grooves.stackGroove.push()
+    neomma.MMA.grooves.stackGroove.push()
     parseFile(fn)
-    MMA.grooves.stackGroove.pop()
+    neomma.MMA.grooves.stackGroove.pop()
 
 
 #######################################
@@ -644,7 +644,7 @@ def lnPrint(ln):
 def printActive(ln):
     """ Print a list of the active tracks. """
 
-    print("Active tracks, groove: %s %s" % (MMA.grooves.currentGroove, ' '.join(ln)))
+    print("Active tracks, groove: %s %s" % (neomma.MMA.grooves.currentGroove, ' '.join(ln)))
     print("%15s  %2s   %s" % ("Track", "Ch", "Events"))
     for a in sorted(gbl.tnames.keys()):
         f = gbl.tnames[a]
@@ -745,7 +745,7 @@ def deleteTrks(ln):
         if not name in gbl.deletedTracks:
             gbl.deletedTracks.append(name)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Track '%s' deleted" % name)
 
 #######################################
@@ -971,7 +971,7 @@ def trackHarmony(name, ln):
     if not ln:
         error("Use: %s Harmony N [...]" % name)
 
-    MMA.harmony.setHarmony(gbl.tnames[name], ln)
+    neomma.MMA.harmony.setHarmony(gbl.tnames[name], ln)
 #    gbl.tnames[name].setHarmony(ln)
 
 
@@ -981,7 +981,7 @@ def trackHarmonyOnly(name, ln):
     if not ln:
         error("Use: %s HarmonyOnly N [...]" % name)
 
-    MMA.harmony.setHarmonyOnly(gbl.tnames[name], ln)
+    neomma.MMA.harmony.setHarmonyOnly(gbl.tnames[name], ln)
 #      gbl.tnames[name].setHarmonyOnly(ln)
 
 
@@ -991,7 +991,7 @@ def trackHarmonyVolume(name, ln):
     if not ln:
         error("Use: %s HarmonyVolume N [...]" % name)
 
-    MMA.harmony.setHarmonyVolume(gbl.tnames[name], ln)
+    neomma.MMA.harmony.setHarmonyVolume(gbl.tnames[name], ln)
 #      gbl.tnames[name].setHarmonyVolume(ln)
 
 
@@ -1108,7 +1108,7 @@ def trackOn(name, ln):
 def trackOrnament(name, ln):
     """ Set the ornamentation. Currently only for SCALE. """
 
-    MMA.ornament.setOrnament(gbl.tnames[name], ln)
+    neomma.MMA.ornament.setOrnament(gbl.tnames[name], ln)
 
 
 def trackTone(name, ln):
@@ -1219,109 +1219,109 @@ def trackUnify(name, ln):
 
 """
 
-simpleFuncs = {'ADJUSTVOLUME': MMA.volume.adjvolume,
-               'AFTER': MMA.after.create,
-               'ALLGROOVES': MMA.grooves.allgrooves,
+simpleFuncs = {'ADJUSTVOLUME': neomma.MMA.volume.adjvolume,
+               'AFTER': neomma.MMA.after.create,
+               'ALLGROOVES': neomma.MMA.grooves.allgrooves,
                'ALLTRACKS': allTracks,
-               'AUTHOR': MMA.docs.docAuthor,
-               'AUTOSOLOTRACKS': MMA.patSolo.setAutoSolo,
-               'BEATADJUST': MMA.tempo.beatAdjust,
-               'CALL': MMA.func.callFunction,
-               'CHANNELPREF': MMA.midifuncs.setChPref,
-               'CHORDADJUST': MMA.chords.chordAdjust,
-               'CMDLINE': MMA.options.cmdLine,
+               'AUTHOR': neomma.MMA.docs.docAuthor,
+               'AUTOSOLOTRACKS': neomma.MMA.patSolo.setAutoSolo,
+               'BEATADJUST': neomma.MMA.tempo.beatAdjust,
+               'CALL': neomma.MMA.func.callFunction,
+               'CHANNELPREF': neomma.MMA.midifuncs.setChPref,
+               'CHORDADJUST': neomma.MMA.chords.chordAdjust,
+               'CMDLINE': neomma.MMA.options.cmdLine,
                'COMMENT': comment,
-               'CRESC': MMA.volume.setCresc,
-               'CUT': MMA.tempo.cut,
-               'DEBUG': MMA.debug.setDebug,
+               'CRESC': neomma.MMA.volume.setCresc,
+               'CUT': neomma.MMA.tempo.cut,
+               'DEBUG': neomma.MMA.debug.setDebug,
                'DEC': macros.vardec,
-               'DECRESC': MMA.volume.setDecresc,
-               'DEFALIAS': MMA.grooves.grooveAlias,
-               'DEFCHORD': MMA.chords.defChord,
-               'DEFCALL': MMA.func.defCall,
-               'DEFGROOVE': MMA.grooves.grooveDefine,
+               'DECRESC': neomma.MMA.volume.setDecresc,
+               'DEFALIAS': neomma.MMA.grooves.grooveAlias,
+               'DEFCHORD': neomma.MMA.chords.defChord,
+               'DEFCALL': neomma.MMA.func.defCall,
+               'DEFGROOVE': neomma.MMA.grooves.grooveDefine,
                'DELETE': deleteTrks,
-               'DOC': MMA.docs.docNote,
-               'DOCVAR': MMA.docs.docVars,
-               'DRUMVOLTR': MMA.translate.drumVolTable.set,
+               'DOC': neomma.MMA.docs.docNote,
+               'DOCVAR': neomma.MMA.docs.docVars,
+               'DRUMVOLTR': neomma.MMA.translate.drumVolTable.set,
                'ELSE': ifelse,
                'ENDIF': ifend,
                'ENDMSET': endmset,
                'ENDREPEAT': repeatend,
                'EOF': eof,
                'ERROR': forceError,
-               'FERMATA': MMA.tempo.fermata,
+               'FERMATA': neomma.MMA.tempo.fermata,
                'GOTO': goto,
-               'GROOVE': MMA.grooves.groove,
-               'GROOVECLEAR': MMA.grooves.grooveClear,
+               'GROOVE': neomma.MMA.grooves.groove,
+               'GROOVECLEAR': neomma.MMA.grooves.grooveClear,
                'IF': macros.varIF,
                'IFEND': ifend,
                'INC': macros.varinc,
                'INCLUDE': include,
                'KEYSIG': keySig.create,
                'LABEL': comment,
-               'LYRIC': MMA.lyric.lyric.option,
-               'MIDIDEF': MMA.mdefine.mdefine,
-               'MIDI': MMA.midifuncs.rawMidi,
-               'MIDICOPYRIGHT': MMA.midifuncs.setMidiCopyright,
-               'MIDICUE': MMA.midifuncs.setMidiCue,
-               'MIDIFILE': MMA.midifuncs.setMidiFileType,
-               'MIDIINC': MMA.midiIn.midiinc,
-               'MIDIVOLUME': MMA.midifuncs.setMidiVolume,
-               'MIDICRESC': MMA.midifuncs.setMidiCresc,
-               'MIDIDECRESC': MMA.midifuncs.setMidiDecresc,
-               'CHANNELINIT': MMA.midifuncs.setChannelInit,
-               'MIDIMARK': MMA.midifuncs.midiMarker,
-               'MIDISPLIT': MMA.midi.setSplitChannels,
-               'MIDITEXT': MMA.midifuncs.setMidiText,
-               'MIDITNAME': MMA.midifuncs.setMidiName,
-               'MMAEND': MMA.paths.mmaend,
-               'MMASTART': MMA.paths.mmastart,
+               'LYRIC': neomma.MMA.lyric.lyric.option,
+               'MIDIDEF': neomma.MMA.mdefine.mdefine,
+               'MIDI': neomma.MMA.midifuncs.rawMidi,
+               'MIDICOPYRIGHT': neomma.MMA.midifuncs.setMidiCopyright,
+               'MIDICUE': neomma.MMA.midifuncs.setMidiCue,
+               'MIDIFILE': neomma.MMA.midifuncs.setMidiFileType,
+               'MIDIINC': neomma.MMA.midiIn.midiinc,
+               'MIDIVOLUME': neomma.MMA.midifuncs.setMidiVolume,
+               'MIDICRESC': neomma.MMA.midifuncs.setMidiCresc,
+               'MIDIDECRESC': neomma.MMA.midifuncs.setMidiDecresc,
+               'CHANNELINIT': neomma.MMA.midifuncs.setChannelInit,
+               'MIDIMARK': neomma.MMA.midifuncs.midiMarker,
+               'MIDISPLIT': neomma.MMA.midi.setSplitChannels,
+               'MIDITEXT': neomma.MMA.midifuncs.setMidiText,
+               'MIDITNAME': neomma.MMA.midifuncs.setMidiName,
+               'MMAEND': neomma.MMA.paths.mmaend,
+               'MMASTART': neomma.MMA.paths.mmastart,
                'MSET': macros.msetvar,
                'MSETEND': endmset,
                'NEWSET': macros.newsetvar,
-               'PATCH': MMA.patch.patch,
-               'PLUGIN': MMA.regplug.plugin,
+               'PATCH': neomma.MMA.patch.patch,
+               'PLUGIN': neomma.MMA.regplug.plugin,
                'PRINT': lnPrint,
                'PRINTACTIVE': printActive,
-               'PRINTCHORD': MMA.chords.printChord,
+               'PRINTCHORD': neomma.MMA.chords.printChord,
                'REPEAT': repeat,
                'REPEATEND': repeatend,
                'REPEATENDING': repeatending,
-               'RESTART': MMA.sequence.restart,
+               'RESTART': neomma.MMA.sequence.restart,
                'RNDSEED': rndseed,
                'RNDSET': macros.rndvar,
-               'SEQ': MMA.sequence.seq,
-               'SEQCLEAR': MMA.sequence.seqClear,
-               'SEQRND': MMA.seqrnd.setSeqRnd,
-               'SEQRNDWEIGHT': MMA.seqrnd.setSeqRndWeight,
-               'SEQSIZE': MMA.sequence.seqsize,
+               'SEQ': neomma.MMA.sequence.seq,
+               'SEQCLEAR': neomma.MMA.sequence.seqClear,
+               'SEQRND': neomma.MMA.seqrnd.setSeqRnd,
+               'SEQRNDWEIGHT': neomma.MMA.seqrnd.setSeqRndWeight,
+               'SEQSIZE': neomma.MMA.sequence.seqsize,
                'SET': macros.setvar,
-               'SETINCPATH': MMA.paths.setIncPath,
-               'SETLIBPATH': MMA.paths.setLibPath,
-               'SETMIDIPLAYER': MMA.player.setMidiPlayer,
-               'SETOUTPATH': MMA.paths.setOutPath,
-               'SETPLUGPATH': MMA.paths.setPlugPath,
-               'SETSYNCTONE': MMA.sync.setSyncTone,
+               'SETINCPATH': neomma.MMA.paths.setIncPath,
+               'SETLIBPATH': neomma.MMA.paths.setLibPath,
+               'SETMIDIPLAYER': neomma.MMA.player.setMidiPlayer,
+               'SETOUTPATH': neomma.MMA.paths.setOutPath,
+               'SETPLUGPATH': neomma.MMA.paths.setPlugPath,
+               'SETSYNCTONE': neomma.MMA.sync.setSyncTone,
                'SHOWVARS': macros.showvars,
                'STACKVALUE': macros.stackValue,
-               'SWELL': MMA.volume.setSwell,
-               'SWINGMODE': MMA.swing.swingMode,
-               'SYNCHRONIZE': MMA.sync.synchronize,
-               'TEMPO': MMA.tempo.tempo,
-               'TIME': MMA.tempo.setTime,
+               'SWELL': neomma.MMA.volume.setSwell,
+               'SWINGMODE': neomma.MMA.swing.swingMode,
+               'SYNCHRONIZE': neomma.MMA.sync.synchronize,
+               'TEMPO': neomma.MMA.tempo.tempo,
+               'TIME': neomma.MMA.tempo.setTime,
                'TIMESIG': timeSig.setSig,
-               'TONETR': MMA.translate.dtable.set,
-               'TRUNCATE': MMA.truncate.setTruncate,
-               'TWEAKS': MMA.tweaks.setTweak,
+               'TONETR': neomma.MMA.translate.dtable.set,
+               'TRUNCATE': neomma.MMA.truncate.setTruncate,
+               'TWEAKS': neomma.MMA.tweaks.setTweak,
                'UNSET': macros.unsetvar,
                'USE': usefile,
                'VARCLEAR': macros.clear,
                'VEXPAND': macros.vexpand,
-               'VOICEVOLTR': MMA.translate.voiceVolTable.set,
-               'VOICETR': MMA.translate.vtable.create,
-               'VOLUME': MMA.volume.setVolume,
-               'TRANSPOSE': MMA.keysig.transpose}
+               'VOICEVOLTR': neomma.MMA.translate.voiceVolTable.set,
+               'VOICETR': neomma.MMA.translate.vtable.create,
+               'VOLUME': neomma.MMA.volume.setVolume,
+               'TRANSPOSE': neomma.MMA.keysig.transpose}
 
 trackFuncs = {
     'ACCENT': trackAccent,
@@ -1330,14 +1330,14 @@ trackFuncs = {
     'CHANNEL': trackChannel,
     'CHORDS': trackChords,
     'DUPRIFF': trackDupRiff,
-    'MIDIVOLUME': MMA.midifuncs.trackMidiVolume,
-    'MIDICRESC': MMA.midifuncs.trackMidiCresc,
-    'MIDIDECRESC': MMA.midifuncs.trackMidiDecresc,
+    'MIDIVOLUME': neomma.MMA.midifuncs.trackMidiVolume,
+    'MIDICRESC': neomma.MMA.midifuncs.trackMidiCresc,
+    'MIDIDECRESC': neomma.MMA.midifuncs.trackMidiDecresc,
     'CHSHARE': trackChShare,
     'COMPRESS': trackCompress,
-    'COPY': MMA.grooves.trackCopy,
+    'COPY': neomma.MMA.grooves.trackCopy,
     'CRESC': trackCresc,
-    'CUT': MMA.tempo.trackCut,
+    'CUT': neomma.MMA.tempo.trackCut,
     'DECRESC': trackDeCresc,
     'DELAY': trackDelay,
     'DIRECTION': trackDirection,
@@ -1345,23 +1345,23 @@ trackFuncs = {
     'DUPROOT': trackDupRoot,
     'FORCEOUT': trackForceOut,
     'FRETNOISE': trackPlectrumFretNoise,
-    'GROOVE': MMA.grooves.trackGroove,
+    'GROOVE': neomma.MMA.grooves.trackGroove,
     'HARMONY': trackHarmony,
     'HARMONYONLY': trackHarmonyOnly,
     'HARMONYVOLUME': trackHarmonyVolume,
     'INVERT': trackInvert,
     'LIMIT': trackChordLimit,
     'MALLET': trackMallet,
-    'MIDICLEAR': MMA.midifuncs.trackMidiClear,
-    'MIDICUE': MMA.midifuncs.trackMidiCue,
-    'MIDIDEF': MMA.mdefine.trackMdefine,
-    'MIDIGLIS': MMA.midifuncs.trackGlis,
-    'MIDIPAN': MMA.midifuncs.trackPan,
-    'MIDISEQ': MMA.midifuncs.trackMidiSeq,
-    'MIDITEXT': MMA.midifuncs.trackMidiText,
-    'MIDITNAME': MMA.midifuncs.trackMidiName,
-    'MIDIVOICE': MMA.midifuncs.trackMidiVoice,
-    'MIDIWHEEL': MMA.midifuncs.trackWheel,
+    'MIDICLEAR': neomma.MMA.midifuncs.trackMidiClear,
+    'MIDICUE': neomma.MMA.midifuncs.trackMidiCue,
+    'MIDIDEF': neomma.MMA.mdefine.trackMdefine,
+    'MIDIGLIS': neomma.MMA.midifuncs.trackGlis,
+    'MIDIPAN': neomma.MMA.midifuncs.trackPan,
+    'MIDISEQ': neomma.MMA.midifuncs.trackMidiSeq,
+    'MIDITEXT': neomma.MMA.midifuncs.trackMidiText,
+    'MIDITNAME': neomma.MMA.midifuncs.trackMidiName,
+    'MIDIVOICE': neomma.MMA.midifuncs.trackMidiVoice,
+    'MIDIWHEEL': neomma.MMA.midifuncs.trackWheel,
     'MOCTAVE': trackMOctave,
     'OCTAVE': trackOctave,
     'OFF': trackOff,
@@ -1372,22 +1372,22 @@ trackFuncs = {
     'SHAPE': trackPlectrumShape,
     'RANGE': trackRange,
     'RDURATION': trackRduration,
-    'RESTART': MMA.sequence.trackRestart,
+    'RESTART': neomma.MMA.sequence.trackRestart,
     'RIFF': trackRiff,
     'RSKIP': trackRskip,
     'RTIME': trackRtime,
     'RVOLUME': trackRvolume,
-    'RPITCH':  MMA.rpitch.setRPitch,
+    'RPITCH':  neomma.MMA.rpitch.setRPitch,
     'SCALETYPE': trackScaletype,
-    'SEQCLEAR': MMA.sequence.trackSeqClear,
-    'SEQRND': MMA.sequence.trackSeqRnd,
-    'SEQUENCE': MMA.sequence.trackSequence,
-    'SEQRNDWEIGHT': MMA.sequence.trackSeqRndWeight,
+    'SEQCLEAR': neomma.MMA.sequence.trackSeqClear,
+    'SEQRND': neomma.MMA.sequence.trackSeqRnd,
+    'SEQUENCE': neomma.MMA.sequence.trackSequence,
+    'SEQRNDWEIGHT': neomma.MMA.sequence.trackSeqRndWeight,
     'STRETCH': trackStretch,
     'STICKY': trackSticky,
     'SWELL': trackSwell,
-    'TRIGGER': MMA.trigger.setTrigger,
-    'MIDINOTE': MMA.midinote.parse,
+    'TRIGGER': neomma.MMA.trigger.setTrigger,
+    'MIDINOTE': neomma.MMA.midinote.parse,
     'NOTESPAN': trackSpan,
     'STRUM': trackStrum,
     'STRUMADD': trackStrumAdd,

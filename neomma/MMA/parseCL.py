@@ -27,9 +27,9 @@ each "tab".
 """
 
 from . import gbl
-from MMA.common import *
+from neomma.MMA.common import *
 
-import MMA.truncate
+import neomma.MMA.truncate
 
 # This table is passed to the track classes. It has
 # an instance for each chord in the current bar.
@@ -51,7 +51,7 @@ class CTable:
 
 lastChord = None   # tracks last chord for "/ /" data lines.
 
-chordTabs = []  # initialized by MMA.main call to setTime()
+chordTabs = []  # initialized by neomma.MMA.main call to setTime()
 
 # these are the track names for muting
 muteTrackNames = 'CBAWDSRP'
@@ -76,8 +76,8 @@ def parseChordLine(l):
 
     ctable = []               # an entry for each chord in the bar
     quarter = gbl.BperQ       # ticks in a quarter note (== 1 beat)
-    if MMA.truncate.length:
-        endTime = MMA.truncate.length
+    if neomma.MMA.truncate.length:
+        endTime = neomma.MMA.truncate.length
     else:
         endTime = (quarter * gbl.QperBar)  # number of ticks in bar
 
@@ -244,7 +244,7 @@ def parseChordLine(l):
                         error("Track mute: track name '%s' not in permitted list '%s'."
                               % (v, muteTrackNames))
 
-        ctab.chord = MMA.chords.ChordNotes(ch)  # Derive chord notes (or mute)
+        ctab.chord = neomma.MMA.chords.ChordNotes(ch)  # Derive chord notes (or mute)
         ctable.append(ctab)
 
     # Finished each chord in data line, test

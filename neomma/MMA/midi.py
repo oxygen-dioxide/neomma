@@ -21,13 +21,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 Bob van der Poel <bob@mellowood.ca>
 """
 
-from   MMA.midiM import intToWord, intTo3Byte, intToLong, intToVarNumber, intTo14, packBytes
-import MMA.midiC
-import MMA.debug
-import MMA.sync
+from   neomma.MMA.midiM import intToWord, intTo3Byte, intToLong, intToVarNumber, intTo14, packBytes
+import neomma.MMA.midiC
+import neomma.MMA.debug
+import neomma.MMA.sync
 from . import gbl
-from   MMA.common import *
-from   MMA.miditables import NONETONE
+from   neomma.MMA.common import *
+from   neomma.MMA.miditables import NONETONE
 
 splitChannels = []
 tempoChanges = []    # A list of tempo changes, use to check from tempo.py
@@ -52,7 +52,7 @@ def setSplitChannels(ln):
         if ch is None:
             if not a in gbl.tnames:
                 a = a.upper()
-                MMA.alloc.trackAlloc(a, 0)    # ensure that track is allocated
+                neomma.MMA.alloc.trackAlloc(a, 0)    # ensure that track is allocated
             if not a in gbl.tnames:
                 error("MidiSplit: Track '%s' is not valid." % a)
             if not gbl.tnames[a].channel:
@@ -64,7 +64,7 @@ def setSplitChannels(ln):
         if ch not in splitChannels:
             splitChannels.append(ch)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         msg = ["SplitChannels: "]
         for a in splitChannels:
             msg.append(str(a))
@@ -158,7 +158,7 @@ def writeSplitTrack(channel, out):
             else:
                 notes[n].miditrk[offset] = [ev]
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint(" Data has been split into %s tracks." % len(notes))
 
     # Insert a channel name in all the new tracks.
@@ -167,7 +167,7 @@ def writeSplitTrack(channel, out):
         if a == -1:
             continue
         if channel == 10:
-            m = "%s" % MMA.midiC.valueToDrum(a)
+            m = "%s" % neomma.MMA.midiC.valueToDrum(a)
         else:
             m = "%s-%s" % (gbl.mtrks[channel].trackname, a)
 
@@ -314,8 +314,8 @@ class Mtrk:
         if program == NONETONE:
             return
 
-        v1, lsb1, msb1 = MMA.midiC.voice2tup(oldprg)
-        v2, lsb2, msb2 = MMA.midiC.voice2tup(program)
+        v1, lsb1, msb1 = neomma.MMA.midiC.voice2tup(oldprg)
+        v2, lsb2, msb2 = neomma.MMA.midiC.voice2tup(program)
 
         if msb1 != msb2:   # only if CTRL32 has changed
             self.addToTrack(offset, packBytes((0xb0 | self.channel, 0x20, msb2)))
@@ -424,7 +424,7 @@ class Mtrk:
             an all-notes-off at that position.
         """
 
-        if MMA.sync.endsync and self.channel >= 0:
+        if neomma.MMA.sync.endsync and self.channel >= 0:
             eof = gbl.tickOffset
             for offset in list(tr.keys()):
                 if offset > eof:
@@ -436,12 +436,12 @@ class Mtrk:
             easier sync in multi-tracks.
         """
 
-        if MMA.sync.synctick and self.channel >= 0:
-            t, v = MMA.sync.syncTone
+        if neomma.MMA.sync.synctick and self.channel >= 0:
+            t, v = neomma.MMA.sync.syncTone
             self.addToTrack(0, packBytes((0x90 | self.channel, t, v)))
             self.addToTrack(1, packBytes((0x90 | self.channel, t, 0)))
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             ttl = 0
             lg = 1
             for t in tr:

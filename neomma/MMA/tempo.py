@@ -23,13 +23,13 @@ Bob van der Poel <bob@mellowood.ca>
 """
 
 from . import gbl
-from MMA.common import *
-from MMA.midiM import packBytes, byte3ToInt
-from MMA.timesig import timeSig
+from neomma.MMA.common import *
+from neomma.MMA.midiM import packBytes, byte3ToInt
+from neomma.MMA.timesig import timeSig
 from struct import unpack
-from MMA.parseCL import setChordTabs
-import MMA.debug
-import MMA.midi
+from neomma.MMA.parseCL import setChordTabs
+import neomma.MMA.debug
+import neomma.MMA.midi
 
 # this is a TIME option to compensate for tempos with an
 # non-4 in the denominator. Needs to be reset for every
@@ -146,7 +146,7 @@ def setTime(ln):
 
     setChordTabs(tabList)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         if sigSet:
             sig =  "TimeSig %s " % timeSig.getAscii()
         else:
@@ -215,7 +215,7 @@ def tempo(ln):
         gbl.mtrks[0].addTempo(gbl.tickOffset + startOffset, gbl.tempo)
         lastChange = gbl.tickOffset + startOffset
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Tempo: Set to %s, offset=%s beats" % (gbl.tempo, startOffset/gbl.BperQ))
 
     else:              # Do a tempo change over bar count
@@ -245,7 +245,7 @@ def tempo(ln):
 
         gbl.tempo = int(v)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Tempo: Set future value to %s over %s beats" %
                 (int(tempo), numbeats))
 
@@ -254,7 +254,7 @@ def tempo(ln):
         gbl.mtrks[0].addTempo(restore, origTempo)
         gbl.tempo = origTempo   # not really right, this tempo will be in effect later
         lastChange = restore
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Tempo: Restored to %s in %s beats" %
                (origTempo, (restore-gbl.tickOffset)/gbl.BperQ))
         
@@ -264,7 +264,7 @@ def tempo(ln):
     # Check meta track for any tempo changes past the last one
     # we've just inserted.
 
-    for p, v in MMA.midi.tempoChanges:
+    for p, v in neomma.MMA.midi.tempoChanges:
         if p > lastChange:
             warning("Tempo change may be invalid since there are more changes after this point.")
             break
@@ -283,7 +283,7 @@ def beatAdjust(ln):
     gbl.tickOffset += adj
     gbl.totTime += (adj / gbl.BperQ) / gbl.tempo   # adjust total time
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("BeatAdjust: inserted %s ticks at bar %s." % (adj, gbl.barNum + 1))
 
 def cut(ln):
@@ -338,7 +338,7 @@ def trackCut(name, ln):
     if m and len(gbl.mtrks[m].miditrk) > 1:
         gbl.mtrks[m].addNoteOff(moff)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Cut %s: Beat %s, Bar %s" % (name, offset, gbl.barNum + 1))
 
 
@@ -467,7 +467,7 @@ def fermata(ln):
                 else:
                     trk[mend] = endEvents
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Fermata: Beat %s, Duration %s, Change %s, Bar %s" % 
               (offset, dur, adj, gbl.barNum + 1))
         if offset < 0:

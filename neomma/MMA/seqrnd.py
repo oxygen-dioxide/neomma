@@ -24,8 +24,8 @@ Bob van der Poel <bob@mellowood.ca>
 
 import random
 
-from MMA.common import *
-import MMA.debug
+from neomma.MMA.common import *
+import neomma.MMA.debug
 
 """ SeqRnd variable is a list. The first entry is a flag:(0, 1 or x):
       0 - not set
@@ -121,7 +121,7 @@ def setSeqRnd(ln):
                 error("SeqRnd: Duplicate track '%s' specified, %s" % (a, emsg))
             seqRnd.append(a)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         msg = ["SeqRnd:"]
         if seqRnd[0] == 2:
             for a in seqRnd[1:]:
@@ -179,7 +179,7 @@ def getweights(ln, msg):
     if not any(tmp):
         error("%s Using all '0's is not permitted." % msg)
     
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Set %s: %s" % (msg, ' '.join([str(x) for x in tmp])))
 
     return tmp

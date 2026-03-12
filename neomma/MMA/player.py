@@ -26,10 +26,10 @@ import time
 import subprocess
 import re
 
-from MMA.common import *
+from neomma.MMA.common import *
 from . import gbl
-import MMA.file
-import MMA.debug
+import neomma.MMA.file
+import neomma.MMA.debug
 
 # Initialize the default midi player.
 if gbl.platform == 'Windows':
@@ -77,13 +77,13 @@ def setMidiPlayer(ln):
                 error("SetMidiPlayer: unknown option '%s'." % a)
 
         else:
-            n.append(MMA.file.fixfname(l))
+            n.append(neomma.MMA.file.fixfname(l))
 
     if not n:
         n = ['']
     midiPlayer = n
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MidiPlayer set to '%s' Background=%s Delay=%s." %
             (' '.join(midiPlayer), inBackGround, waitTime))
 

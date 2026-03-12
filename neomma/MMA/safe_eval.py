@@ -33,7 +33,7 @@ import re
 from math import *
 from random import randint
 from os import environ
-from MMA.common import *
+from neomma.MMA.common import *
 import sys
 
 safeCmds = ['ceil', 'fabs', 'floor', 'exp', 'log', 'log10', 'pow',

@@ -24,12 +24,12 @@ Louis James Barman
 """
 
 
-import MMA.notelen
+import neomma.MMA.notelen
 
 from . import gbl
-from MMA.common import *
-from MMA.pat import PC, Pgroup
-import MMA.debug 
+from neomma.MMA.common import *
+from neomma.MMA.pat import PC, Pgroup
+import neomma.MMA.debug 
 import copy
 
 # By default notes are NOT stopped with a groove change
@@ -129,7 +129,7 @@ class Plectrum(PC):
         
         if not l or len(l)==1 and ( l[0].upper()=='OFF' or l[0].upper()=='NONE'):
             self.fretNoise = None
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("%s FretNoise Off" % self.name)
             return
 
@@ -166,7 +166,7 @@ class Plectrum(PC):
                         o.bars.append(i - 1)
 
             elif cmd == 'DURATION':
-                o.duration = MMA.notelen.getNoteLen(opt)
+                o.duration = neomma.MMA.notelen.getNoteLen(opt)
 
             elif cmd == 'MAX':
                 i = stoi(opt)
@@ -187,7 +187,7 @@ class Plectrum(PC):
                         o.strings.append(i)
 
             elif cmd == 'TRACK':
-                MMA.alloc.trackAlloc(opt, 1)
+                neomma.MMA.alloc.trackAlloc(opt, 1)
                 if gbl.tnames[opt].vtype != 'BASS':
                     error("%s FretNoise Track must be a BASS track, not %s." % \
                           (self.name, gbl.tnames[opt].vtype))
@@ -215,7 +215,7 @@ class Plectrum(PC):
         if not o.track:
             error("%s Fretnoise: No track was set. Use 'Track=some-bass-track' option." % self.name)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint(self.getFretNoiseOptions())
         
 
@@ -645,7 +645,7 @@ class Plectrum(PC):
 
             chordBarreFretNo += ct.chord.barre
 
-            if MMA.debug.debug or MMA.debug.plecShow:
+            if neomma.MMA.debug.debug or neomma.MMA.debug.plecShow:
                 self.printChordShape(ct, chordBarreFretNo)
 
             plectrumNoteOnList = []  # for debugging only
@@ -700,12 +700,12 @@ class Plectrum(PC):
                     note = notes[stringNo].pitch
 
                     if notes[stringNo].duplicate:
-                        if MMA.debug.debug:
+                        if neomma.MMA.debug.debug:
                             dPrint("%s: Ignoring duplicate note %d." % (self.name, note))
                         continue
 
                     if notes[stringNo].fretNo is None:
-                        if MMA.debug.debug:
+                        if neomma.MMA.debug.debug:
                             dPrint("%s: Ignoring muted note %d." % (self.name, note))
                         continue
 
@@ -734,7 +734,7 @@ class Plectrum(PC):
 
                 self.lastChord = ct.name
 
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("%s: channel=%s offset=%s chordList=%s NoteOn=%s." % 
                     (self.name, self.channel, p.offset + gbl.tickOffset,
                         chordList, plectrumNoteOnList))

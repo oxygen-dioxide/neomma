@@ -26,11 +26,11 @@ import json
 import os
 import time
 
-import MMA.midiC
-import MMA.grooves
+import neomma.MMA.midiC
+import neomma.MMA.grooves
 
 from . import gbl
-from   MMA.common import *
+from   neomma.MMA.common import *
 
 
 def docDrumNames(order):
@@ -39,7 +39,7 @@ def docDrumNames(order):
     notenames = ['E\\flat', 'E', 'F', 'G\\flat', 'G', 'A\\flat',
                  'A', 'B\\flat', 'B', 'C', 'D\\flat', 'D'] * 5
 
-    n = zip(MMA.midiC.drumNames, range(27, len(MMA.midiC.drumNames)+27), notenames)
+    n = zip(neomma.MMA.midiC.drumNames, range(27, len(neomma.MMA.midiC.drumNames)+27), notenames)
 
     if order == "a":
         for a, v, m in sorted(n):
@@ -53,7 +53,7 @@ def docDrumNames(order):
 def docCtrlNames(order):
     """ Print LaTex table of MIDI controller names. """
 
-    n = zip(MMA.midiC.ctrlNames, range(len(MMA.midiC.ctrlNames)))
+    n = zip(neomma.MMA.midiC.ctrlNames, range(len(neomma.MMA.midiC.ctrlNames)))
 
     if order == "a":
         for a, v in sorted(n):
@@ -67,7 +67,7 @@ def docCtrlNames(order):
 def docInstNames(order):
     """ Print LaTex table of instrument names. """
 
-    n = zip(MMA.midiC.voiceNames, range(len(MMA.midiC.voiceNames)))
+    n = zip(neomma.MMA.midiC.voiceNames, range(len(neomma.MMA.midiC.voiceNames)))
     if order == "a":
         for a, v in sorted(n):
             a = a.replace('&', '\&')
@@ -155,9 +155,9 @@ def docDefine(ln):
         c = gbl.tnames[a]
         if c.sequence and len(c.sequence) != c.sequence.count(None):
             if c.vtype == 'DRUM':
-                v = [MMA.midiC.valueToDrum(x) for x in c.toneList]
+                v = [neomma.MMA.midiC.valueToDrum(x) for x in c.toneList]
             else:
-                v = [MMA.midiC.valueToInst(x) for x in c.voice]
+                v = [neomma.MMA.midiC.valueToInst(x) for x in c.voice]
             seq = [c.formatPattern(c.sequence[x]) for x in range(gbl.seqSize)]
             l.append([c.name, v, seq])
 
@@ -185,7 +185,7 @@ def docDump():
 
         if defs:
             for l in defs:
-                alias = MMA.grooves.getAlias(l[0])
+                alias = neomma.MMA.grooves.getAlias(l[0])
                 if alias:
                     if len(alias) > 1:
                         alias = "Aliases: %s" % alias
@@ -241,7 +241,7 @@ def docDump():
                 print('<Table Border=3 CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="60%">')
                 print('  <TR><TD>')
                 print('    <H2> <A Href=%s> %s </a> </H2> ' % (gfile, l[0]))
-                alias = MMA.grooves.getAlias(l[0])
+                alias = neomma.MMA.grooves.getAlias(l[0])
                 if alias:
                     if len(alias) > 1:
                         ll = "Aliases"
@@ -366,10 +366,10 @@ def htmlGraph(f):
 
     if '/' in f:
         u, f = f.rsplit('/', 1)
-        MMA.parse.usefile([u])
-    MMA.grooves.groove([f])
+        neomma.MMA.parse.usefile([u])
+    neomma.MMA.grooves.groove([f])
 
-    groove = MMA.grooves.currentGroove.title()
+    groove = neomma.MMA.grooves.currentGroove.title()
 
     for a in defs:
         if a[0].upper() == groove.upper():
@@ -409,9 +409,9 @@ def htmlGraph(f):
         print("<p> <b>Track Name: %s</b>" % t.title())
         print("<p><Table Border=0 Width=75%>")
         if trk.vtype == "DRUM":
-            v = [MMA.midiC.valueToDrum(x) for x in trk.toneList]
+            v = [neomma.MMA.midiC.valueToDrum(x) for x in trk.toneList]
         else:
-            v = [MMA.midiC.valueToInst(x) for x in trk.voice]
+            v = [neomma.MMA.midiC.valueToInst(x) for x in trk.voice]
         dorow("Voice/Tones", v, "Articulate", trk.artic)
         v = [str(int(x * 100)) for x in trk.volume]
         if trk.vtype != "DRUM":

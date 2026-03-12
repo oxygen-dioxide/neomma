@@ -23,8 +23,8 @@ Bob van der Poel <bob@mellowood.ca>
 Roman numeral chord to standard notations.
 """
 
-from MMA.common import *
-from MMA.keysig import keySig
+from neomma.MMA.common import *
+from neomma.MMA.keysig import keySig
 
 
 # Table of scales ... a list of 7 notes for each possible Major/Minor scale

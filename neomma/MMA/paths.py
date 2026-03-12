@@ -29,12 +29,12 @@ import tempfile
 from os import environ
 
 from . import gbl
-from MMA.common import *
-import MMA.auto
-import MMA.grooves
-import MMA.exits
-import MMA.debug
-from  MMA.safe_eval import safeEnv
+from neomma.MMA.common import *
+import neomma.MMA.auto
+import neomma.MMA.grooves
+import neomma.MMA.exits
+import neomma.MMA.debug
+from  neomma.MMA.safe_eval import safeEnv
 
 outfile = ''
 
@@ -106,9 +106,9 @@ def mmastart(ln):
         error("Use: MMAstart FILE [file...]")
 
     for a in ln:
-        gbl.mmaStart.append(MMA.file.fixfname(a))
+        gbl.mmaStart.append(neomma.MMA.file.fixfname(a))
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MMAstart set to: %s" % gbl.mmaStart)
 
 def mmaend(ln):
@@ -118,9 +118,9 @@ def mmaend(ln):
         error("Use: MMAend FILE [file...]")
 
     for a in ln:
-        gbl.mmaEnd.append(MMA.file.fixfname(a))
+        gbl.mmaEnd.append(neomma.MMA.file.fixfname(a))
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MMAend set to: %s" % gbl.mmaEnd)
 
 def setRC(f):
@@ -148,18 +148,18 @@ def readRC():
 
     readDone = 0
     for i in rcfiles:
-        f = MMA.file.locFile(i, None)
+        f = neomma.MMA.file.locFile(i, None)
         if f:
-            if MMA.debug.showrun:
+            if neomma.MMA.debug.showrun:
                 dPrint("Reading RC file '%s'" % f)
-            MMA.parse.parseFile(f)
+            neomma.MMA.parse.parseFile(f)
             readDone = 1
             break
         else:
             if mmaRC:
                 error("Specified init file '%s' not found" % mmaRC)
 
-    if not readDone and MMA.debug.debug:
+    if not readDone and neomma.MMA.debug.debug:
         gbl.lineno = -1
         warning("No RC file was found or processed")
 
@@ -174,7 +174,7 @@ def dommaStart():
         if not fn:
             warning("MmaStart file '%s' not found/processed" % f)
         else:
-            MMA.parse.parseFile(fn)
+            neomma.MMA.parse.parseFile(fn)
         gbl.lineno = -1   # reset for real code
 
 
@@ -186,7 +186,7 @@ def dommaEnd():
         if not fn:
             warning("MmaStart file '%s' not found/processed" % f)
         else:
-            MMA.parse.parseFile(fn)
+            neomma.MMA.parse.parseFile(fn)
         gbl.lineno = -1   # reset for real code
 
 
@@ -200,7 +200,7 @@ def findIncFile(fn):
     global incPath
 
     for lib in incPath:
-        path = MMA.file.locFile(fn, lib)
+        path = neomma.MMA.file.locFile(fn, lib)
         if path:
             return path
 
@@ -216,7 +216,7 @@ def findLibFile(fn):
         expandLib()
 
     for lib in libDirs:
-        path = MMA.file.locFile(fn, lib)
+        path = neomma.MMA.file.locFile(fn, lib)
         if path:
             return path
 
@@ -234,12 +234,12 @@ def setLibPath(ln, user=1):
     libDirs = []
 
     for l in ln:
-        f = MMA.file.fixfname(l)
+        f = neomma.MMA.file.fixfname(l)
         libPath.append(f)
 
     expandLib(user)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("LibPath set: %s" % ' '.join(libPath))
 
     
@@ -270,9 +270,9 @@ def expandLib(user=0):
 
     # forget about previously loaded mma lib databases
 
-    MMA.auto.grooveDB = []
+    neomma.MMA.auto.grooveDB = []
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("LibPath expansion set to: %s" % ' '.join(libDirs))
 
 
@@ -283,10 +283,10 @@ def setIncPath(ln):
     incPath = []
 
     for l in ln:
-        f = MMA.file.fixfname(l)
+        f = neomma.MMA.file.fixfname(l)
         incPath.append(f)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("IncPath set: %s" % ' '.join(incPath))
 
 ###########################################
@@ -303,9 +303,9 @@ def setOutPath(ln):
         error("Use: SetOutPath PATH")
 
     else:
-        gbl.outPath = MMA.file.fixfname(ln[0])
+        gbl.outPath = neomma.MMA.file.fixfname(ln[0])
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("OutPath set to '%s'" % gbl.outPath)
 
 
@@ -330,7 +330,7 @@ def createOutfileName(extension):
 
     elif gbl.playFile:
         _, outfile = tempfile.mkstemp(prefix="MMA_", suffix=".mid")
-        MMA.exits.files.append(outfile)
+        neomma.MMA.exits.files.append(outfile)
 
     else:
         outfile, ext = os.path.splitext(gbl.infile)
@@ -338,7 +338,7 @@ def createOutfileName(extension):
             outfile = gbl.infile
         outfile += extension
 
-    outfile = MMA.file.fixfname(outfile)
+    outfile = neomma.MMA.file.fixfname(outfile)
 
 
 ##############################################
@@ -351,9 +351,9 @@ def setPlugPath(ln):
     plugPaths = []
 
     for l in ln:
-        plugPaths.append( MMA.file.fixfname(l) )
+        plugPaths.append( neomma.MMA.file.fixfname(l) )
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("PlugPath set: %s" % ' '.join(plugPaths))
       
 

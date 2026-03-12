@@ -23,11 +23,11 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-from MMA.common import *
-from MMA.chordtable import chordlist
-import MMA.roman
-from MMA.keysig import keySig  # needed for voicing mode keycenter()
-import MMA.debug
+from neomma.MMA.common import *
+from neomma.MMA.chordtable import chordlist
+import neomma.MMA.roman
+from neomma.MMA.keysig import keySig  # needed for voicing mode keycenter()
+import neomma.MMA.debug
 
 import copy
 
@@ -84,7 +84,7 @@ def defChord(ln):
 
     chordlist[name] = (notes, scale, "User Defined")
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("ChordType '%s', %s" % (name, chordlist[name]))
 
 
@@ -162,7 +162,7 @@ def chordAdjust(ln):
 
 
 class ChordNotes:
-    """ The Chord class creates and manipulates chords for MMA. The
+    """ The Chord class creates and manipulates chords for neomma.MMA. The
     class is initialized with a call with the chord name. Eg:
 
     ch = ChordNotes("Am")
@@ -316,7 +316,7 @@ class ChordNotes:
         # rest of name is valid roman. Convert to "standard"
         if name[0] in ("I", "V", "i", "v"):
             n = name
-            name = MMA.roman.convert(name)
+            name = neomma.MMA.roman.convert(name)
 
         # Split chord name (A,B..) and type (minor, dim)
         if name[1:2] in ('#b'):
@@ -357,7 +357,7 @@ class ChordNotes:
 
         if slash:   # convert Roman or Arabic to name of note from chord scale
             if slash[0] in ('I', 'i', 'V', 'v') or slash[0].isdigit():
-                n = MMA.roman.rvalue(slash)
+                n = neomma.MMA.roman.rvalue(slash)
                 n = self.scaleList[n] % 12   # midi value 
 
                 slash = ('C', 'C#', 'D', 'D#', 'E', 'F',
@@ -427,7 +427,7 @@ class ChordNotes:
                         wmessage += "\nChords with '%s': %s" % (slash, ' '.join(sorted(ll)))
 
                     slashPrinted.append(t)  # only print this chord/slash once
-                if not MMA.debug.rmShow:
+                if not neomma.MMA.debug.rmShow:
                     warning(wmessage)
             
 
@@ -444,7 +444,7 @@ class ChordNotes:
             self.noteListLen = len(self.noteList)
             self.bnoteList = tuple(self.noteList)
 
-        if MMA.debug.rmShow:  # Display roman debug (Debug=Roman)
+        if neomma.MMA.debug.rmShow:  # Display roman debug (Debug=Roman)
             if slash:
                 a = '/' + slash
             else:

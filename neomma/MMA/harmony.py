@@ -22,8 +22,8 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-from MMA.common import *
-import MMA.debug
+from neomma.MMA.common import *
+import neomma.MMA.debug
 import random
 
 def setHarmony(self, ln):
@@ -44,8 +44,8 @@ def setHarmony(self, ln):
     if self.vtype in ('CHORD', 'DRUM'):
         warning("Harmony setting for %s track ignored" % self.vtype)
 
-    if MMA.debug.debug:
-        MMA.debug.trackSet(self.name, "Harmony")
+    if neomma.MMA.debug.debug:
+        neomma.MMA.debug.trackSet(self.name, "Harmony")
 
         
 def setHarmonyOnly(self, ln):
@@ -67,8 +67,8 @@ def setHarmonyOnly(self, ln):
     if self.vtype in ('CHORD', 'DRUM'):
         warning("HarmonyOnly setting for %s track ignored" % self.vtype)
 
-    if MMA.debug.debug:
-        MMA.debug.trackSet(self.name, 'HarmonyOnly')
+    if neomma.MMA.debug.debug:
+        neomma.MMA.debug.trackSet(self.name, 'HarmonyOnly')
 
 
 def setHarmonyVolume(self, ln):
@@ -89,8 +89,8 @@ def setHarmonyVolume(self, ln):
     if self.vtype in ('PLECTRUM', 'DRUM'):
         warning("HarmonyVolume adjustment for %s track ignored" % self.vtype)
 
-    if MMA.debug.debug:
-        MMA.debug.trackSet(self.name, "HarmonyVolume")
+    if neomma.MMA.debug.debug:
+        neomma.MMA.debug.trackSet(self.name, "HarmonyVolume")
 
 
 ##########################################################

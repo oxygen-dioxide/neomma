@@ -24,9 +24,9 @@ Bob van der Poel <bob@mellowood.ca>
 """
 
 from . import gbl
-from MMA.common import *
-import MMA.debug
-from MMA.notelen import noteLenTable
+from neomma.MMA.common import *
+import neomma.MMA.debug
+from neomma.MMA.notelen import noteLenTable
 
 mode = 0      # defaults to 0, set to 1 for swing mode
 skew = None   # this is just for $_SwingMode macro
@@ -119,7 +119,7 @@ def swingMode(ln):
         else:
             error(emsg)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("SwingMode: Status=%s; Accent=%s,%s; Delay=%s,%s; Skew Note lengths: " 
             "%s and %s ticks. Notes=%s" % 
             (mode, int(accent1 * 100), int(accent2 * 100), delay1, delay2,

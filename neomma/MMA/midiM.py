@@ -28,7 +28,7 @@ These are necessary to create the big-endian values MIDI expects.
 
 import sys
 from struct import pack, unpack
-from MMA.common import *
+from neomma.MMA.common import *
 from . import gbl
 
 PY3 = sys.version_info[0] == 3

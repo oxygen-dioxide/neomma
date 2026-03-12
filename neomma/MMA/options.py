@@ -27,15 +27,15 @@ import sys
 import os
 import tempfile
 
-import MMA.docs
-import MMA.parse
-import MMA.chords
-import MMA.volume
-import MMA.exits
+import neomma.MMA.docs
+import neomma.MMA.parse
+import neomma.MMA.chords
+import neomma.MMA.volume
+import neomma.MMA.exits
 
 from . import gbl
-from MMA.common import *
-from MMA.macro import macros
+from neomma.MMA.common import *
+from neomma.MMA.macro import macros
 
 cmdSMF = None
 
@@ -77,8 +77,8 @@ def opts(l=None):
             gbl.barRange.append("ABS")
 
         elif o in ('-d', '-o', '-p', '-s', '-r', '-w', '-n', '-e', '-c'):
-            import MMA.debug   # circular dep. problem
-            MMA.debug.cmdLineDebug(o[-1])
+            import neomma.MMA.debug   # circular dep. problem
+            neomma.MMA.debug.cmdLineDebug(o[-1])
         
         elif o == '-S':
             ln = a.split('=', 1)
@@ -88,17 +88,17 @@ def opts(l=None):
             gbl.printProcessed = True
 
         elif o == '-f':
-            import MMA.paths
+            import neomma.MMA.paths
             gbl.outfile = a
             if internal:
                 warning("Output filename overwritten by -f CmdLine option.")
-                MMA.paths.createOutfileName(".mid")
+                neomma.MMA.paths.createOutfileName(".mid")
 
         elif o == '-i':
-            import MMA.paths
+            import neomma.MMA.paths
             if internal:
                 cmdError("-i")
-            MMA.paths.setRC(a)
+            neomma.MMA.paths.setRC(a)
 
         elif o == '-g':
             if internal:
@@ -154,14 +154,14 @@ def opts(l=None):
                 gbl.createDocs = 99
 
             elif a == 'k':
-                import MMA.alloc
+                import neomma.MMA.alloc
                 # important! Needs a space before the trailing LF for mma.el
                 print("Base track names: %s \n" % 
-                      ' '.join([a for a in sorted(MMA.alloc.trkClasses)]))
+                      ' '.join([a for a in sorted(neomma.MMA.alloc.trkClasses)]))
                 print("Commands: %s BEGIN END DEFAULT\n" % 
-                      ' '.join([a for a in sorted(MMA.parse.simpleFuncs)]))
+                      ' '.join([a for a in sorted(neomma.MMA.parse.simpleFuncs)]))
                 print("TrackCommands: %s \n" %
-                      ' '.join([a for a in sorted(MMA.parse.trackFuncs)]))
+                      ' '.join([a for a in sorted(neomma.MMA.parse.trackFuncs)]))
                 print("Not complete ... subcommands, comments, chords...")
                 sys.exit(0)
 
@@ -170,12 +170,12 @@ def opts(l=None):
                 usage()
 
         elif o == '-0':
-            import MMA.sync
-            MMA.sync.synchronize(['START'])
+            import neomma.MMA.sync
+            neomma.MMA.sync.synchronize(['START'])
 
         elif o == '-1':
-            import MMA.sync
-            MMA.sync.synchronize(['END'])
+            import neomma.MMA.sync
+            neomma.MMA.sync.synchronize(['END'])
 
         elif o == '-P':
             gbl.playFile = 1
@@ -185,20 +185,20 @@ def opts(l=None):
             # the plugin security. Use -II for security override.
             # It does mean you can't have plugin called "I", but
             # you could use "i" and it'll work.
-            import MMA.regplug
+            import neomma.MMA.regplug
             if a == 'I':
-                MMA.regplug.secOverRide = True
+                neomma.MMA.regplug.secOverRide = True
 
             # Plugin help. Note we have not loaded any plugins at this
             # point. pluginHelp() will find the plugin, register it and
             # call its help function.
             else: 
-                MMA.regplug.pluginHelp(a)
+                neomma.MMA.regplug.pluginHelp(a)
                 sys.exit(0)
                 
 
         elif o == '-V':
-            import MMA.file
+            import neomma.MMA.file
             
             if internal:   # can't have a -V in a -V :)
                 cmdError("-V")
@@ -247,13 +247,13 @@ def opts(l=None):
 
             # we can only have one scratch file, so no fear of overload.
             # otherwise we might need to explicity delete file here.
-            MMA.exits.files.append(tfile)
+            neomma.MMA.exits.files.append(tfile)
 
             args = [tfile]  # fake the CLI so mma thinks the created file is yours
             
         elif o=='-x':  # any one of some xtra, seldom used, options
-            import MMA.xtra
-            MMA.xtra.xoption(a, args)
+            import neomma.MMA.xtra
+            neomma.MMA.xtra.xoption(a, args)
             
         else:
             usage()      # unreachable??
@@ -263,7 +263,7 @@ def opts(l=None):
 
     # a few sanity checks
 
-    #if  MMA.writeMid.splitOutput:
+    #if  neomma.MMA.writeMid.splitOutput:
     #    if gbl.playFile:
     #        error("The -P (play) option is not compatible with channel/track splitting.")
     #    if gbl.infile == 1:
@@ -287,8 +287,8 @@ def opts(l=None):
         gbl.infile = 1
         
         if not gbl.outfile:
-            import MMA.debug   # circular dep. problem
-            if not(MMA.debug.noOutput):
+            import neomma.MMA.debug   # circular dep. problem
+            if not(neomma.MMA.debug.noOutput):
                 error("Input from STDIN specified. Use -f to set an output filename.")
 
     

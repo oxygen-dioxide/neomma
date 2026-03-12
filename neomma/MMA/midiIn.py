@@ -23,14 +23,14 @@ Bob van der Poel <bob@mellowood.ca>
 """
 
 from . import gbl
-import MMA.file
-import MMA.debug
-from   MMA.common import *
+import neomma.MMA.file
+import neomma.MMA.debug
+from   neomma.MMA.common import *
 
-from   MMA.alloc import trackAlloc
-from   MMA.readmidi import MidiData
+from   neomma.MMA.alloc import trackAlloc
+from   neomma.MMA.readmidi import MidiData
 
-from   MMA.midiM import packBytes
+from   neomma.MMA.midiM import packBytes
 
 ### FIXME ... some truly ugly code follows!!!
 
@@ -65,7 +65,7 @@ def midiinc(ln):
         cmd = cmd.upper()
 
         if cmd == 'FILE':
-            filename = MMA.file.fixfname(opt)
+            filename = neomma.MMA.file.fixfname(opt)
 
         elif cmd == 'VOLUME':
             velAdjust = stoi(opt)
@@ -240,7 +240,7 @@ def midiinc(ln):
     if (istart >= iend) or (istart < 0) or (iend < 0):
         error("MidiInc: Range invalid, start=%s, end=%s" % (istart, iend))
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MidiInc: File=%s, Volume=%s, Octave=%s, Transpose=%s, Lyric=%s, " 
             "Text=%s, Range=%sT..%sT StripSilence=%sT Offset=%sT Verbose=%s" 
             % (filename, velAdjust, octAdjust, transpose, doLyric, doText,
@@ -295,7 +295,7 @@ def midiinc(ln):
             else:
                 disc += 1
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("MidiInc text events: %s inserted, %s out of range." % (inst, disc))
 
     if doLyric:
@@ -310,7 +310,7 @@ def midiinc(ln):
                 inst += 1
             else:
                 disc += 1
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("MidiInc lyric events: %s inserted, %s out of range." % (inst, disc))
 
     for n, c, riffmode, printriff in channels:
@@ -424,9 +424,9 @@ def midiinc(ln):
                 if printriff:
                     print("%s Sequence %s" % (tr, ' '.join(txt)))
                 else:
-                    MMA.sequence.trackSequence(tr, txt)
+                    neomma.MMA.sequence.trackSequence(tr, txt)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
             dPrint("MidiInc events: %s inserted, %s out of range." % (inst, disc))
 
 

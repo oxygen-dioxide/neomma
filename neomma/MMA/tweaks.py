@@ -24,16 +24,16 @@ This module has support for some simple default tweaks.
 
 """
 
-from MMA.common import *
-import MMA.midiC
+from neomma.MMA.common import *
+import neomma.MMA.midiC
 
 import copy
 
 def setTweak(ln):
     """ Option tweaks. """
 
-    import MMA.pat   # here to avoid a circular dep problem
-    from MMA.miditables import drumKits
+    import neomma.MMA.pat   # here to avoid a circular dep problem
+    from neomma.MMA.miditables import drumKits
    
 
     notopt, ln = opt2pair(ln)
@@ -45,10 +45,10 @@ def setTweak(ln):
         cmd = cmd.upper()
 
         if cmd in ('DEFAULTDRUM', 'DEFAULTTONE'):
-            MMA.pat.defaultDrum = MMA.midiC.decodeVoice(opt)
+            neomma.MMA.pat.defaultDrum = neomma.MMA.midiC.decodeVoice(opt)
 
         elif cmd == 'DEFAULTVOICE':
-            MMA.pat.defaultVoice = MMA.midiC.decodeVoice(opt)
+            neomma.MMA.pat.defaultVoice = neomma.MMA.midiC.decodeVoice(opt)
 
         elif cmd == 'DRUMKIT':
             opt = opt.upper()
@@ -61,10 +61,10 @@ def setTweak(ln):
                 if opt<0 or opt>127:
                     error("Tweaks DrumKit: value must be 0..127 not '%s'." % opt)
                     
-            MMA.pat.defaultDrum = opt
+            neomma.MMA.pat.defaultDrum = opt
             
         elif cmd == 'DIM':
-            from MMA.chordtable import chordlist
+            from neomma.MMA.chordtable import chordlist
 
             if opt == '3':
                 # this is so we can change the desc. (no non-standard)
@@ -75,8 +75,8 @@ def setTweak(ln):
                 error("Tweaks: DIM requires '3' or '7' arg, not '%s'." % opt)
 
         elif cmd == 'PLECTRUMRESET':
-            import MMA.patPlectrum
-            MMA.patPlectrum.plectrumReset = getTF(opt, "Tweaks PlectrumReset")
+            import neomma.MMA.patPlectrum
+            neomma.MMA.patPlectrum.plectrumReset = getTF(opt, "Tweaks PlectrumReset")
             
         else:
             error("Tweaks: '%s' unknown command." % cmd)

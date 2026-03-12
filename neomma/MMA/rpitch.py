@@ -23,9 +23,9 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-from MMA.common import *
+from neomma.MMA.common import *
 from . import gbl
-import MMA.debug 
+import neomma.MMA.debug 
 
 import random
 
@@ -160,8 +160,8 @@ def setRPitch(name, ln):
     if not rp.offsets:
         warning("%s No offsets have been set, command will have no effect." % msg)
         
-    if MMA.debug.debug:
-         MMA.debug.trackSet(self.name, "RPitch")
+    if neomma.MMA.debug.debug:
+         neomma.MMA.debug.trackSet(self.name, "RPitch")
 
 def doRpitch(self, position, note):
     """ Apply rpitch setting to note. Returns modified note.

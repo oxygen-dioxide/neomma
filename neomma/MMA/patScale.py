@@ -24,14 +24,14 @@ Bob van der Poel <bob@mellowood.ca>
 
 import random
 
-import MMA.harmony
-import MMA.notelen
-import MMA.ornament
-from MMA.pat  import PC, Pgroup
+import neomma.MMA.harmony
+import neomma.MMA.notelen
+import neomma.MMA.ornament
+from neomma.MMA.pat  import PC, Pgroup
 
 from . import gbl
-from MMA.common import *
-import MMA.debug
+from neomma.MMA.common import *
+import neomma.MMA.debug
 
 import copy
 
@@ -77,7 +77,7 @@ class Scale(PC):
         a = Pgroup()
 
         a.offset = self.setBarOffset(ev[0])
-        a.duration = MMA.notelen.getNoteLen(ev[1])
+        a.duration = neomma.MMA.notelen.getNoteLen(ev[1])
         a.vol = stoi(ev[2], "Type error in Scale definition")
 
         return a
@@ -98,7 +98,7 @@ class Scale(PC):
 
         self.scaleType = seqBump(tmp)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Set %s ScaleType to: %s" %
                   (self.name, ' '.join(self.scaleType)))
         
@@ -240,14 +240,14 @@ class Scale(PC):
 
             if self.harmony[sc]:
                 ch = self.getChordInPos(p.offset, ctable).chord.noteList
-                h = MMA.harmony.harmonize(self.harmony[sc], note, ch)
+                h = neomma.MMA.harmony.harmonize(self.harmony[sc], note, ch)
                 harmlist =  list(zip(h, [p.vol * self.harmonyVolume[sc]] * len(h)))
             else:
                 harmlist = []
 
             offset = p.offset
             if self.ornaments['type']:
-                offset = MMA.ornament.doOrnament(self, nlist,
+                offset = neomma.MMA.ornament.doOrnament(self, nlist,
                                         self.getChordInPos(offset, ctable).chord.scaleList, p)
                 nlist = []
 

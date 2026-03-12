@@ -24,14 +24,14 @@ Bob van der Poel <bob@mellowood.ca>
 
 import random
 
-import MMA.notelen
-import MMA.harmony
-from MMA.keysig import keySig
-import MMA.chords
-import MMA.debug
+import neomma.MMA.notelen
+import neomma.MMA.harmony
+from neomma.MMA.keysig import keySig
+import neomma.MMA.chords
+import neomma.MMA.debug
 from . import gbl
-from MMA.common import *
-from MMA.pat import PC, Pgroup
+from neomma.MMA.common import *
+from neomma.MMA.pat import PC, Pgroup
 
 
 class Aria(PC):
@@ -73,7 +73,7 @@ class Aria(PC):
         a = Pgroup()
 
         a.offset = self.setBarOffset(ev[0])
-        a.duration = MMA.notelen.getNoteLen(ev[1])
+        a.duration = neomma.MMA.notelen.getNoteLen(ev[1])
         a.vol = stoi(ev[2], "Note volume in Aria definition not int")
 
         return a
@@ -102,7 +102,7 @@ class Aria(PC):
         self.deplete = seqBump(dlpt)
         self.restart()
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             msg = ["Set %s ScaleType:" % self.name]
             for a in self.scaleType:
                 msg.append(a)
@@ -135,7 +135,7 @@ class Aria(PC):
 
         self.restart()
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             msg = ["Set %s Direction:" % self.name]
             for a in self.selectDir:
                 msg.append(str(a))
@@ -181,7 +181,7 @@ class Aria(PC):
                 ch, t = k.split()
                 if t.lower() == 'minor':
                     ch += "m"
-                notelist = list(MMA.chords.ChordNotes(ch).scaleList)
+                notelist = list(neomma.MMA.chords.ChordNotes(ch).scaleList)
 
             elif (stype == 'SCALE' or stype == 'AUTO') and \
                     (not self.notes or self.lastChord != thisChord):
@@ -249,7 +249,7 @@ class Aria(PC):
                 notelist = []
 
             if self.harmony[sc]:
-                h = MMA.harmony.harmonize(self.harmony[sc], note, ct.chord.noteList)
+                h = neomma.MMA.harmony.harmonize(self.harmony[sc], note, ct.chord.noteList)
                 harmlist = list(zip(h, [p.vol * self.harmonyVolume[sc]] * len(h)))
             else:
                 harmlist = []

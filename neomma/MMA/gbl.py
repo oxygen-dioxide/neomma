@@ -34,8 +34,10 @@ version = "25.05.0"        # Version -- May/ 2025
     The above variables can be accessed from the rest of the mma modules in
     the form "gbl.MMAdir", etc.
 """
-
-from __main__ import MMAdir, platform
+import os
+MMAdir = os.path.dirname(os.path.dirname(__file__))
+import platform as platformlib
+platform = platformlib.system()
 
 """ mtrks is storage for the MIDI data as it is created.
     It is a dict of class Mtrk() instances. Keys are the

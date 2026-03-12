@@ -26,11 +26,11 @@ the sequences for later recall.
 
 """
 
-import MMA.midiC
-import MMA.midiM
+import neomma.MMA.midiC
+import neomma.MMA.midiM
 
 from . import gbl
-from   MMA.common import *
+from   neomma.MMA.common import *
 
 
 def mdefine(ln):
@@ -94,7 +94,7 @@ class Mdefine:
 
             off = stof(l[0], "Value for offset must be integer/float")
 
-            c = MMA.midiC.ctrlToValue(l[1])
+            c = neomma.MMA.midiC.ctrlToValue(l[1])
             if c < 0:
                 c = stoi(l[1])
                 if c < 0 or c > 0x7f:
@@ -104,7 +104,7 @@ class Mdefine:
             if d < 0 or d > 0x7f:
                 error("MIDI Control Datum value must be 0x00 to 0x7f")
 
-            evs.append([off, MMA.midiM.packBytes(c, d)])
+            evs.append([off, neomma.MMA.midiM.packBytes(c, d)])
 
         self.defs[name] = evs
 

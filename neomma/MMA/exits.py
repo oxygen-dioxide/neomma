@@ -26,7 +26,7 @@ This module contains cleanup code to be called on exit of MMA.
 
 import atexit
 import os
-import MMA.common
+import neomma.MMA.common
 
 files = []
 
@@ -44,6 +44,6 @@ def cleanup():
         except:
             pass
 
-    MMA.common.cleanPrintBuffer()
+    neomma.MMA.common.cleanPrintBuffer()
 
 atexit.register(cleanup)

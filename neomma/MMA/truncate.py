@@ -27,8 +27,8 @@ In parse.py/parse() we adjust the song pointer for the current seq size.
 
 """
 
-from MMA.common import *
-import MMA.debug
+from neomma.MMA.common import *
+import neomma.MMA.debug
 
 length = None
 count = None
@@ -91,7 +91,7 @@ def setTruncate(ln):
         else:
             error("Truncate: '%s' is an unknown option." % cmd)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Truncate: Next %s bar(s) are %g beats, "
               "using pattern from beats %g to %g."
             % (count, beats, float(side) / gbl.BperQ, (float(side) + length) / gbl.BperQ))

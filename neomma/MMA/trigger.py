@@ -24,10 +24,10 @@ All trigger functions.
 
 """
 
-from MMA.common import *
-import MMA.debug
+from neomma.MMA.common import *
+import neomma.MMA.debug
 from . import gbl
-import MMA.truncate
+import neomma.MMA.truncate
 
 import random
 import copy 
@@ -154,8 +154,8 @@ def makeTriggerSequence(self, ctable, pattern):
                # Note to braindead self, the TRUNCATE option is
                # used to shorten a bar's duration. So the end of
                # bar can be 'gbl.barlen' or 'truncate.length'
-               if MMA.truncate.length:
-                   barEnd = MMA.truncate.length
+               if neomma.MMA.truncate.length:
+                   barEnd = neomma.MMA.truncate.length
                else:
                    barEnd = gbl.barLen
                maxd = barEnd - tpats[i].offset
@@ -282,8 +282,8 @@ def setTrigger(name, ln):
         else:
             error("%s Trigger '%s' is an unknown command." % (self.name, cmd))
 
-    if MMA.debug.debug:
-        MMA.debug.trackSet(self.name, "TRIGGER")
+    if neomma.MMA.debug.debug:
+        neomma.MMA.debug.trackSet(self.name, "TRIGGER")
 
 def getTriggerOptions(self):
     """ Called from setTrigger() and macro. Returns string with current options. """

@@ -24,22 +24,22 @@ Bob van der Poel <bob@mellowood.ca>
 
 import os
 
-import MMA.midi
-import MMA.midifuncs
-import MMA.parse
-import MMA.file
-import MMA.options
-import MMA.auto
-import MMA.docs
-import MMA.tempo
-import MMA.debug
-import MMA.paths
-import MMA.writeMid
+import neomma.MMA.midi
+import neomma.MMA.midifuncs
+import neomma.MMA.parse
+import neomma.MMA.file
+import neomma.MMA.options
+import neomma.MMA.auto
+import neomma.MMA.docs
+import neomma.MMA.tempo
+import neomma.MMA.debug
+import neomma.MMA.paths
+import neomma.MMA.writeMid
 
-from  MMA.safe_eval import safeEnv
+from  neomma.MMA.safe_eval import safeEnv
 
 from . import gbl
-from   MMA.common import *
+from   neomma.MMA.common import *
 
 
 cmdSMF = None
@@ -60,37 +60,37 @@ if m:    # don't set to empty ... will crash
 # this will redirect to a file
 gbl.logFile = safeEnv('MMA_LOGFILE')
 
-MMA.paths.init()   # initialize the lib/include paths
+neomma.MMA.paths.init()   # initialize the lib/include paths
 
 # Get our command line stuff
 
-MMA.options.opts()
+neomma.MMA.options.opts()
 
 
 #  LibPath and IncPath are set before option parsing, but
 #  debug setting wasn't. So we need to do the debug for this now
-if MMA.debug.debug:
-    dPrint("Initialization has set LibPath set to %s" % MMA.paths.libPath)
-    dPrint("Initialization has set IncPath set to %s" % MMA.paths.incPath)
+if neomma.MMA.debug.debug:
+    dPrint("Initialization has set LibPath set to %s" % neomma.MMA.paths.libPath)
+    dPrint("Initialization has set IncPath set to %s" % neomma.MMA.paths.incPath)
 
 #######################################
 # Set up initial meta track stuff. Track 0 == meta
 
-m = gbl.mtrks[0] = MMA.midi.Mtrk(0)
+m = gbl.mtrks[0] = neomma.MMA.midi.Mtrk(0)
 
 if gbl.infile:
     if gbl.infile != 1:
-        fileName = MMA.file.locFile(gbl.infile, None)
+        fileName = neomma.MMA.file.locFile(gbl.infile, None)
         if fileName and not gbl.noCredit:
             m.addTrkName(0, "%s" % fileName.rstrip(".mma"))
-            m.addText(0, "Created by MMA. Input filename: %s" % fileName)
+            m.addText(0, "Created by neomma.MMA. Input filename: %s" % fileName)
 
 
 m.addTempo(0, gbl.tempo)      # most user files will override this
-MMA.tempo.setTime(['4/4'])    # and this. IMPORTANT! Sets default chordTabs[]
+neomma.MMA.tempo.setTime(['4/4'])    # and this. IMPORTANT! Sets default chordTabs[]
    
 # Read RC files
-MMA.paths.readRC()
+neomma.MMA.paths.readRC()
 
 
 ################################################
@@ -100,7 +100,7 @@ MMA.paths.readRC()
 if gbl.makeGrvDefs:
     if gbl.infile:
         error("No filename is permitted with the -g option")
-    MMA.auto.libUpdate()                # update and EXIT
+    neomma.MMA.auto.libUpdate()                # update and EXIT
 
 
 ################################
@@ -110,63 +110,63 @@ if not gbl.infile:
     if gbl.createDocs:
         gbl.lineno = -1
         error("-D options require a filename.")
-    MMA.options.usage("No input filename specified.")
+    neomma.MMA.options.usage("No input filename specified.")
 
 ################################
 # Just extract docs (-Dxh, etc) to stdout.
 
 if gbl.createDocs:
     if gbl.createDocs == 4:
-        MMA.docs.htmlGraph(gbl.infile)
+        neomma.MMA.docs.htmlGraph(gbl.infile)
     else:
-        f = MMA.file.locFile(gbl.infile, None)
+        f = neomma.MMA.file.locFile(gbl.infile, None)
         if not f:
             error("File '%s' not found" % gbl.infile)
-        MMA.parse.parseFile(f)
-        MMA.docs.docDump()
+        neomma.MMA.parse.parseFile(f)
+        neomma.MMA.docs.docDump()
     sys.exit(0)
 
 
 #########################################################
 # This cmdline option overrides the setting in RC files
 
-if MMA.options.cmdSMF is not None:
+if neomma.MMA.options.cmdSMF is not None:
     gbl.lineno = -1
-    MMA.midifuncs.setMidiFileType(['SMF=%s' % MMA.options.cmdSMF])
+    neomma.MMA.midifuncs.setMidiFileType(['SMF=%s' % neomma.MMA.options.cmdSMF])
 
 ######################################
 # Create the output filename
 
-if not MMA.debug.noOutput:
-    MMA.paths.createOutfileName(".mid")
+if not neomma.MMA.debug.noOutput:
+    neomma.MMA.paths.createOutfileName(".mid")
 
 
 ################################################
 # Read/process files....
 
 # First the mmastart files
-MMA.paths.dommaStart()
+neomma.MMA.paths.dommaStart()
 
 # The song file specified on the command line
 
 if gbl.infile == 1:  # use stdin, set filename to 1
     f = 1
 else:
-    f = MMA.file.locFile(gbl.infile, None)
+    f = neomma.MMA.file.locFile(gbl.infile, None)
 
     if not f:
         gbl.lineno = -1
         error("Input file '%s' not found" % gbl.infile)
 
-MMA.parse.parseFile(f)
+neomma.MMA.parse.parseFile(f)
 
 # Finally, the mmaend files
-MMA.paths.dommaEnd() 
+neomma.MMA.paths.dommaEnd() 
 
 #################################################
 # Just display the channel assignments (-c) and exit...
 
-if MMA.debug.chshow:
+if neomma.MMA.debug.chshow:
     msg = ["\nFile '%s' parsed, but no MIDI file produced!" % gbl.infile]
     msg.append("\nTracks allocated:\n")
     k = list(gbl.tnames.keys())
@@ -214,9 +214,9 @@ if MMA.debug.chshow:
 
     sys.exit(0)
 
-MMA.writeMid.maker()
+neomma.MMA.writeMid.maker()
 
-if MMA.debug.debug:
+if neomma.MMA.debug.debug:
     dPrint("Completed processing '%s' to '%s'." %
-           (gbl.infile, MMA.paths.outfile))
+           (gbl.infile, neomma.MMA.paths.outfile))
     

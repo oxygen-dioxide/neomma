@@ -23,32 +23,32 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-import MMA.patChord
-import MMA.patWalk
-import MMA.patBass
-import MMA.patPlectrum
-import MMA.patDrum
-import MMA.patScale
-import MMA.patArpeggio
-import MMA.patSolo
-import MMA.patAria
-import MMA.grooves
-import MMA.debug
+import neomma.MMA.patChord
+import neomma.MMA.patWalk
+import neomma.MMA.patBass
+import neomma.MMA.patPlectrum
+import neomma.MMA.patDrum
+import neomma.MMA.patScale
+import neomma.MMA.patArpeggio
+import neomma.MMA.patSolo
+import neomma.MMA.patAria
+import neomma.MMA.grooves
+import neomma.MMA.debug
 
 from . import gbl
-from MMA.common import *
+from neomma.MMA.common import *
 
 trkClasses = {
-    'BASS'     : MMA.patBass.Bass,
-    'CHORD'    : MMA.patChord.Chord,
-    'ARPEGGIO' : MMA.patArpeggio.Arpeggio,
-    'SCALE'    : MMA.patScale.Scale,
-    'DRUM'     : MMA.patDrum.Drum,
-    'WALK'     : MMA.patWalk.Walk,
-    'MELODY'   : MMA.patSolo.Melody,
-    'SOLO'     : MMA.patSolo.Solo,
-    'ARIA'     : MMA.patAria.Aria,
-    'PLECTRUM' : MMA.patPlectrum.Plectrum
+    'BASS'     : neomma.MMA.patBass.Bass,
+    'CHORD'    : neomma.MMA.patChord.Chord,
+    'ARPEGGIO' : neomma.MMA.patArpeggio.Arpeggio,
+    'SCALE'    : neomma.MMA.patScale.Scale,
+    'DRUM'     : neomma.MMA.patDrum.Drum,
+    'WALK'     : neomma.MMA.patWalk.Walk,
+    'MELODY'   : neomma.MMA.patSolo.Melody,
+    'SOLO'     : neomma.MMA.patSolo.Solo,
+    'ARIA'     : neomma.MMA.patAria.Aria,
+    'PLECTRUM' : neomma.MMA.patPlectrum.Plectrum
 
 }
 
@@ -93,10 +93,10 @@ def trackAlloc(name, err):
 
     # Update current grooves to reflect new track.
 
-    for slot in MMA.grooves.glist.keys():
+    for slot in neomma.MMA.grooves.glist.keys():
         newtk.saveGroove(slot)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Creating new track %s" % name)
 
     return

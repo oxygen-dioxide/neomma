@@ -26,12 +26,12 @@ Bob van der Poel <bob@mellowood.ca>
 import random
 
 
-import MMA.harmony
-import MMA.notelen
+import neomma.MMA.harmony
+import neomma.MMA.notelen
 
 from . import gbl
-from MMA.common import *
-from MMA.pat import PC, Pgroup
+from neomma.MMA.common import *
+from neomma.MMA.pat import PC, Pgroup
 
 
 class Walk(PC):
@@ -53,7 +53,7 @@ class Walk(PC):
         a = Pgroup()
 
         a.offset = self.setBarOffset(ev[0])
-        a.duration = MMA.notelen.getNoteLen(ev[1])
+        a.duration = neomma.MMA.notelen.getNoteLen(ev[1])
         a.vol = stoi(ev[2], "Type error in Walking Bass definition")
 
         return a
@@ -145,7 +145,7 @@ class Walk(PC):
 
             if self.harmony[sc]:
                 ch = self.getChordInPos(p.offset, ctable).chord.noteList
-                h = MMA.harmony.harmonize(self.harmony[sc], note, ch)
+                h = neomma.MMA.harmony.harmonize(self.harmony[sc], note, ch)
                 vol = p.vol * self.harmonyVolume[sc]
                 harmlist = list(zip(h, [vol] * len(h)))
             else:
@@ -153,7 +153,7 @@ class Walk(PC):
 
             offset = p.offset
             if self.ornaments['type']:
-                offset = MMA.ornament.doOrnament(self, notelist,
+                offset = neomma.MMA.ornament.doOrnament(self, notelist,
                                 self.getChordInPos(offset, ctable).chord.scaleList, p)
                 notelist = []
 

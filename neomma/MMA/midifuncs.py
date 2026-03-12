@@ -25,9 +25,9 @@ Low level entry points, mostly called directly from the parser.
 
 import struct
 from . import gbl
-import MMA.mdefine
-from   MMA.common import *
-import MMA.debug
+import neomma.MMA.mdefine
+from   neomma.MMA.common import *
+import neomma.MMA.debug
 
 # Storage for midi channel init commands (MidiInit). Commands are added
 # from the functions setMidiInt and trackSetMidiInit in this module.
@@ -78,10 +78,10 @@ def rawMidi(ln):
         if a < 0 or a > 0xff:
             error("All values must be in the range 0 to 0xff, not '%s'" % a)
         mb.append(a)
-    mb = MMA.midiM.packBytes((mb))   # save value for debug
+    mb = neomma.MMA.midiM.packBytes((mb))   # save value for debug
     gbl.mtrks[0].addToTrack(gbl.tickOffset, mb)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MIDI: Inserted raw midi in metatrack: %s" %
               ' '.join([str(a) for a in struct.unpack("%sB" % len(mb), mb)]))
 
@@ -118,7 +118,7 @@ def setMidiFileType(ln):
         else:
             error("Use: MIDIFile [SMF=0/1] [RUNNING=0/1]")
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         if gbl.runningStatus:
             a = 'ON'
         else:
@@ -145,7 +145,7 @@ def setChPref(ln):
 
         gbl.midiChPrefs[n.upper()] = c
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("ChannelPref: %s" % 
               ' '.join(["%s=%s" % (n, c) for n, c in gbl.midiChPrefs.items()]))
 
@@ -215,11 +215,11 @@ def doMidiTrackCresc(ln, dir, func):
         # No start, insert the current master volume
         ln.insert(0, str(masterMidiVolume))
 
-    v1 = MMA.volume.calcMidiVolume14(ln[0])
+    v1 = neomma.MMA.volume.calcMidiVolume14(ln[0])
     if v1 < 0 or v1 > 0x3fff:
         error("%s: Volume must be 0..16383." % (v1))
 
-    v2 = MMA.volume.calcMidiVolume14(ln[1])
+    v2 = neomma.MMA.volume.calcMidiVolume14(ln[1])
     if v2 < 0 or v2 > 0x3fff:
         error("%s: Volume must be 0..16383." % (v1))
 
@@ -255,7 +255,7 @@ def doMidiTrackCresc(ln, dir, func):
     masterMidiVolume = v2
     gbl.mtrks[0].addMasterVolume(end, v2)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MIDI(de)Cresc: Added %s changes" % t)
 
 
@@ -267,7 +267,7 @@ def setMidiVolume(ln):
     if len(ln) != 1:
         error("MidiVolume: Needs exactly one argument.")
 
-    v = MMA.volume.calcMidiVolume14(ln[0])
+    v = neomma.MMA.volume.calcMidiVolume14(ln[0])
 
     if v < 0 or v > 0x3fff:
         error("MidiVolume: Volume setting must be 0...16383.")
@@ -275,7 +275,7 @@ def setMidiVolume(ln):
     gbl.mtrks[0].addMasterVolume(gbl.tickOffset, v)
     masterMidiVolume = v
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MidiVolume: Master volume set to %s." % v)
 
 
@@ -317,13 +317,13 @@ def setChannelInit(ln):
         error("ChannelInit: A command is required.")
 
     ln[0] = ln[0].upper()
-    if ln[0] not in MMA.parse.trackFuncs:
+    if ln[0] not in neomma.MMA.parse.trackFuncs:
         error("ChannelInit: Track function %s does not exist." % ln[0])
 
     for c in channels:
         channelInit[c].append(ln)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("ChannelInit: '%s' queued to channels %s" % 
             (' '.join(ln), ','.join([str(c) for c in channels])))
 
@@ -336,9 +336,9 @@ def doChannelInit(channel, name):
         trackFuncs table not existing. So, this might cause a future problem!!!
     """
 
-    for l in MMA.midifuncs.channelInit[channel]:
-        MMA.parse.trackFuncs[l[0]](name, l[1:])
-    MMA.midifuncs.channelInit[channel] = []
+    for l in neomma.MMA.midifuncs.channelInit[channel]:
+        neomma.MMA.parse.trackFuncs[l[0]](name, l[1:])
+    neomma.MMA.midifuncs.channelInit[channel] = []
 
 ################################################
 ## Track functions
@@ -350,15 +350,15 @@ def trackMidiVolume(name, ln):
     if len(ln) != 1:
         error("%s MidiVolume: Needs exactly 1 arg." % name)
 
-    v = MMA.volume.calcMidiVolume(ln[0])
+    v = neomma.MMA.volume.calcMidiVolume(ln[0])
     if v < 0 or v > 127:
         error("%s MidiVolume: Volumes need to be 0..127, not %s." % (name, v))
 
     gbl.tnames[name].midiPending.append(("CVOLUME", gbl.tickOffset, v))
     gbl.tnames[name].cVolume = v
 
-    if MMA.debug.debug:
-        MMA.debug.trackSet(name, 'MIDIVolume')
+    if neomma.MMA.debug.debug:
+        neomma.MMA.debug.trackSet(name, 'MIDIVolume')
 
 
 def trackMidiCresc(name, ln):
@@ -399,10 +399,10 @@ def doMidiCresc(name, ln, dir, func):
 
         ln.insert(0, str(currentVol))
 
-    v1 = MMA.volume.calcMidiVolume(ln[0])
+    v1 = neomma.MMA.volume.calcMidiVolume(ln[0])
     if v1 < 0 or v1 > 127:
         error("%s %s: Volume must be 0..127." % (name, v1))
-    v2 = MMA.volume.calcMidiVolume(ln[1])
+    v2 = neomma.MMA.volume.calcMidiVolume(ln[1])
     if v2 < 0 or v2 > 127:
         error("%s %s: Volume must be 0..127." % (name, v1))
 
@@ -428,7 +428,7 @@ def doMidiCresc(name, ln, dir, func):
         gbl.tnames[name].midiPending.append(("CVOLUME", int(p), v))
         p += step
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("%s MidiVolume: Added %s changes" % (name, t))
 
 def trackGlis(name, ln):
@@ -444,7 +444,7 @@ def trackGlis(name, ln):
 
     gbl.tnames[name].midiPending.append(("GLIS", gbl.tickOffset, v))
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Set %s MIDIGlis to %s" % (name, v))
 
 
@@ -519,7 +519,7 @@ def trackWheel(name, ln):
                 error("%s MidiWheel Reset: Use ON or OFF, not '%s'." % (name, v))
 
         elif o == 'RATE':
-            rate = MMA.notelen.getNoteLen(v)
+            rate = neomma.MMA.notelen.getNoteLen(v)
 
         elif o == 'CYCLE':
             if v in ('NO', '0', 'OFF'):
@@ -538,7 +538,7 @@ def trackWheel(name, ln):
             startOffset = gbl.tickOffset
         tdata.midiPending.append(("WHEEL", startOffset, setOnly))
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("MidiWheel %s: detuned to %s at %s ticks." %
                 (name, setOnly, startOffset))
         return
@@ -601,7 +601,7 @@ def trackWheel(name, ln):
     if reset:
         tdata.midiPending.append(("WHEEL", off+5, 0x2000))  # reset at end
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         if not reset:
             rset = "No RESET." 
         else:
@@ -678,7 +678,7 @@ def trackPan(name, ln):
     else:
         tdata.midiPending.append(("PAN", gbl.tickOffset, newPan))
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         if beats:
             dPrint("Set %s MIDIPan from %s to %s over %s beats." % 
                 (name, initPan, newPan, beats))
@@ -695,7 +695,7 @@ def trackMidiText(name, ln):
     ln = ' '.join(ln)
     gbl.tnames[name].midiPending.append(("MIDITEXT", gbl.tickOffset, ln))
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Set %s MIDIText '%s'." % (name, ln))
 
 
@@ -708,7 +708,7 @@ def trackMidiCue(name, ln):
     ln = ' '.join(ln)
     gbl.tnames[name].midiPending.append(("MIDICUE", gbl.tickOffset, ln))
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Set %s MIDICue '%s'." % (name, ln))
 
 
@@ -729,7 +729,7 @@ def trackMidiExt(ln):
         pn = "_%s" % ids
         ids += 1
 
-        MMA.mdefine.mdef.create(pn, s[0])
+        neomma.MMA.mdefine.mdef.create(pn, s[0])
         ln = ln[:sp] + ' ' + pn + ' ' + ln[sp:]
 
     return ln.split()
@@ -790,5 +790,5 @@ def trackMidiName(name, ln):
 
     gbl.tnames[name].midiPending.append(('TNAME', 0, ln[0]))
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Set %s MIDI Track Name to %s" % (name, ln[0]))

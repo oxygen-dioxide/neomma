@@ -22,8 +22,8 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-from MMA.common import *
-import MMA.debug
+from neomma.MMA.common import *
+import neomma.MMA.debug
 import re
 
 """ Volumes are specified in musical terms, but converted to
@@ -80,7 +80,7 @@ def adjvolume(ln):
         else:
             error("ADJUSTVOLUME DYNAMIC: '%s' for AdjustVolume is unknown" % v)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Volume Ratio: %s%% Track / %s%% Master" % (vTRatio * 100, vMRatio * 100))
         dPrint("Volume table: %s" % 
               ' '.join([ "%s=%s" % (a, int(vols[a] * 100)) for a in sorted(vols)]))
@@ -147,7 +147,7 @@ def setVolume(ln):
     volume = calcVolume(ln[0], volume)
 
     futureVol = []
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Volume: %s%%" % (100 * volume))
 
 
@@ -195,7 +195,7 @@ def setSwell(ln):
     futureVol.extend(fvolume(0, futureVol[-1],
                              [str(int(volume * 100)), c])[offset:])
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Set Swell to: %s" % ' '.join([str(int(a * 100)) for a in futureVol]))
 
 
@@ -215,7 +215,7 @@ def setCrescendo(dir, ln):
 
     futureVol = fvolume(dir, volume, ln)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Set (De)Cresc to: %s" % ' '.join([str(int(a * 100)) for a in futureVol]))
 
 # Used by both the 2 funcs above and from TRACK.setCresc()

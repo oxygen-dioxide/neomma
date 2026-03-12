@@ -31,11 +31,11 @@ Bob van der Poel <bob@mellowood.ca>
 import textwrap, traceback, sys, re
 from collections import defaultdict
 
-from MMA.common import error, warning
-from MMA.macro import macros
-import MMA.gbl as gbl
+from neomma.MMA.common import error, warning
+from neomma.MMA.macro import macros
+import neomma.MMA.gbl as gbl
 
-from MMA.termsize import getTerminalSize
+from neomma.MMA.termsize import getTerminalSize
 termwidth = getTerminalSize()[0]-1
 
 try:

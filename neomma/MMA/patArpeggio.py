@@ -24,12 +24,12 @@ Bob van der Poel <bob@mellowood.ca>
 
 import random
 
-import MMA.notelen
-import MMA.harmony
+import neomma.MMA.notelen
+import neomma.MMA.harmony
 
 from . import gbl
-from MMA.common import *
-from MMA.pat import PC, Pgroup
+from neomma.MMA.common import *
+from neomma.MMA.pat import PC, Pgroup
 
 
 class Arpeggio(PC):
@@ -53,7 +53,7 @@ class Arpeggio(PC):
                   "for apreggio define, not '%s'" % ' '.join(ev))
 
         a.offset = self.setBarOffset(ev[0])
-        a.duration = MMA.notelen.getNoteLen(ev[1])
+        a.duration = neomma.MMA.notelen.getNoteLen(ev[1])
         a.vol = stoi(ev[2], "Type error in Arpeggio definition")
 
         return a
@@ -156,7 +156,7 @@ class Arpeggio(PC):
                 notelist = []
 
             if self.harmony[sc]:
-                h = MMA.harmony.harmonize(self.harmony[sc], note, ourChord)
+                h = neomma.MMA.harmony.harmonize(self.harmony[sc], note, ourChord)
                 vol = p.vol * self.harmonyVolume[sc]
                 harmlist = list(zip(h, [vol] * len(h)))
             else:
@@ -164,7 +164,7 @@ class Arpeggio(PC):
 
             offset = p.offset
             if self.ornaments['type']:
-                offset = MMA.ornament.doOrnament(self, notelist,
+                offset = neomma.MMA.ornament.doOrnament(self, notelist,
                                self.getChordInPos(offset, ctable).chord.scaleList, p)
                 notelist = []
 

@@ -24,15 +24,15 @@ Bob van der Poel <bob@mellowood.ca>
 """
 
 from . import gbl
-from MMA.common import *
-import MMA.debug
-from MMA.notelen import noteLenTable
+from neomma.MMA.common import *
+import neomma.MMA.debug
+from neomma.MMA.notelen import noteLenTable
 
-from MMA.alloc import trackAlloc
-from MMA.macro import macros
-from MMA.pat import pats
+from neomma.MMA.alloc import trackAlloc
+from neomma.MMA.macro import macros
+from neomma.MMA.pat import pats
 
-import MMA.seqrnd
+import neomma.MMA.seqrnd
 
 def trackSequence(name, ln):
     """ Define a sequence for a track.
@@ -159,7 +159,7 @@ def trackSequence(name, ln):
 
     self.sequence = seqBump(tmp)
 
-    if MMA.debug.seqshow:
+    if neomma.MMA.debug.seqshow:
         msg = ["%s sequence set:" % self.name]
         for a in ln:
             if a in "Zz-":
@@ -193,9 +193,9 @@ def seqsize(ln):
         for a in gbl.tnames.values():
             a.setSeqSize()
 
-        MMA.seqrnd.seqRndWeight = seqBump(MMA.seqrnd.seqRndWeight)
+        neomma.MMA.seqrnd.seqRndWeight = seqBump(neomma.MMA.seqrnd.seqRndWeight)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Set SeqSize to %s" % n)
 
 
@@ -221,9 +221,9 @@ def seq(ln):
 
     gbl.seqCount = s - 1
 
-    if MMA.seqrnd.seqRnd[0] == 1:
+    if neomma.MMA.seqrnd.seqRnd[0] == 1:
         warning("SeqRnd has been disabled by a Seq command")
-        MMA.seqrnd.seqRnd = [0]
+        neomma.MMA.seqrnd.seqRnd = [0]
 
 
 def seqClear(ln):
@@ -237,9 +237,9 @@ def seqClear(ln):
             continue
         n.clearSequence()
 
-    MMA.volume.futureVol = []
+    neomma.MMA.volume.futureVol = []
 
-    MMA.seqrnd.setSeqRndWeight(['1'])
+    neomma.MMA.seqrnd.setSeqRndWeight(['1'])
 
 
 def restart(ln):
@@ -266,7 +266,7 @@ def trackSeqClear(name, ln):
 
     for n in gbl.tnames:
         if n.find(name) == 0:
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("SeqClear: Track %s cleared." % n)
             gbl.tnames[n].clearSequence()
 
@@ -282,7 +282,7 @@ def trackSeqRnd(name, ln):
 
     self.seqRnd = getTF(arg, "%s SeqRnd" % (name))
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         if self.seqRnd:
             a = "On"
         else:
@@ -294,7 +294,7 @@ def trackSeqRndWeight(name, ln):
     """ Set rnd weight for track. """
  
     tr = gbl.tnames[name]
-    tr.seqRndWeight = MMA.seqrnd.getweights(ln, "%s SeqRndWeight" % name)
+    tr.seqRndWeight = neomma.MMA.seqrnd.getweights(ln, "%s SeqRndWeight" % name)
  
 
 def trackRestart(name, ln):

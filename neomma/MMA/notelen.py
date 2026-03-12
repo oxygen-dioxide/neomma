@@ -25,7 +25,7 @@ Bob van der Poel <bob@mellowood.ca>
 """
 
 from . import gbl
-from MMA.common import *
+from neomma.MMA.common import *
 
 noteLenTable = {
     '0': 1,                   # special 0==1 midi tick

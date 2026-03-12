@@ -23,13 +23,13 @@ Bob van der Poel <bob@mellowood.ca>
 """
 
 
-import MMA.notelen
-import MMA.harmony
-import MMA.ornament
+import neomma.MMA.notelen
+import neomma.MMA.harmony
+import neomma.MMA.ornament
 
 from . import gbl
-from MMA.common import *
-from MMA.pat import PC, Pgroup
+from neomma.MMA.common import *
+from neomma.MMA.pat import PC, Pgroup
 
 
 class Bass(PC):
@@ -51,7 +51,7 @@ class Bass(PC):
         a = Pgroup()
 
         a.offset = self.setBarOffset(ev[0])
-        a.duration = MMA.notelen.getNoteLen(ev[1])
+        a.duration = neomma.MMA.notelen.getNoteLen(ev[1])
         a.addoctave = 0
 
         # parse the offset (field 3) ... n[n][#s&b+-]
@@ -125,14 +125,14 @@ class Bass(PC):
                 notelist = []
 
             if self.harmony[sc]:
-                h = MMA.harmony.harmonize(self.harmony[sc], note, ct.chord.noteList)
+                h = neomma.MMA.harmony.harmonize(self.harmony[sc], note, ct.chord.noteList)
                 harmlist = list(zip(h, [p.vol * self.harmonyVolume[sc]] * len(h)))
             else:
                 harmlist = []
 
             offset = p.offset
             if self.ornaments['type']:
-                offset = MMA.ornament.doOrnament(self, notelist,
+                offset = neomma.MMA.ornament.doOrnament(self, notelist,
                                         self.getChordInPos(offset, ctable).chord.scaleList, p)
                 notelist = []
 

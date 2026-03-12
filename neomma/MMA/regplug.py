@@ -31,13 +31,13 @@ import sys
 import importlib
 import hashlib
 import json
-import MMA.debug
+import neomma.MMA.debug
 
-from MMA.paths import plugPaths
-from MMA.common import *
-import MMA.parse
-from MMA.alloc import trkClasses
-import MMA.appdirs   # not mine, but it works!
+from neomma.MMA.paths import plugPaths
+from neomma.MMA.common import *
+import neomma.MMA.parse
+from neomma.MMA.alloc import trkClasses
+import neomma.MMA.appdirs   # not mine, but it works!
 
 # In python3 raw_input() has been renamed input()
 if sys.version_info[0] == 3:
@@ -140,7 +140,7 @@ def findPlugin(targ):
 
     # 3. The plugin directory (mmapath/plugins)
     if tryPlugDir:
-        for p in MMA.paths.plugPaths:
+        for p in neomma.MMA.paths.plugPaths:
             mdir, modName = matchName(p)
             if mdir:
                 return p, mdir, modName
@@ -176,7 +176,7 @@ def getPermission(path, name):
 
     # We need somewhere to store this registery. appdirs to the rescue!
     if not permFile:
-        cachePath = errorName = MMA.appdirs.user_data_dir('mma', 'Mellowood')
+        cachePath = errorName = neomma.MMA.appdirs.user_data_dir('mma', 'Mellowood')
         
         # Can we access the directory? If not, we first try to create
         # a mma directory (we're assuming that HOME/.config, HOME/.local/config,
@@ -312,25 +312,25 @@ def registerPlugin(p):
                     'cmd':  cmdName   }
 
     try:
-        MMA.parse.simpleFuncs[cmdName] = e.run
+        neomma.MMA.parse.simpleFuncs[cmdName] = e.run
         simplePlugs.append(cmdName)
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Plugin: %s simple plugin RUN registered." % cmdName.title())
     except:
         pass
     
     try:
-        MMA.parse.trackFuncs[cmdName] = e.trackRun
+        neomma.MMA.parse.trackFuncs[cmdName] = e.trackRun
         trackPlugs.append(cmdName)
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Plugin: %s track plugin TrackRun registered." % cmdName.title())
     except:
         pass
     
     try:
-        MMA.parse.dataFuncs[cmdName] = e.dataRun
+        neomma.MMA.parse.dataFuncs[cmdName] = e.dataRun
         dataPlugs.append(cmdName)
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Plugin: %s data plugin DataRun registered." % cmdName.title())
     except:
         pass
@@ -384,7 +384,7 @@ def plugin(ln):
                 else:
                     error("Plugin Disable: '%s' is an unknown or illegal option." % o)
 
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 if plugsOff:
                     dPrint("Plugin: loading disabled.")
                 else:

@@ -26,23 +26,23 @@ Bob van der Poel <bob@mellowood.ca>
 import copy
 import random
 
-import MMA.notelen
-import MMA.translate
-import MMA.midi
-import MMA.midiC
-import MMA.mdefine
-import MMA.volume
-import MMA.alloc
-import MMA.seqrnd
-import MMA.truncate
-import MMA.ornament
-import MMA.trigger
-import MMA.rpitch
-import MMA.debug
+import neomma.MMA.notelen
+import neomma.MMA.translate
+import neomma.MMA.midi
+import neomma.MMA.midiC
+import neomma.MMA.mdefine
+import neomma.MMA.volume
+import neomma.MMA.alloc
+import neomma.MMA.seqrnd
+import neomma.MMA.truncate
+import neomma.MMA.ornament
+import neomma.MMA.trigger
+import neomma.MMA.rpitch
+import neomma.MMA.debug
 
 from . import gbl
-from MMA.common import *
-from MMA.miditables import NONETONE, drumKits
+from neomma.MMA.common import *
+from neomma.MMA.miditables import NONETONE, drumKits
 
 pats = {}        # Storage for all pattern defines
 
@@ -186,8 +186,8 @@ class PC:
         if self.vtype not in ("CHORD", "ARPEGGIO"):
             warning("Compress is ignored in %s tracks" % self.vtype)
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "Compress")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "Compress")
 
     def setRange(self, ln):
         """ set range. """
@@ -213,8 +213,8 @@ class PC:
         if self.vtype == 'ARIA':
             self.restart()
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "Range")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "Range")
 
     def setVoicing(self, ln):
         """ set the Voicing Mode options.
@@ -251,12 +251,12 @@ class PC:
                 n = n[1:]
             else:
                 mul = 1
-            tmp.append(MMA.notelen.getNoteLen(n) * mul)
+            tmp.append(neomma.MMA.notelen.getNoteLen(n) * mul)
 
         self.delay = seqBump(tmp)
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "Delay")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "Delay")
 
     def setDupRoot(self, ln):
         """ set/unset root duplication.
@@ -317,8 +317,8 @@ class PC:
 
         self.chord = seqBump(clist)
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "Chords")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "Chords")
 
     def setChordLimit(self, ln):
         """ set/unset the chordLimit flag. """
@@ -363,8 +363,8 @@ class PC:
         if self.vtype not in ("CHORD", "ARPEGGIO"):
             warning("%s LIMIT is ignored in %s tracks" % (tname, self.vtype))
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(tname, "Limit")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(tname, "Limit")
 
     def setChannel(self, ln=None):
         """ Set the midi-channel number for a track.
@@ -455,8 +455,8 @@ class PC:
         gbl.midiAvail[c] += 1
 
         if not c in gbl.mtrks:
-            gbl.mtrks[c] = MMA.midi.Mtrk(c)
-            if MMA.debug.debug:
+            gbl.mtrks[c] = neomma.MMA.midi.Mtrk(c)
+            if neomma.MMA.debug.debug:
                 dPrint("MIDI channel %s buffer created" % c)
 
         # If a track name has not be set via MidiTName (this will be
@@ -471,7 +471,7 @@ class PC:
             if not f:
                 self.midiPending.append(('TNAME', 0, self.name.title()))
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("MIDI Channel %s assigned to %s" % (self.channel, self.name))
 
     def setChShare(self, ln):
@@ -490,7 +490,7 @@ class PC:
 
         sc = ln.upper()
 
-        MMA.alloc.trackAlloc(sc, 1)
+        neomma.MMA.alloc.trackAlloc(sc, 1)
 
         if not sc in gbl.tnames:
             error("Channel '%s' does not exist. No such name" % sc)
@@ -528,8 +528,8 @@ class PC:
         arg = ln[0].upper()
         self.sticky = getTF(arg, "%s Sticky" % (self.name))
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "Sticky")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "Sticky")
 
         
     def setStrum(self, ln):
@@ -563,8 +563,8 @@ class PC:
         if self.vtype == "DRUM":
             warning("Strum has no effect in %s tracks" % self.name)
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "Strum")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "Strum")
 
     def setStrumAdd(self, ln):
         """ Additional options for strum. """
@@ -578,8 +578,8 @@ class PC:
 
         self.strumAdd = seqBump(tmp)
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "StrumAdd")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "StrumAdd")
 
     def getStrum(self, sc):
         """ Returns the strum factor. Note that if strum==(0,0) a 0 is returned."""
@@ -609,7 +609,7 @@ class PC:
             self.disable = 0
             self.ssvoice = -1
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("%s Enabled" % self.name)
 
     def setOff(self):
@@ -617,7 +617,7 @@ class PC:
 
         self.disable = 1
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("%s Disabled" % self.name)
 
     def setRVolume(self, ln):
@@ -632,8 +632,8 @@ class PC:
 
         self.rVolume = seqBump(tmp)
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "RVolume")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "RVolume")
 
          
     def setRSkip(self, ln):
@@ -676,8 +676,8 @@ class PC:
 
         self.rSkip = seqBump(tmp)
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "RSkip")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "RSkip")
 
 
     def setRDuration(self, ln):
@@ -693,8 +693,8 @@ class PC:
 
         self.rDuration = seqBump(tmp)
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "RDuration")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "RDuration")
 
 
     def setRTime(self, ln):
@@ -710,8 +710,8 @@ class PC:
 
         self.rTime = seqBump(tmp)
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "RTime")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "RTime")
 
     def setDirection(self, ln):
         """ Set scale direction. """
@@ -731,8 +731,8 @@ class PC:
             self.lastChord = None
             self.lastNote = -1
 
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "Direction")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "Direction")
 
     def setScaletype(self, ln):
         """ Set scale type.
@@ -777,8 +777,8 @@ class PC:
 
         self.invert = seqBump(tmp)
         
-        if MMA.debug.debug:
-            MMA.debug.trackSet(self.name, "Invert")
+        if neomma.MMA.debug.debug:
+            neomma.MMA.debug.trackSet(self.name, "Invert")
 
     def setOctave(self, ln):
         """ Set the octave for a track. Use 0-10, -x, +x. """
@@ -799,7 +799,7 @@ class PC:
 
         self.octave = seqBump(tmp)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Set %s Octave to: %s" % 
                   (self.name, ' '.join([str(i // 12) for i in self.octave])))
 
@@ -818,7 +818,7 @@ class PC:
 
         self.octave = seqBump(tmp)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Set %s MOctave to: %s" % 
                   (self.name, ' '.join([str((i // 12) - 1) for i in self.octave])))
 
@@ -836,7 +836,7 @@ class PC:
         self.spanStart = start
         self.spanEnd = end
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Set %s Span to %s...%s" % (self.name, self.spanStart, self.spanEnd))
 
     def setSeqSize(self):
@@ -903,7 +903,7 @@ class PC:
 
         tmp = []
         for n in ln:
-            voc = MMA.midiC.decodeVoice(n)
+            voc = neomma.MMA.midiC.decodeVoice(n)
             tmp.append(voc)
 
         self.voice = seqBump(tmp)
@@ -924,13 +924,13 @@ class PC:
             warning("%s %s %s shared with %s. Changing voice may create conflict"
                     % (t1, ', '.join(a), v1, self.name))
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             if self.vtype == 'DRUM':
                dPrint("Set %s Tone to: %s" % 
-                      (self.name, ' '.join([MMA.midiC.valueToDrum(i) for i in self.voice])))
+                      (self.name, ' '.join([neomma.MMA.midiC.valueToDrum(i) for i in self.voice])))
             else:
                 dPrint("Set %s Voice to: %s" % 
-                       (self.name, ' '.join([MMA.midiC.valueToInst(i) for i in self.voice])))
+                       (self.name, ' '.join([neomma.MMA.midiC.valueToInst(i) for i in self.voice])))
 
 
     def setMidiClear(self, ln):
@@ -939,9 +939,9 @@ class PC:
         if ln[0] in 'zZ-':
             self.midiClear = None
         else:
-            self.midiClear = MMA.mdefine.mdef.get(ln[0])
+            self.midiClear = neomma.MMA.mdefine.mdef.get(ln[0])
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("%s MIDIClear: %s" % (self.name, self.midiSeqFmt(self.midiClear)))
 
     def doMidiClear(self):
@@ -988,14 +988,14 @@ class PC:
             if a in 'zZ-':
                 seq.append(None)
             else:
-                seq.append(MMA.mdefine.mdef.get(a.upper()))
+                seq.append(neomma.MMA.mdefine.mdef.get(a.upper()))
 
         if seq.count(None) == len(seq):
             self.midiSeq = []
         else:
             self.midiSeq = seqBump(seq)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("%s MIDISeq: %s" % 
                   (self.name, ' '.join(['{ %s }' % self.midiSeqFmt(l) for l in seq])))
 
@@ -1018,14 +1018,14 @@ class PC:
             if a in 'zZ':  # some bars in seq might not want midi stuff
                 seq.append(None)
             else:
-                seq.append(MMA.mdefine.mdef.get(a.upper()))
+                seq.append(neomma.MMA.mdefine.mdef.get(a.upper()))
 
         if seq.count(None) == len(seq):  # see if all bars in seq are None
             self.midiVoice = []          # yes, kill the whole voice thing
         else:
             self.midiVoice = seqBump(seq)  # set voice for all bars in seq
  
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("%s MIDIVoice: %s" %
                   (self.name, ' '.join(['{ %s }' % self.midiSeqFmt(l) for l in seq])))
 
@@ -1038,7 +1038,7 @@ class PC:
         ret = ''
         for i in lst:
             ret += "%s %s 0x%02x ; " % (i[0],
-                          MMA.midiC.valueToCtrl(i[1][0]), i[1][1])
+                          neomma.MMA.midiC.valueToCtrl(i[1][0]), i[1][1])
         return ret.rstrip("; ")
 
     def setVolume(self, ln):
@@ -1055,17 +1055,17 @@ class PC:
 
 
         for i, n in enumerate(ln):
-            a = MMA.volume.calcVolume(n, self.volume[i])
+            a = neomma.MMA.volume.calcVolume(n, self.volume[i])
             if self.vtype == 'DRUM' or \
                     (self.vtype in ('MELODY', 'SOLO') and self.drumType):
-                a = MMA.translate.drumVolTable.get(self.toneList[i], a)
+                a = neomma.MMA.translate.drumVolTable.get(self.toneList[i], a)
             else:
-                a = MMA.translate.voiceVolTable.get(self.voice[i], a)
+                a = neomma.MMA.translate.voiceVolTable.get(self.voice[i], a)
             tmp[i] = a
 
         self.volume = seqBump(tmp)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Set %s Volume to: %s" %
                   (self.name, ' '.join([str(int(a * 100))  for a in self.volume])))
 
@@ -1084,9 +1084,9 @@ class PC:
         if self.volume.count(vol) != len(self.volume):
             warning("(De)Crescendo being used with track with variable sequence volumes")
 
-        self.futureVols = MMA.volume.fvolume(dir, vol, ln)
+        self.futureVols = neomma.MMA.volume.fvolume(dir, vol, ln)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Set %s Cresc to: %s" % 
                   (self.name, ' '.join([str(int(a * 100)) for a in self.futureVols])))
 
@@ -1118,13 +1118,13 @@ class PC:
             offset = 0
         c = str(c)
 
-        self.futureVols = MMA.volume.fvolume(0, self.volume[0],
+        self.futureVols = neomma.MMA.volume.fvolume(0, self.volume[0],
                                              [ln[0], c])
 
-        self.futureVols.extend(MMA.volume.fvolume(0, self.futureVols[-1],
+        self.futureVols.extend(neomma.MMA.volume.fvolume(0, self.futureVols[-1],
              [str(int(self.volume[0] * 100)), c])[offset:])
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Set %s Swell to: %s" % 
                   (self.name, ' '.join([str( int(a * 100)) for a in self.futureVols])))
 
@@ -1145,7 +1145,7 @@ class PC:
                 if val == '0' or val.upper() == 'NONE':
                     self.mallet = 0
                 else:
-                    self.mallet = MMA.notelen.getNoteLen(val)
+                    self.mallet = neomma.MMA.notelen.getNoteLen(val)
 
             elif mode == 'DECAY':
                 val = stof(val, "Mallet Decay must be a value, not '%s'" % val)
@@ -1158,7 +1158,7 @@ class PC:
             else:
                 error("%s Mallet: %s is not a option." % (self.name, mode))
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("%s Mallet Rate:%s Decay:%s" %
                 (self.name, self.mallet, self.malletDecay))
 
@@ -1221,7 +1221,7 @@ class PC:
 
         self.accent = seqBump(tmp)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             accList = []
             for s in self.accent:
                 accList.append('{')
@@ -1260,7 +1260,7 @@ class PC:
 
         self.artic = seqBump(tmp)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Set %s Articulate to: %s" % 
                   (self.name, ' '.join([str(a) for a in self.artic])))
 
@@ -1276,7 +1276,7 @@ class PC:
                        
         self.unify = seqBump(tmp)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Set %s Unify to: %s" %
               (self.name, ' '.join([str(a) for a in self.unify])))
 
@@ -1337,7 +1337,7 @@ class PC:
             then call back to this to finish the job.
         """
 
-        if self.vtype != 'PLECTRUM' or MMA.patPlectrum.plectrumReset == True:
+        if self.vtype != 'PLECTRUM' or neomma.MMA.patPlectrum.plectrumReset == True:
             self.doMidiClear()
             
         g = self.grooves[gname]
@@ -1423,7 +1423,7 @@ class PC:
             self.harmonyVolume = [.8]
             self.strum = [None]
             self.strumAdd = [0]
-            self.volume = [MMA.volume.vols['M']]
+            self.volume = [neomma.MMA.volume.vols['M']]
             self.compress = [0]
             self.dupRoot = [[]]
             self.chordLimit = [0,0]
@@ -1436,7 +1436,7 @@ class PC:
             self.midiVoice = []
             self.spanStart = 0
             self.spanEnd = 127
-            self.trigger = MMA.trigger.Trigger()
+            self.trigger = neomma.MMA.trigger.Trigger()
             self.mallet = 0
             self.malletDecay = 0
             self.futureVols = []
@@ -1444,7 +1444,7 @@ class PC:
             self.delay = [0]
 
             # ornamentation
-            self.ornaments = MMA.ornament.default()
+            self.ornaments = neomma.MMA.ornament.default()
 
             # for midinote (see midinote.py)
             self.transpose = 0   # transpose off=0, on=1
@@ -1494,7 +1494,7 @@ class PC:
 
         pats[slot] = self.defPatRiff(ln)
 
-        if MMA.debug.pshow:
+        if neomma.MMA.debug.pshow:
             dPrint("%s pattern %s: %s" % (self.name.title(), redef,
                   self.formatPattern(pats[slot])))
 
@@ -1527,7 +1527,7 @@ class PC:
 
             self.riff = copy.deepcopy(tr.riff)
 
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("%s DupRiff copied from %s." % (self.name, t))
 
         else:
@@ -1559,7 +1559,7 @@ class PC:
 
                 tr.riff = copy.deepcopy(self.riff)
 
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("%s DupRiff copied to %s." % (self.name, tr.name))
 
     def setRiff(self, ln):
@@ -1576,7 +1576,7 @@ class PC:
             else:
                 self.riff.append(self.defPatRiff(ln))
 
-        if MMA.debug.pshow:
+        if neomma.MMA.debug.pshow:
             msg = ["%s Riff:" % self.name]
             if solo:
                 msg.append(self.riff[-1])
@@ -1689,8 +1689,8 @@ class PC:
 
         plist.sort( key=lambda plist: plist.offset)
 
-        if MMA.swing.mode:
-            plist = MMA.swing.pattern(plist, self.vtype)
+        if neomma.MMA.swing.mode:
+            plist = neomma.MMA.swing.pattern(plist, self.vtype)
 
         return plist
 
@@ -1772,13 +1772,13 @@ class PC:
                 except KeyError:
                     pass
 
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 if self.vtype == 'DRUM':
                     dPrint("%s Tone '%s' inserted at %s" % 
-                           (self.name, MMA.midiC.valueToDrum(v) , gbl.tickOffset))
+                           (self.name, neomma.MMA.midiC.valueToDrum(v) , gbl.tickOffset))
                 else:
                     dPrint("%s Voice '%s' inserted at %s" % 
-                           (self.name, MMA.midiC.valueToInst(v) , gbl.tickOffset))
+                           (self.name, neomma.MMA.midiC.valueToInst(v) , gbl.tickOffset))
 
         """ Our 2nd stab at MIDIVOICE. This time any sequences
             with offsets >0 are sent. AND the smidiVoice and midiSent
@@ -1825,7 +1825,7 @@ class PC:
         """
 
         if self.seqRnd:
-            self.seq = MMA.seqrnd.getrndseq(self.seqRndWeight)
+            self.seq = neomma.MMA.seqrnd.getrndseq(self.seqRndWeight)
         else:
             self.seq = gbl.seqCount
 
@@ -1837,7 +1837,7 @@ class PC:
         else:
             pattern = self.sequence[sc]
             if self.trigger.mode:
-                pattern = MMA.trigger.makeTriggerSequence(self, ctable, pattern)
+                pattern = neomma.MMA.trigger.makeTriggerSequence(self, ctable, pattern)
                 if not pattern and self.trigger.override:
                     pattern = self.sequence[sc]
             if not pattern:
@@ -1850,13 +1850,13 @@ class PC:
         if not self.channel:
             self.setChannel()
 
-        MMA.midifuncs.doChannelInit(self.channel, self.name)
+        neomma.MMA.midifuncs.doChannelInit(self.channel, self.name)
 
         # If there is track specific chord data, substitute it for the ctable
         # data already passed.
 
         if self.chord[sc]:
-            ctable = MMA.parse.parseChordLine(self.chord[sc])
+            ctable = neomma.MMA.parse.parseChordLine(self.chord[sc])
 
         # We are ready to create musical data. 1st do pending midi commands.
         # It probably doesn't matter if we do this now or later??? 
@@ -1883,10 +1883,10 @@ class PC:
         # to start/end slicing the pattern.
         # NOTE: use a deepcopy of the pattern!
 
-        if MMA.truncate.length and self.vtype not in ("SOLO", "MELODY"):
+        if neomma.MMA.truncate.length and self.vtype not in ("SOLO", "MELODY"):
             new = []
-            pstart = MMA.truncate.side
-            pend = pstart + MMA.truncate.length
+            pstart = neomma.MMA.truncate.side
+            pend = pstart + neomma.MMA.truncate.length
 
             # Go though original pattern and duplicate events (with
             # adjusted offsets) for the new beats. Note that the size/len
@@ -1909,41 +1909,41 @@ class PC:
 
             if c == 'TNAME':
                 gbl.mtrks[self.channel].addTrkName(off, v)
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("%s Track name inserted at offset %s" % 
                           (self.name, off))
 
             elif c == 'GLIS':
                 gbl.mtrks[self.channel].addGlis(off, v)
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("%s Glis at offset %s set to %s" % 
                           (self.name, off, ord(chr(v))))
 
             elif c == 'PAN':
                 gbl.mtrks[self.channel].addPan(off, v)
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("%s Pan at offset %s set to %s" % 
                           (self.name, off, v))
 
             elif c == 'CVOLUME':
                 gbl.mtrks[self.channel].addChannelVol(off, v)
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("%s ChannelVolume at offset %s set to %s" % 
                           (self.name, off, v))
 
             elif c == 'MIDITEXT':
                 gbl.mtrks[self.channel].addText(off, v)
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("%s MidiText inserted at %s." % (self.name, off))
 
             elif c == 'MIDICUE':
                 gbl.mtrks[self.channel].addCuePoint(off, v)
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("%s MidiCue inserted at %s." % (self.name, off))
 
             elif c == 'WHEEL':
                 gbl.mtrks[self.channel].addWheel(off, v)
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("%s Wheel inserted at %s." % (self.name, off))
 
             else:
@@ -1999,23 +1999,23 @@ class PC:
             trackAdjust += (self.nextVolume - trackAdjust) * \
                 bt / gbl.barLen
 
-        trackAdjust *= MMA.volume.vTRatio
+        trackAdjust *= neomma.MMA.volume.vTRatio
 
-        fullAdjust = MMA.volume.volume
+        fullAdjust = neomma.MMA.volume.volume
 
         # Is everything off?
         if not fullAdjust:
             return 0
 
         # global single bar cresc adjust
-        if MMA.volume.nextVolume:
+        if neomma.MMA.volume.nextVolume:
             bt = beat
             if bt < 1:  # might have negative offsets, cres code ignores
                 bt = 0
-            fullAdjust += (MMA.volume.nextVolume - fullAdjust) * \
+            fullAdjust += (neomma.MMA.volume.nextVolume - fullAdjust) * \
                 bt / gbl.barLen
 
-        fullAdjust *= MMA.volume.vMRatio
+        fullAdjust *= neomma.MMA.volume.vMRatio
 
         v *= (trackAdjust + fullAdjust)
 
@@ -2085,7 +2085,7 @@ class PC:
         if sp:   # get offset, and note length modifier
             note = v[sp + 1:]
             v = v[:sp]
-            notepart = MMA.notelen.getNoteLen(note) * sign
+            notepart = neomma.MMA.notelen.getNoteLen(note) * sign
         else:
             notepart = 0
 
@@ -2138,7 +2138,7 @@ class PC:
         sc = self.seq
 
         if self.rPitch:
-            note = MMA.rpitch.doRpitch(self, offset, note)
+            note = neomma.MMA.rpitch.doRpitch(self, offset, note)
         rptr = self.mallet
         if rptr and duration > rptr:
             ll = self.getDur(rptr)

@@ -27,8 +27,8 @@ other module.
 """
 
 from . import gbl
-from   MMA.common import *
-import MMA.debug
+from   neomma.MMA.common import *
+import neomma.MMA.debug
 
 majKy = { "C" :  0, "G" :  1, "D" :  2,
           "A" :  3, "E" :  4, "B" :  5,
@@ -158,7 +158,7 @@ class KeySig:
             if gbl.tnames[t].vtype == 'ARIA':
                 gbl.tnames[t].restart()
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("KeySig: %s" % self.getKeysig())
 
     def getKeysig(self):
@@ -308,5 +308,5 @@ def transpose(ln):
     else:
         gbl.transpose = getTranspose(ln, "Transpose")
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Set Transpose to %s" % gbl.transpose)

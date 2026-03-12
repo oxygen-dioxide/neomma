@@ -34,29 +34,29 @@ import os
 from os import environ
 from os import path
 
-import MMA.midiC
-import MMA.translate
-import MMA.volume
-import MMA.grooves
-import MMA.parse
-import MMA.parseCL
-import MMA.player
-import MMA.seqrnd
-import MMA.midinote
-import MMA.swing
-import MMA.ornament
-import MMA.rpitch
-import MMA.chords
-import MMA.debug
-import MMA.lyric
+import neomma.MMA.midiC
+import neomma.MMA.translate
+import neomma.MMA.volume
+import neomma.MMA.grooves
+import neomma.MMA.parse
+import neomma.MMA.parseCL
+import neomma.MMA.player
+import neomma.MMA.seqrnd
+import neomma.MMA.midinote
+import neomma.MMA.swing
+import neomma.MMA.ornament
+import neomma.MMA.rpitch
+import neomma.MMA.chords
+import neomma.MMA.debug
+import neomma.MMA.lyric
 
-from MMA.safe_eval import safeEnv, safeEval
+from neomma.MMA.safe_eval import safeEnv, safeEval
 from . import gbl
 
-from   MMA.notelen import getNoteLen
-from   MMA.keysig import keySig
-from   MMA.timesig import timeSig
-from   MMA.common import *
+from   neomma.MMA.notelen import getNoteLen
+from   neomma.MMA.keysig import keySig
+from   neomma.MMA.timesig import timeSig
+from   neomma.MMA.common import *
 
 
 def sliceVariable(p, sl):
@@ -95,7 +95,7 @@ class Macros:
         if ln:
             error("VarClear does not take an argument.")
         self.vars = {}
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("All variable definitions cleared.")
 
     def stackValue(self, s):
@@ -113,8 +113,8 @@ class Macros:
         # Simple/global     system values
 
         if s == 'CHORDADJUST':
-            return ' '.join([ "%s=%s" % (a, MMA.chords.cdAdjust[a]) 
-                              for a in sorted(MMA.chords.cdAdjust)])
+            return ' '.join([ "%s=%s" % (a, neomma.MMA.chords.cdAdjust[a]) 
+                              for a in sorted(neomma.MMA.chords.cdAdjust)])
 
         elif s == 'FILENAME':
             a = gbl.inpath.fname
@@ -144,14 +144,14 @@ class Macros:
             return str(gbl.QperBar)
 
         elif s == 'CTABS':
-            return ','.join([ str((float(x) / gbl.BperQ) + 1) for x in MMA.parseCL.chordTabs])
+            return ','.join([ str((float(x) / gbl.BperQ) + 1) for x in neomma.MMA.parseCL.chordTabs])
 
         elif s == 'TIMESIG':
             return timeSig.getAscii()
 
         elif s == 'TEMPO':  # get the current tempo via the record in midi.py
             tmp = gbl.tempo
-            for o,t in MMA.midi.tempoChanges:
+            for o,t in neomma.MMA.midi.tempoChanges:
                 if o > gbl.tickOffset:
                     break
                 tmp = t
@@ -164,53 +164,53 @@ class Macros:
             return str(gbl.infile)
 
         elif s == 'VOLUME':
-            return str(int(MMA.volume.volume * 100))  # INT() is important
+            return str(int(neomma.MMA.volume.volume * 100))  # INT() is important
 
         elif s == 'VOLUMERATIO':
-            return str((MMA.volume.vTRatio * 100))
+            return str((neomma.MMA.volume.vTRatio * 100))
 
         elif s == 'LASTVOLUME':
-            return str(int(MMA.volume.lastVolume * 100))
+            return str(int(neomma.MMA.volume.lastVolume * 100))
 
         elif s == 'GROOVE':
-            return MMA.grooves.currentGroove
+            return neomma.MMA.grooves.currentGroove
 
         elif s == 'GROOVELIST':
-            return ' '.join(sorted([x for x in MMA.grooves.glist.keys() if isinstance(x, str)]))
+            return ' '.join(sorted([x for x in neomma.MMA.grooves.glist.keys() if isinstance(x, str)]))
 
         elif s == 'TRACKLIST':
             return ' '.join(sorted(gbl.tnames.keys()))
 
         elif s == 'LASTGROOVE':
-            return MMA.grooves.lastGroove
+            return neomma.MMA.grooves.lastGroove
 
         elif s == 'PLUGINS':
-            from MMA.regplug import simplePlugs  # to avoid circular import error
+            from neomma.MMA.regplug import simplePlugs  # to avoid circular import error
             return ' '.join(simplePlugs)
 
         elif s == 'TRACKPLUGINS':
-            from MMA.regplug import trackPlugs  # to avoid circular import error
+            from neomma.MMA.regplug import trackPlugs  # to avoid circular import error
             return ' '.join(trackPlugs)
          
         elif s == 'DATAPLUGINS':
-            from MMA.regplug import dataPlugs  # to avoid circular import error
+            from neomma.MMA.regplug import dataPlugs  # to avoid circular import error
             return ' '.join(dataPlugs)
         
         elif s == 'SEQ':
             return str(gbl.seqCount)
 
         elif s == 'SEQRND':
-            if MMA.seqrnd.seqRnd[0] == 0:
+            if neomma.MMA.seqrnd.seqRnd[0] == 0:
                 return "Off"
-            if MMA.seqrnd.seqRnd[0] == 1:
+            if neomma.MMA.seqrnd.seqRnd[0] == 1:
                 return "On"
-            return ' '.join(MMA.seqrnd.seqRnd[1:])
+            return ' '.join(neomma.MMA.seqrnd.seqRnd[1:])
 
         elif s == 'SEQSIZE':
             return str(gbl.seqSize)
 
         elif s == 'SWINGMODE':
-            return MMA.swing.settings()
+            return neomma.MMA.swing.settings()
 
         elif s == 'TICKPOS':
             return str(gbl.tickOffset)
@@ -224,10 +224,10 @@ class Macros:
             return self.pushstack.pop()
 
         elif s == 'DEBUG':
-            return MMA.debug.getFlags()
+            return neomma.MMA.debug.getFlags()
         
         elif s == 'LASTDEBUG':
-            return MMA.debug.getLFlags()
+            return neomma.MMA.debug.getLFlags()
             
         elif s == 'VEXPAND':
             if self.expandMode:
@@ -237,11 +237,11 @@ class Macros:
 
         elif s == "MIDIPLAYER":
             return "%s Background=%s Delay=%s." % \
-                (' '.join(MMA.player.midiPlayer), MMA.player.inBackGround,
-                 MMA.player.waitTime)
+                (' '.join(neomma.MMA.player.midiPlayer), neomma.MMA.player.inBackGround,
+                 neomma.MMA.player.waitTime)
 
         elif s == "MIDISPLIT":
-            return ' '.join([str(x) for x in MMA.midi.splitChannels])
+            return ' '.join([str(x) for x in neomma.MMA.midi.splitChannels])
 
         elif s == "MIDIASSIGNS":
             x = []
@@ -251,28 +251,28 @@ class Macros:
             return ' '.join(x)
 
         elif s == 'SEQRNDWEIGHT':
-            return ' '.join([str(x) for x in MMA.seqrnd.seqRndWeight])
+            return ' '.join([str(x) for x in neomma.MMA.seqrnd.seqRndWeight])
 
         elif s == 'AUTOLIBPATH':
-            return ' '.join(MMA.paths.libDirs)
+            return ' '.join(neomma.MMA.paths.libDirs)
 
         elif s == 'LIBPATH':
-            return ' '.join(MMA.paths.libPath)
+            return ' '.join(neomma.MMA.paths.libPath)
 
         elif s == 'MMAPATH':
             return gbl.MMAdir
 
         elif s == 'INCPATH':
-            return ' '.join(MMA.paths.incPath)
+            return ' '.join(neomma.MMA.paths.incPath)
 
         elif s == 'PLUGPATH':
-            return ' '.join(MMA.paths.plugPaths)
+            return ' '.join(neomma.MMA.paths.plugPaths)
     
         elif s == 'VOICETR':
-            return MMA.translate.vtable.retlist()
+            return neomma.MMA.translate.vtable.retlist()
 
         elif s == 'TONETR':
-            return MMA.translate.dtable.retlist()
+            return neomma.MMA.translate.dtable.retlist()
 
         elif s == 'OUTPATH':
             return gbl.outPath
@@ -284,7 +284,7 @@ class Macros:
             return str(gbl.lineno)
 
         elif s == 'LYRIC':
-            return MMA.lyric.lyric.setting()
+            return neomma.MMA.lyric.lyric.setting()
 
         # Some time/date macros. Useful for generating copyright strings
 
@@ -380,7 +380,7 @@ class Macros:
             return "Mallet Rate=%i Decay=%i" % (t.mallet, t.malletDecay*100)
 
         elif func == 'MIDINOTE':
-            return MMA.midinote.mopts(t)
+            return neomma.MMA.midinote.mopts(t)
 
         elif func == 'MIDIVOLUME':
             return "%s" % t.cVolume
@@ -392,10 +392,10 @@ class Macros:
             return ' '.join([str((i//12)-1) for i in t.octave])
 
         elif func == 'ORNAMENT':
-            return MMA.ornament.getOrnOpts(t)
+            return neomma.MMA.ornament.getOrnOpts(t)
         
         elif func == 'PLUGINS':
-            from MMA.regplug import trackPlugs  # avoids circular import
+            from neomma.MMA.regplug import trackPlugs  # avoids circular import
             return ' '.join(trackPlugs)
         
         elif func == 'RANGE':
@@ -441,7 +441,7 @@ class Macros:
             return ' '.join(tmp)
 
         elif func == 'RPITCH':
-            return MMA.rpitch.getOpts(t)
+            return neomma.MMA.rpitch.getOpts(t)
             
                     
         elif func == 'SEQUENCE':
@@ -487,24 +487,24 @@ class Macros:
             return ' '.join([str(x) for x in t.strumAdd])
 
         elif func == 'TRIGGER':
-            return MMA.trigger.getTriggerOptions(t)
+            return neomma.MMA.trigger.getTriggerOptions(t)
 
         elif func == 'TONE':
             if t.vtype in ('MELODY', 'SOLO'):
                 if not t.drumType:
                     error("Melody/Solo tracks must be DRUMTYPE for tone.")
-                return str(MMA.midiC.valueToDrum(t.drumTone))
+                return str(neomma.MMA.midiC.valueToDrum(t.drumTone))
 
             elif t.vtype != 'DRUM':
                 error("Tracktype %s doesn't have TONE" % t.vtype)
 
-            return ' '.join([MMA.midiC.valueToDrum(a) for a in t.toneList])
+            return ' '.join([neomma.MMA.midiC.valueToDrum(a) for a in t.toneList])
 
         elif func == 'UNIFY':
             return ' '.join([str(x) for x in t.unify])
 
         elif func == 'VOICE':
-            return ' '.join([MMA.midiC.valueToInst(a) for a in t.voice])
+            return ' '.join([neomma.MMA.midiC.valueToInst(a) for a in t.voice])
 
         elif func == 'VOICING':
             if t.vtype != 'CHORD':
@@ -723,7 +723,7 @@ class Macros:
 
         self.vars[v] = random.choice(ln[1:])
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Variable $%s randomly set to '%s'" % (v, self.vars[v]))
 
     def newsetvar(self, ln):
@@ -767,7 +767,7 @@ class Macros:
 
         self.vars[v] = t
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Variable $%s == '%s'" % (v, self.vars[v]))
 
     def msetvar(self, ln):
@@ -806,7 +806,7 @@ class Macros:
         if v in self.vars:
             del(macros.vars[v])
 
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("Variable '%s' UNSET" % v)
         else:
             warning("Attempt to UNSET nonexistent variable '%s'" % v)
@@ -820,12 +820,12 @@ class Macros:
 
         if cmd == 'ON':
             self.expandMode = 1
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("Variable expansion ON")
 
         elif cmd == 'OFF':
             self.expandMode = 0
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("Variable expansion OFF")
 
         else:
@@ -860,7 +860,7 @@ class Macros:
 
         self.vars[v] = str(vl)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Variable '%s' INC to %s" % (v, self.vars[v]))
 
     def vardec(self, ln):
@@ -891,7 +891,7 @@ class Macros:
 
         self.vars[v] = str(vl)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Variable '%s' DEC to %s" % (v, self.vars[v]))
 
     def varIF(self, ln):

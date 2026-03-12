@@ -27,8 +27,8 @@ import tempfile
 import os
 
 from . import gbl
-from MMA.common import *
-import MMA.debug
+from neomma.MMA.common import *
+import neomma.MMA.debug
 
 class AfterData:
     def __init__(self):
@@ -119,7 +119,7 @@ def create(ln):
     else:
         afterData.append(dat)  # our stack (actually a list of events)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("After: Added event '%s' at bar %s." % (' '.join(dat.cmd), dat.bar))
 
         
@@ -166,7 +166,7 @@ def check(recurse=False):
             for a in stuff:
                 fd.write( "%s\n" % ' '.join(a))
             fd.close()
-            MMA.parse.parseFile(name)
+            neomma.MMA.parse.parseFile(name)
             try:
                 os.remove(name)
             except:

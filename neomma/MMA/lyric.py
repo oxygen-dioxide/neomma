@@ -23,9 +23,9 @@ Bob van der Poel <bob@mellowood.ca>
 """
 
 from . import gbl
-from   MMA.common import *
-import MMA.paths
-import MMA.debug
+from   neomma.MMA.common import *
+import neomma.MMA.paths
+import neomma.MMA.debug
 
 class Lyric:
     textev = None    # set if TEXT EVENTS (not recommended)
@@ -109,7 +109,7 @@ class Lyric:
 
                 elif v == 'LYRIC':
                     self.textev = None
-                    if MMA.debug.debug:
+                    if neomma.MMA.debug.debug:
                         dPrint("Lyric: lyrics set as LYRIC events.")
 
                 else:
@@ -118,12 +118,12 @@ class Lyric:
             elif o == 'SPLIT':
                 if v == 'BAR':
                     self.barsplit = 1
-                    if MMA.debug.debug:
+                    if neomma.MMA.debug.debug:
                         dPrint("Lyric: lyrics distributed thoughout bar.")
 
                 elif v == 'NORMAL':
                     self.barsplit = None
-                    if MMA.debug.debug:
+                    if neomma.MMA.debug.debug:
                         dPrint("Lyric: lyrics appear as one per bar.")
 
                 else:
@@ -145,12 +145,12 @@ class Lyric:
                 if self.versenum < 1:
                     error("Lyric: Attempt to set Verse to %s. Values must be > 0" % self.versenum)
 
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("Lyric: Verse number set to %s" % self.versenum)
 
             elif o == 'CHORDS':
                 self.dupchords = getTF(v, "Lyric Chords")
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     if self.dupchords:
                         dPrint("Lyric: Chords are duplicated as lyrics.")
                     else:
@@ -162,20 +162,20 @@ class Lyric:
                     if t.upper() == 'ADD': # keyword
                         addTrans=True
                     else:  # either int or up-maj-3, etc.
-                        v = MMA.keysig.getTranspose([t], "Lyric Transpose")
+                        v = neomma.MMA.keysig.getTranspose([t], "Lyric Transpose")
 
                 if addTrans:
                     self.transpose += v
                 else:
                     self.transpose = v
 
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("Lyric: Chord names transposed %s steps." % self.transpose)
 
             elif o == 'ADDTRANSPOSE':
-                self.transpose += MMA.keysig.getTranspose([v], "Lyric AddTranspose")
+                self.transpose += neomma.MMA.keysig.getTranspose([v], "Lyric AddTranspose")
 
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("Lyric: Chord names transposed %s steps." % self.transpose)
 
             elif o == 'CNAMES':
@@ -188,7 +188,7 @@ class Lyric:
                 else:
                     error("Lyric CNames: expecting 'Sharp' or 'Flat', not '%s'" % v )
 
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     msg = "Lyric: Chord names favor "
                     if self.transKey:
                         msg += "#."
@@ -220,9 +220,9 @@ class Lyric:
                         meta.addText(0, b"@KMIDI KARAOKE FILE")
                         meta.addText(0, b"@V0100")
                         # change extension to .kar
-                        MMA.paths.createOutfileName('.kar')
+                        neomma.MMA.paths.createOutfileName('.kar')
  
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     msg = "Lyric: Karmode "
                     if self.karmode:
                         msg += "ENABLED."

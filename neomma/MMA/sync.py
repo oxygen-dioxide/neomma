@@ -26,8 +26,8 @@ Functions/variables for the sync stuff.
   process for certain synths and notation converters.
 """
 
-from MMA.common import *
-import MMA.debug
+from neomma.MMA.common import *
+import neomma.MMA.debug
 
 synctick    =  0      # flag, set if we want a tick on all tracks at offset 0
 endsync     =  0      # flag, set if we want a eof sync
@@ -82,5 +82,5 @@ def setSyncTone(ln):
             error("SetSyncTone: Expecting options: Tone, Velocity, Volume. Not %s"
                   % cmd)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("SetSyncTone: Tone=%s, Velocity=%s" % tuple(syncTone))

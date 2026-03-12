@@ -25,11 +25,11 @@ This module handles voice name translations.
 
 """
 
-import MMA.midiC
+import neomma.MMA.midiC
 
 from . import gbl
-from MMA.common import *
-import MMA.debug
+from neomma.MMA.common import *
+import neomma.MMA.debug
 
 """ Translation table for VOICE. This is ONLY used when a voice is set
     from the VOICE command. If a translation exists the translation is
@@ -55,7 +55,7 @@ class Vtable:
 
         if not ln:
             self.table = {}
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("Voice Translation table reset.")
             return
 
@@ -67,7 +67,7 @@ class Vtable:
         for v, a in opts:
             self.table[v] = a
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("Voice Translations: %s" % ' '.join(["%s=%s" % (v, a) for v, a in opts]))
 
     def get(self, name):
@@ -97,8 +97,8 @@ class Dtable:
 
         l = []
         for n in sorted(self.table.keys()):
-            l.append("%s=%s" % (MMA.midiC.valueToDrum(n),
-                                MMA.midiC.valueToDrum(self.table[n])))
+            l.append("%s=%s" % (neomma.MMA.midiC.valueToDrum(n),
+                                neomma.MMA.midiC.valueToDrum(self.table[n])))
 
         return ' '.join(l)
 
@@ -107,7 +107,7 @@ class Dtable:
 
         if not ln:
             self.table = {}
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("DrumTone Translation table reset.")
 
             return
@@ -118,20 +118,20 @@ class Dtable:
             error("TONETR: Each translation pair must be in the format Tone=NewTone.")
 
         for v, a in opts:
-            v1 = MMA.midiC.drumToValue(v)
+            v1 = neomma.MMA.midiC.drumToValue(v)
             if v1 < 0:
                 error("TONETR: Tone '%s' not defined." % v)
 
-            a1 = MMA.midiC.drumToValue(a)
+            a1 = neomma.MMA.midiC.drumToValue(a)
             if a1 < 0:
                 error("TONETR: Tone '%s' not defined." % a)
 
             self.table[v1] = a1
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("TONETR Translations: %s" % 
-                  ' '.join(["%s(%s)=%s" % (v, MMA.midiC.drumToValue(v), 
-                                           MMA.midiC.drumToValue(a)) for v, a in opts]))
+                  ' '.join(["%s(%s)=%s" % (v, neomma.MMA.midiC.drumToValue(v), 
+                                           neomma.MMA.midiC.drumToValue(a)) for v, a in opts]))
 
 
     def get(self, name):
@@ -139,10 +139,10 @@ class Dtable:
             validation of 'name'. It is called from patDrum and patSolo.
         """
 
-        v = MMA.midiC.drumToValue(name)
+        v = neomma.MMA.midiC.drumToValue(name)
 
         if v < 0:
-            if MMA.midiC.instToValue(name) >= 0 and name[0].isalpha():
+            if neomma.MMA.midiC.instToValue(name) >= 0 and name[0].isalpha():
                 emsg = "(Note: %s is a valid TONE name.)" % name
             else:
                 emsg = ''
@@ -171,7 +171,7 @@ class VoiceVolTable:
     def retlist(self):
         l = []
         for n in sorted(self.table.keys()):
-            l.append("%s=%s" % (MMA.midiC.valueToInst(n), self.table[n]))
+            l.append("%s=%s" % (neomma.MMA.midiC.valueToInst(n), self.table[n]))
 
         return ' '.join(l)
 
@@ -180,7 +180,7 @@ class VoiceVolTable:
 
         if not ln:
             self.table = {}
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("Voice Volume Adjustment table reset.")
 
             return
@@ -191,7 +191,7 @@ class VoiceVolTable:
             error("VOICEVOLTR: Expecting VOICE=VOLUME pairs.")
 
         for v, a in opts:
-            val = MMA.midiC.instToValue(v)
+            val = neomma.MMA.midiC.instToValue(v)
 
             if val < 0:
                 error("VOICEVOLTR: unknown voice '%s'." % v)
@@ -202,7 +202,7 @@ class VoiceVolTable:
 
             self.table[val] = a / 100.
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("VOICEVOLTR: %s" % ' '.join(["%s=%s" % (v.upper(), a) for v, a in opts]))
 
     def get(self, v, vol):
@@ -225,7 +225,7 @@ class DrumVolTable:
 
         l = []
         for n in sorted(self.table.keys()):
-            l.append("%s=%s" % (MMA.midiC.valueToDrum(n), self.table[n]))
+            l.append("%s=%s" % (neomma.MMA.midiC.valueToDrum(n), self.table[n]))
 
         return ' '.join(l)
 
@@ -234,7 +234,7 @@ class DrumVolTable:
 
         if not ln:
             self.table = {}
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("DRUMVOLTR: Adjustment table reset.")
 
             return
@@ -245,7 +245,7 @@ class DrumVolTable:
             error("DRUMVOLTR: Each option must be in the format TONE=AJUSTMENT.")
 
         for v, a in opt:
-            val = MMA.midiC.drumToValue(v)
+            val = neomma.MMA.midiC.drumToValue(v)
 
             if val < 0:
                 error("DRUMVOLTR: Unknown tone '%s'." % v)
@@ -256,9 +256,9 @@ class DrumVolTable:
 
             self.table[val] = a / 100.
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("DRUMVOLTR: %s" %
-                  ' '.join(["%s=%s" % (MMA.midiC.valueToDrum(val), a) for v, a in opt]))
+                  ' '.join(["%s=%s" % (neomma.MMA.midiC.valueToDrum(val), a) for v, a in opt]))
 
 
     def get(self, v, vol):

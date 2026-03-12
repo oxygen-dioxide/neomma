@@ -30,19 +30,19 @@ Bob van der Poel <bob@mellowood.ca>
     lastGroove and currentGroove are used by macros
 """
 
-import MMA.midi
-import MMA.notelen
-import MMA.auto
-import MMA.volume
-import MMA.parse
-import MMA.parseCL
-import MMA.seqrnd
-import MMA.docs
-import MMA.debug
+import neomma.MMA.midi
+import neomma.MMA.notelen
+import neomma.MMA.auto
+import neomma.MMA.volume
+import neomma.MMA.parse
+import neomma.MMA.parseCL
+import neomma.MMA.seqrnd
+import neomma.MMA.docs
+import neomma.MMA.debug
 
-from MMA.timesig import timeSig
+from neomma.MMA.timesig import timeSig
 from . import gbl
-from   MMA.common import *
+from   neomma.MMA.common import *
 
 
 glist = {}
@@ -111,19 +111,19 @@ def grooveDefine(ln):
         error("Can't define groove name %s, already defined as an alias for %s." \
                   % (slot, aliaslist[slot]))
 
-    if MMA.debug.gvShow and slot in glist:
+    if neomma.MMA.debug.gvShow and slot in glist:
         dPrint("Redefining groove %s, line %s." % (slot, gbl.lineno))
 
     grooveDefineDo(slot)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Groove settings saved to '%s'." % slot)
 
     if gbl.makeGrvDefs:   # doing a database update ...
-        MMA.auto.updateGrooveList(slot)
+        neomma.MMA.auto.updateGrooveList(slot)
 
     if len(ln) > 1:
-        MMA.docs.docDefine(ln)
+        neomma.MMA.docs.docDefine(ln)
 
 
 def grooveDefineDo(slot):
@@ -135,14 +135,14 @@ def grooveDefineDo(slot):
 
     glist[slot] = {
         'SEQSIZE':   gbl.seqSize,
-        'SEQRNDWT':  MMA.seqrnd.seqRndWeight[:],
+        'SEQRNDWT':  neomma.MMA.seqrnd.seqRndWeight[:],
         'QPERBAR':   gbl.QperBar,
         'BARLEN':    gbl.barLen,
-        'SEQRND':    MMA.seqrnd.seqRnd[:],
+        'SEQRND':    neomma.MMA.seqrnd.seqRnd[:],
         'TIMESIG':   timeSig.get(),
-        'SWINGMODE': MMA.swing.gsettings(),
-        'VRATIO':    (MMA.volume.vTRatio, MMA.volume.vMRatio),
-        'CTABS':     MMA.parseCL.chordTabs[:] }
+        'SWINGMODE': neomma.MMA.swing.gsettings(),
+        'VRATIO':    (neomma.MMA.volume.vTRatio, neomma.MMA.volume.vMRatio),
+        'CTABS':     neomma.MMA.parseCL.chordTabs[:] }
 
 
 def grooveAlias(ln):
@@ -195,18 +195,18 @@ def groove(ln):
                 slot = aliaslist[slot]
         
         if not slot in glist:
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("Groove '%s' not defined. Trying auto-load from libraries" 
                       % slot)
 
-            l, slot = MMA.auto.findGroove(slotOrig)    # name of the lib file with groove
+            l, slot = neomma.MMA.auto.findGroove(slotOrig)    # name of the lib file with groove
 
             if l:
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("Attempting to load groove '%s' from '%s'." % (slot, l))
 
                 reportFutureVols()
-                MMA.parse.usefile([l])
+                neomma.MMA.parse.usefile([l])
 
                 if not slot in glist:
                     error("Groove '%s' not found. Is the groove in the file '%s'? "
@@ -245,7 +245,7 @@ def groove(ln):
     if lastGroove == '':
         lastGroove = slot
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Groove settings restored from '%s'." % slot)
 
 
@@ -262,14 +262,14 @@ def grooveDo(slot):
     g = glist[slot]
 
     gbl.seqSize = g['SEQSIZE']
-    MMA.seqrnd.seqRndWeight = g['SEQRNDWT']
+    neomma.MMA.seqrnd.seqRndWeight = g['SEQRNDWT']
     gbl.QperBar = g['QPERBAR']
     gbl.barLen  = g['BARLEN']
-    MMA.seqrnd.seqRnd = g['SEQRND']
+    neomma.MMA.seqrnd.seqRnd = g['SEQRND']
     timeSig.create(*g['TIMESIG'])  # passing tuple as 2 args.
-    MMA.swing.grestore(g['SWINGMODE'])
-    MMA.volume.vTRatio, MMA.volume.vMRatio = g['VRATIO']
-    MMA.parseCL.chordTabs = g['CTABS']
+    neomma.MMA.swing.grestore(g['SWINGMODE'])
+    neomma.MMA.volume.vTRatio, neomma.MMA.volume.vMRatio = g['VRATIO']
+    neomma.MMA.parseCL.chordTabs = g['CTABS']
 
     for n in gbl.tnames.values():
         if n.sticky:
@@ -285,7 +285,7 @@ def grooveDo(slot):
         for a in gbl.tnames.values():
             a.setSeqSize()
 
-    MMA.seqrnd.seqRndWeight = seqBump(MMA.seqrnd.seqRndWeight)
+    neomma.MMA.seqrnd.seqRndWeight = seqBump(neomma.MMA.seqrnd.seqRndWeight)
 
     gbl.seqCount = 0
 
@@ -346,7 +346,7 @@ def grooveClear(ln):
     lastGroove = ''
     currentGroove = ''
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("All grooves deleted.")
 
 
@@ -373,7 +373,7 @@ def nextGroove():
             lastGroove = currentGroove
             currentGroove = slot
 
-            if MMA.debug.debug:
+            if neomma.MMA.debug.debug:
                 dPrint("Groove (list) setting restored from '%s'." % slot)
 
 
@@ -399,7 +399,7 @@ def trackGroove(name, ln):
     if g.sequence == [None] * len(g.sequence):
         warning("'%s' Track Groove has no sequence. Track name error?" % name)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("%s Groove settings restored from '%s'." % (name, slot))
 
 
@@ -441,8 +441,8 @@ def allgrooves(ln):
             # NOTE: we don't bother checking for FALSE
             if o == 'NOWARN':
                 if getTF(v) == True:
-                    startNoWarn = MMA.debug.noWarn
-                    MMA.debug.noWarn = 1
+                    startNoWarn = neomma.MMA.debug.noWarn
+                    neomma.MMA.debug.noWarn = 1
                     noWarn = True
 
             elif o == 'VERBOSE':   # report which affected
@@ -472,8 +472,8 @@ def allgrooves(ln):
     else:
         trAction = ''
 
-    sfuncs = MMA.parse.simpleFuncs
-    tfuncs = MMA.parse.trackFuncs
+    sfuncs = neomma.MMA.parse.simpleFuncs
+    tfuncs = neomma.MMA.parse.trackFuncs
     seqwarning = 0
 
     counter = 0
@@ -531,13 +531,13 @@ def allgrooves(ln):
     gbl.inAllGrooves = False
 
     if noWarn:
-        MMA.debug.noWarn = startNoWarn
+        neomma.MMA.debug.noWarn = startNoWarn
         
     if not counter:
         warning("No tracks affected with '%s'" % ' '.join(ln))
 
     else:
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("AllGrooves: %s tracks modified." % counter)
 
 
@@ -551,7 +551,7 @@ def trackCopy(name, ln):
 
         for dest in ln[1:]:
             dest = dest.upper()  # Destination is 1st arg
-            MMA.alloc.trackAlloc(dest, 1) # create dest if it doesn't exist
+            neomma.MMA.alloc.trackAlloc(dest, 1) # create dest if it doesn't exist
             trackCopyDo(dest, [src])
 
     elif ln and ln[0].upper() == 'FROM':   # optional 'from' keyword
@@ -624,5 +624,5 @@ def trackCopyDo(name, ln):
     else:
         self.restoreGroove(COPYGROOVE)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("Copy: Settings duplicated from %s to %s" % (cp.name, self.name))

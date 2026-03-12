@@ -22,20 +22,20 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-import MMA.notelen
-import MMA.translate
-import MMA.harmony
-import MMA.volume
-import MMA.alloc
-import MMA.swing
-import MMA.truncate
+import neomma.MMA.notelen
+import neomma.MMA.translate
+import neomma.MMA.harmony
+import neomma.MMA.volume
+import neomma.MMA.alloc
+import neomma.MMA.swing
+import neomma.MMA.truncate
 
 from . import gbl
 
-from MMA.common import *
-from MMA.pat import PC, Pgroup
-from MMA.keysig import keySig
-import MMA.debug
+from neomma.MMA.common import *
+from neomma.MMA.pat import PC, Pgroup
+from neomma.MMA.keysig import keySig
+import neomma.MMA.debug
 
 import re
 import random
@@ -94,7 +94,7 @@ class Melody(PC):
 
         self.drumType = 1
         self.setChannel('10')  # MMA assumes all drums are on channel 10
-        self.voice = seqBump([MMA.pat.defaultDrum])
+        self.voice = seqBump([neomma.MMA.pat.defaultDrum])
         
     def setVoicing(self, ln):
         """ Set the voicing option for a solo/melody track. Only permitted
@@ -128,7 +128,7 @@ class Melody(PC):
 
             elif opt == 'ROOT':
                 try:
-                    self.rootChord = MMA.chords.cdAdjust[val.upper()]
+                    self.rootChord = neomma.MMA.chords.cdAdjust[val.upper()]
                 except KeyError:
                     error("Voicing %s: Chord name %s not valid." % (self.name, val))
 
@@ -227,17 +227,17 @@ class Melody(PC):
                           % (self.name, opt, ', '.join(valid)))
                 self.arpDirection = opt
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("%s Arpeggiate: Rate=%s Decay=%s Direction=%s" % 
                   (self.name, self.arpRate, self.arpDecay, self.arpDirection))
 
     def getNoteLen(self, n):
-        """ This is a special interface to MMA.notelen.getNoteLen() which
+        """ This is a special interface to neomma.MMA.notelen.getNoteLen() which
             adjusts the length (in MIDI ticks) by the "stetch" value for
             this class.
         """
 
-        return MMA.notelen.getNoteLen(n) * self.stretch
+        return neomma.MMA.notelen.getNoteLen(n) * self.stretch
 
     def restart(self):
         self.ssvoice = -1
@@ -251,7 +251,7 @@ class Melody(PC):
         if len(ln) > 1:
             error("Only 1 value permitted for Drum Tone in Solo tracks")
 
-        self.drumTone = MMA.translate.dtable.get(ln[0])
+        self.drumTone = neomma.MMA.translate.dtable.get(ln[0])
 
     def getChord(self, c, velocity, isdrum, isgrace):
         """ Extract a set of notes for a single beat.
@@ -330,7 +330,7 @@ class Melody(PC):
                 if cc == '*':
                     events.append(NoteEvent(self.drumTone, thisvel, isgrace))
                 else:
-                    events.append(NoteEvent(int(MMA.translate.dtable.get(cc)), thisvel, isgrace))
+                    events.append(NoteEvent(int(neomma.MMA.translate.dtable.get(cc)), thisvel, isgrace))
 
             else:   # must be a note(s) in std. notation
                 cc = list(cc)
@@ -414,8 +414,8 @@ class Melody(PC):
         # Get the end of the bar in ticks. If we're doing a truncate
         # use the temporary bar length, otherwise figure it out.
 
-        if MMA.truncate.length:
-            barEnd = MMA.truncate.length
+        if neomma.MMA.truncate.length:
+            barEnd = neomma.MMA.truncate.length
         else:
             barEnd = gbl.barLen
 
@@ -517,8 +517,8 @@ class Melody(PC):
                     vc, vo = vv.split('=', 1)  # note: it's already uppercase!
 
                     if vc == 'VOLUME':
-                        if vo in MMA.volume.vols:   # arg was a volume 'FF, 'mp', etc.
-                            velocity = defaultVelocity * MMA.volume.vols[vo]
+                        if vo in neomma.MMA.volume.vols:   # arg was a volume 'FF, 'mp', etc.
+                            velocity = defaultVelocity * neomma.MMA.volume.vols[vo]
                         else:
                             error("%s: No volume '%s'." % (self.name, vo))
 
@@ -643,8 +643,8 @@ class Melody(PC):
                 warning("%s, end of last note overlaps end of bar by %g "
                         "beat(s)." % (self.name, (offset - barEnd) / float(gbl.BperQ)))
 
-        if MMA.swing.mode:
-            notes = MMA.swing.swingSolo(notes)
+        if neomma.MMA.swing.mode:
+            notes = neomma.MMA.swing.swingSolo(notes)
 
  
         return notes
@@ -703,7 +703,7 @@ class Melody(PC):
             if tb.chordZ:
                 continue
 
-            h = MMA.harmony.harmonize(harmony, pitch, tb.chord.bnoteList)
+            h = neomma.MMA.harmony.harmonize(harmony, pitch, tb.chord.bnoteList)
 
             for n in h:
                 e = NoteEvent(n,
@@ -880,14 +880,14 @@ def setAutoSolo(ln):
     autoSoloTracks = []
     for n in ln:
         n = n.upper()
-        MMA.alloc.trackAlloc(n, 1)
+        neomma.MMA.alloc.trackAlloc(n, 1)
         if gbl.tnames[n].vtype not in ('MELODY', 'SOLO'):
             error("All autotracks must be Melody or Solo tracks, not %s"
                   % gbl.tnames[n].vtype)
 
         autoSoloTracks.append(n)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("AutoSolo track names: %s" % ' '.join([a for a in autoSoloTracks]))
 
 
@@ -922,7 +922,7 @@ def extractSolo(ln, rptcount):
         for s, trk in zip(solo, autoSoloTracks):
             if not s:
                 continue    # skip placeholder/empty tracks
-            MMA.alloc.trackAlloc(trk, 1)
+            neomma.MMA.alloc.trackAlloc(trk, 1)
             t = gbl.tnames[trk]
             if t.riff:
                 error("%s: Attempt to add {} solo when the track "
@@ -943,7 +943,7 @@ def extractSolo(ln, rptcount):
                     and set(gbl.tnames[t].harmonyOnly) != {None}:
                 gbl.tnames[t].setRiff(firstSolo[:])
 
-                if MMA.debug.debug:
+                if neomma.MMA.debug.debug:
                     dPrint("%s duplicated to %s for HarmonyOnly." % (trk, t))
 
     return ln

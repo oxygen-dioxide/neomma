@@ -27,8 +27,8 @@ proper time sigs for correct operation. So, here you go.
 """
 
 from . import gbl
-import MMA.midi
-from   MMA.common import *
+import neomma.MMA.midi
+from   neomma.MMA.common import *
 
 class TimeSig:
     """ Track and set the current time signature.

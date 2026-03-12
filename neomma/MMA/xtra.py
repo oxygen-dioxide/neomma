@@ -27,11 +27,11 @@ Handle -x options.
 import os
 import sys
 
-from MMA.common import *
+from neomma.MMA.common import *
 from . import gbl
-import MMA.paths 
-import MMA.auto
-import MMA.writeMid
+import neomma.MMA.paths 
+import neomma.MMA.auto
+import neomma.MMA.writeMid
 
 
 def checkChords(clist):
@@ -43,7 +43,7 @@ def checkChords(clist):
     okaylist = []
     for b in clist:
         try:
-            MMA.chords.ChordNotes(b)
+            neomma.MMA.chords.ChordNotes(b)
             okaylist.append(b)
         except:
             continue
@@ -53,14 +53,14 @@ def checkChords(clist):
 def checkFile(l):
     """ Check a MMA input file an verify chords are valid. """
 
-    # one could read a RC file. Insert MMA.paths.readRC()
+    # one could read a RC file. Insert neomma.MMA.paths.readRC()
     # here, but it's probably a silly thing to do since we
     # really aren't attempting a proper parse ...
 
-    infile = MMA.file.locFile(l, None)  # filename to check
+    infile = neomma.MMA.file.locFile(l, None)  # filename to check
     if not infile:
         error("Input file '%s' not found." % l)
-    inpath = MMA.file.ReadFile(infile)
+    inpath = neomma.MMA.file.ReadFile(infile)
     validChords = []
 
     while 1:
@@ -102,7 +102,7 @@ def checkFile(l):
                 else:
                     try:
                         gbl.ignoreBadChords = True
-                        MMA.chords.ChordNotes(c)
+                        neomma.MMA.chords.ChordNotes(c)
                         validChords.append(c)
                         gbl.ignoreBadChords = False
                     except:  # mma printed the error message so keep trucking
@@ -128,15 +128,15 @@ def listGrooves(arg):
     
     # the libpath can't be changed via a CLI, so we only
     # need (and use) the default
-    libp = MMA.paths.libPath
+    libp = neomma.MMA.paths.libPath
     
-    MMA.auto.findGroove('')  # initalize the database
+    neomma.MMA.auto.findGroove('')  # initalize the database
 
-    for dir, g in MMA.auto.grooveDB:
+    for dir, g in neomma.MMA.auto.grooveDB:
         for filename, namelist in g.items():
             for x in namelist:
                 if arg in x:
-                    for a in MMA.paths.libPath:
+                    for a in neomma.MMA.paths.libPath:
                         if filename.startswith(a):
                             filename = filename[len(a)+1:]
                             break
@@ -150,7 +150,7 @@ def listGrooves(arg):
     sys.exit(0)
 
 def printVars():
-    from MMA.macro import macros
+    from neomma.MMA.macro import macros
 
     print(args)
     for a in args:
@@ -177,7 +177,7 @@ def xoption(opt, args):
     elif opt == 'CHORDS':
         # check a list of chords on the cmd line for validity
         if not args:
-            MMA.options.usage()
+            neomma.MMA.options.usage()
         checkChords(args)
         sys.exit(0)   # don't return ... all we can do is the chords
 
@@ -191,7 +191,7 @@ def xoption(opt, args):
         listGrooves(args)
 
     elif opt == "PRINT":
-        from MMA.macro import macros
+        from neomma.MMA.macro import macros
 
         for a in args:
             if a[0]=='$':  # strip off option leading $
@@ -207,14 +207,14 @@ def xoption(opt, args):
         sys.exit(0)
 
     elif opt == "TSPLIT":
-        if MMA.writeMid.splitOutput:
+        if neomma.MMA.writeMid.splitOutput:
             warning("-xTSPLIT overwriting prior setting.")
-        MMA.writeMid.splitOutput = 'TRACKS'
+        neomma.MMA.writeMid.splitOutput = 'TRACKS'
 
     elif opt == 'CSPLIT':
-        if MMA.writeMid.splitOutput:
+        if neomma.MMA.writeMid.splitOutput:
             warning("-xCSPLIT overwriting prior setting.")
-        MMA.writeMid.splitOutput = 'CHANNELS'
+        neomma.MMA.writeMid.splitOutput = 'CHANNELS'
         
     else:
         error("'%s' is an unknown -x option" % opt)

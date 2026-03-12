@@ -23,15 +23,15 @@ Bob van der Poel <bob@mellowood.ca>
 This module contains interface for MIDI constants and conversion routines.
 """
 
-from MMA.common import *
-from MMA.miditables import *
-import MMA.translate
+from neomma.MMA.common import *
+from neomma.MMA.miditables import *
+import neomma.MMA.translate
 
 
 def decodeVoice(n):
     """ Convert a single voice item. Used by setVoice() and tweaks. """
 
-    n = MMA.translate.vtable.get(n)
+    n = neomma.MMA.translate.vtable.get(n)
     voc = instToValue(n)
 
     if voc < 0 and n[0].isalpha():

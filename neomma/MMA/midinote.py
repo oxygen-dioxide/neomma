@@ -25,13 +25,13 @@ This module does all the midinote stuff.
 """
 
 
-import MMA.notelen
-import MMA.midiC
-from   MMA.midiM import packBytes
-import MMA.debug
+import neomma.MMA.notelen
+import neomma.MMA.midiC
+from   neomma.MMA.midiM import packBytes
+import neomma.MMA.debug
 from . import gbl
-from   MMA.common import *
-from   MMA.keysig import keySig
+from   neomma.MMA.common import *
+from   neomma.MMA.keysig import keySig
 
 
 def parse(name, ln):
@@ -129,7 +129,7 @@ def parse(name, ln):
         else:
             error("MidiNote: Unknown command '%s'." % a)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         if opts:
             dPrint("MIDINOTE: %s" % mopts(trk))
 
@@ -258,7 +258,7 @@ def insertNote(trk, ln):
                     else:
                         n = trk.toneList[gbl.seqCount]
                 else:
-                    n = MMA.midiC.drumToValue(n)
+                    n = neomma.MMA.midiC.drumToValue(n)
                     if n < 0:
                         error("MidiNote: unknown drum tone '%s' in %s." % (n, trk.name))
             else:
@@ -300,7 +300,7 @@ def insertNote(trk, ln):
     if trk.tickdur:
         duration = stoi(ln[3])
     else:
-        duration = MMA.notelen.getNoteLen(ln[3])
+        duration = neomma.MMA.notelen.getNoteLen(ln[3])
         if trk.articulate:
             duration = (duration * trk.artic[gbl.seqCount]) // 100
             if duration < 1:
@@ -316,7 +316,7 @@ def insertNote(trk, ln):
         track.addToTrack(gbl.tickOffset + offset, onEvent)
         track.addToTrack(gbl.tickOffset + offset + duration, offEvent)
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MidiNote Note %s: inserted note %s at offset %s." % (trk.name, notes, offset))
 
 
@@ -338,7 +338,7 @@ def insertPB(trk, ln):
     track = gbl.mtrks[channel]
     track.addToTrack(gbl.tickOffset + offset, packBytes((0xe0 | channel-1, v % 128, v // 128)))
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MidiNote PB %s: inserted bend %s at offset %s." % (trk.name, v-8192, offset))
 
 
@@ -383,7 +383,7 @@ def insertPBrange(trk, ln):
         offset += tinc
         bend += vinc
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MidiNote PBR %s: inserted bends %s to %s at offsets %s to %s." % 
             (trk.name, v1-8192, v2-8192, s1, s2))
 
@@ -396,7 +396,7 @@ def insertControl(trk, ln):
 
     offset = getoffset(trk, ln[0])
 
-    v = MMA.midiC.ctrlToValue(ln[1])
+    v = neomma.MMA.midiC.ctrlToValue(ln[1])
     if v < 0:
         v = stoi(ln[1])
         if v < 0 or v > 0x7f:
@@ -415,7 +415,7 @@ def insertControl(trk, ln):
 
     track.addToTrack(gbl.tickOffset + offset, packBytes((0xb0 | channel-1, v, d)) )
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MidiNote Ctrl %s: inserted Controller %s value %s at offset %s." % 
             (trk.name, v, d, offset))
 
@@ -438,7 +438,7 @@ def insertChTouch(trk, ln):
 
     track.addToTrack(gbl.tickOffset + offset, packBytes((0xd0 | channel-1, v)))
  
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MidiNote ChAT %s: inserted channel aftertouch %s at offset %s." % 
             (trk.name, v, offset))
 
@@ -482,6 +482,6 @@ def insertChTouchRange(trk, ln):
         offset += tinc
         bend += vinc
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint("MidiNote ChATR %s: inserted events %s to %s at offsets %s to %s." %
             (trk.name, v1, v2, s1, s2))

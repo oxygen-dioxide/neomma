@@ -22,12 +22,12 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-import MMA.notelen
-import MMA.translate
+import neomma.MMA.notelen
+import neomma.MMA.translate
 
 from . import gbl
-from MMA.common import *
-from MMA.pat import PC, Pgroup
+from neomma.MMA.common import *
+from neomma.MMA.pat import PC, Pgroup
 
 
 class Drum(PC):
@@ -81,7 +81,7 @@ class Drum(PC):
         tmp = []
 
         for n in ln:
-            tmp.append(MMA.translate.dtable.get(n))
+            tmp.append(neomma.MMA.translate.dtable.get(n))
 
         self.toneList = seqBump(tmp)
 
@@ -101,7 +101,7 @@ class Drum(PC):
         a = Pgroup()
 
         a.offset = self.setBarOffset(ev[0])
-        a.duration = MMA.notelen.getNoteLen(ev[1])
+        a.duration = neomma.MMA.notelen.getNoteLen(ev[1])
         a.vol = stoi(ev[2], "Type error in Drum volume")
 
         return a

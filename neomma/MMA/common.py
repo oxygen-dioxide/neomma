@@ -22,9 +22,9 @@ Bob van der Poel <bob@mellowood.ca>
 
 
 These are a collection of miscellaneous routines used in various
-parts of MMA. It is safe to load the whole works with:
+parts of neomma.MMA. It is safe to load the whole works with:
 
-    from MMA.common import *
+    from neomma.MMA.common import *
 
 without side effects (yeah, right).
 
@@ -34,7 +34,7 @@ import sys
 import time
 from . import gbl
 from textwrap import wrap
-import MMA.debug
+import neomma.MMA.debug
 
 # A buffer for various debug/warning/error messages
 # this is only used if MMA_LOGFILE has been set. The
@@ -42,7 +42,7 @@ import MMA.debug
 outBuffer = []
 
 # having the term width is nice for pretty print error/warning
-from MMA.termsize import getTerminalSize
+from neomma.MMA.termsize import getTerminalSize
 termwidth = getTerminalSize()[0]-1
 
 def bufferPrint(a):
@@ -113,7 +113,7 @@ def error(msg):
 def warning(msg):
     """ Print warning message and return. """
 
-    if not MMA.debug.noWarn:
+    if not neomma.MMA.debug.noWarn:
         if gbl.lineno >= 0:
             linno = "<Line %d>" % gbl.lineno
         else:

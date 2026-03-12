@@ -28,10 +28,10 @@ Code for Defaults and recursion stack Ignazio Di Napoli.
 
 import copy
 from . import gbl
-import MMA.file
-from MMA.macro import macros
-from MMA.common import *
-import MMA.debug
+import neomma.MMA.file
+from neomma.MMA.macro import macros
+from neomma.MMA.common import *
+import neomma.MMA.debug
 
 # Storage for our functions 
 class Funcs:
@@ -123,7 +123,7 @@ def defCall(l):
     
     funcList[fname] = Funcs(params, body, defaults, gbl.inpath.fname, lineN)
     
-    if MMA.debug.debug: 
+    if neomma.MMA.debug.debug: 
         t = [ a[1:] for a in params]
         dPrint("DefCall: Created function '%s': %s" % (fname, ', '.join(t)))
 
@@ -217,7 +217,7 @@ def callFunction(l):
     #print body
     #print "=" * 80
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         dPrint ("Call: function '%s' expanded." % fname)
 
 

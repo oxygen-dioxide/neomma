@@ -28,15 +28,15 @@ import os
 import sys
 import pickle
 
-import MMA.midi
-import MMA.parse
-import MMA.grooves
-import MMA.swing
+import neomma.MMA.midi
+import neomma.MMA.parse
+import neomma.MMA.grooves
+import neomma.MMA.swing
 
-import MMA.paths
+import neomma.MMA.paths
 
 from . import gbl
-from MMA.common import *
+from neomma.MMA.common import *
 
 grooveDB = []        # when filled in it becomes [['dir', dict-db], ..]
 mmadir = ".mmaDB"   # constant, name of the lib database file
@@ -68,13 +68,13 @@ def libUpdate():
 
     print( "Creating MMA groove directory database(s). Standby..." )
 
-    """ MMA.paths.libDirs contains a complete list of all the directories in
+    """ neomma.MMA.paths.libDirs contains a complete list of all the directories in
         the libPath; we create a .mmaDB file for each one.
     """
 
-    if not MMA.paths.libDirs:
-        MMA.paths.expandLib()
-    for lib in MMA.paths.libDirs:
+    if not neomma.MMA.paths.libDirs:
+        neomma.MMA.paths.expandLib()
+    for lib in neomma.MMA.paths.libDirs:
 
         gdDate = None
         grooveDB = [[lib, {}]]
@@ -139,18 +139,18 @@ def libUpdate():
                 print("       Creating: %s" % f)
 
             mkGrooveList = []
-            MMA.grooves.grooveClear([])
+            neomma.MMA.grooves.grooveClear([])
             gbl.mtrks = {}
-            MMA.swing.mode = 0
+            neomma.MMA.swing.mode = 0
             for c in gbl.midiAssigns.keys():
                 gbl.midiAssigns[c] = []
             for a, v in enumerate(gbl.midiAvail):
                 gbl.midiAvail[a] = 0
-            gbl.mtrks[0] = MMA.midi.Mtrk(0)
+            gbl.mtrks[0] = neomma.MMA.midi.Mtrk(0)
 
             gbl.tnames = {}
 
-            MMA.parse.parseFile(f)    # read current file, grab grooves
+            neomma.MMA.parse.parseFile(f)    # read current file, grab grooves
 
             fileCount += 1            # just so we can report to user
             grooveCount += len(mkGrooveList)
@@ -279,9 +279,9 @@ def findGroove(targ):
 
     if not grooveDB:
         grooveDB = []
-        if not MMA.paths.libDirs:
-            MMA.paths.expandLib()
-        for d in MMA.paths.libDirs:
+        if not neomma.MMA.paths.libDirs:
+            neomma.MMA.paths.expandLib()
+        for d in neomma.MMA.paths.libDirs:
             g = loadDB(d)
             if g:
                 grooveDB.append([d, g])
@@ -296,7 +296,7 @@ def findGroove(targ):
 
     if ':' in targ:
         dirfile, targ = targ.split(':', 1)
-        dirpath = MMA.paths.findLibFile(dirfile)
+        dirpath = neomma.MMA.paths.findLibFile(dirfile)
         targ = targ.upper()
         if dirpath is None:
             error("The file '%s' does not exist in libraries." % dirfile)
@@ -319,7 +319,7 @@ def findGroove(targ):
             # be:   1. stdlib  (no stdlib/swing.mma here)
             #      ..  lib   YES... found stdlib/swing.mma here
 
-            fpath = MMA.paths.findLibFile(dirfile)
+            fpath = neomma.MMA.paths.findLibFile(dirfile)
 
             if not fpath:
                 error("Can't locate library file: %s! Groove: %s can't be found either."

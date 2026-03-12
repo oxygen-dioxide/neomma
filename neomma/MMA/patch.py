@@ -24,10 +24,10 @@ This module contains the various patch manger routines.
 
 """
 
-from MMA.common import *
-from MMA.miditables import *
-import MMA.file
-import MMA.midiC
+from neomma.MMA.common import *
+from neomma.MMA.miditables import *
+import neomma.MMA.file
+import neomma.MMA.midiC
 
 
 def patch(ln):
@@ -104,11 +104,11 @@ def patchset(ln):
 
         if voc in voiceNames:
             warning("Patch Set duplicating voice name %s=%s with %s=%s" %
-                    (voiceNames[voc], voc, n, MMA.midiC.extVocStr(voc)))
+                    (voiceNames[voc], voc, n, neomma.MMA.midiC.extVocStr(voc)))
 
         if n in voiceInx:
             warning("Patch Set duplicating voice value %s=%s with %s=%s" %
-                    (MMA.midiC.extVocStr(voiceInx[n]), n, MMA.midiC.extVocStr(voc), n))
+                    (neomma.MMA.midiC.extVocStr(voiceInx[n]), n, neomma.MMA.midiC.extVocStr(voc), n))
 
         voiceNames[voc] = n
         voiceInx[n] = voc
@@ -145,7 +145,7 @@ def plistgm():
 
     for v in sorted(voiceNames.keys()):
         if v <= 127:
-            print("%s=%s" % (MMA.midiC.extVocStr(v), voiceNames[v]))
+            print("%s=%s" % (neomma.MMA.midiC.extVocStr(v), voiceNames[v]))
 
 
 def plistext():
@@ -153,7 +153,7 @@ def plistext():
 
     for v in sorted(voiceNames.keys()):
         if v > 127:
-            print("%s=%s" % (MMA.midiC.extVocStr(v), voiceNames[v]))
+            print("%s=%s" % (neomma.MMA.midiC.extVocStr(v), voiceNames[v]))
 
 
 def plistall():

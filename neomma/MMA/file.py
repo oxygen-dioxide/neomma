@@ -25,8 +25,8 @@ Bob van der Poel <bob@mellowood.ca>
 import sys
 import os
 from . import gbl
-from   MMA.common import *
-import MMA.debug
+from   neomma.MMA.common import *
+import neomma.MMA.debug
 
 PY3 = sys.version_info[0] == 3
 
@@ -122,7 +122,7 @@ class ReadFile:
             except IOError:
                 error("Unable to open '%s' for input" % fname)
  
-        if MMA.debug.debug or MMA.debug.showFilenames:
+        if neomma.MMA.debug.debug or neomma.MMA.debug.showFilenames:
             dPrint("Opening file '%s'." % fname)
 
         self.fname = fname

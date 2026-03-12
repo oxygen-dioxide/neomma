@@ -26,12 +26,12 @@ Bob van der Poel <bob@mellowood.ca>
 
 import random
 
-import MMA.notelen
-import MMA.ornament
+import neomma.MMA.notelen
+import neomma.MMA.ornament
 from . import gbl
-from MMA.common import *
-from MMA.pat import PC, Pgroup
-import MMA.debug
+from neomma.MMA.common import *
+from neomma.MMA.pat import PC, Pgroup
+import neomma.MMA.debug
 
 import copy
 
@@ -160,7 +160,7 @@ class Chord(PC):
             else:
                 error("Voicing does not have a '%s' option" % mode)
                 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             v = self.voicing
             dPrint("Set %s Voicing MODE=%s RANGE=%s CENTER=%s RMOVE=%s MOVE=%s DIR=%s " %
                   (self.name, v.mode, v.range, v.center, v.random, v.bcount, v.dir))
@@ -187,7 +187,7 @@ class Chord(PC):
 
         self.dupRoot = seqBump(tmp)
 
-        if MMA.debug.debug:
+        if neomma.MMA.debug.debug:
             dPrint("%s DupRoot set to: %s" % (self.name, self.getDupRootSetting()))
 
     def getDupRootSetting(self):
@@ -213,7 +213,7 @@ class Chord(PC):
         a = Pgroup()
 
         a.offset = self.setBarOffset(ev[0])
-        a.duration = MMA.notelen.getNoteLen(ev[1])
+        a.duration = neomma.MMA.notelen.getNoteLen(ev[1])
 
         vv = ev[2:]
         if len(vv) > 8:
@@ -432,7 +432,7 @@ class Chord(PC):
                 while 1:
                     lo = loo.pop()
                     if lo[1]:
-                        offset = MMA.ornament.doOrnament(self, [lo],
+                        offset = neomma.MMA.ornament.doOrnament(self, [lo],
                                 self.getChordInPos(p.offset, ctable).chord.scaleList, p)
                         break
                     elif not loo:
