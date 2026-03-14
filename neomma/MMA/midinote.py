@@ -95,7 +95,7 @@ def parse(name, ln):
             trk.tadjust = stoi(v)
 
         else:
-            error("MIDINote: unknown option pair %s=%s." % (o, v))
+            error("MIDINote: unknown option pair {}={}.".format(o, v))
     
     # end of option pairs.
 
@@ -222,7 +222,7 @@ def note2val(trk, acctable, orig):
         t.pop(0)
 
     if t:  # anything left? Error.
-        error("MidiNote: Unknown note specifier '%s' in '%s'." % (''.join(t), orig))
+        error("MidiNote: Unknown note specifier '{}' in '{}'.".format(''.join(t), orig))
 
     return val
 
@@ -260,7 +260,7 @@ def insertNote(trk, ln):
                 else:
                     n = neomma.MMA.midiC.drumToValue(n)
                     if n < 0:
-                        error("MidiNote: unknown drum tone '%s' in %s." % (n, trk.name))
+                        error("MidiNote: unknown drum tone '{}' in {}.".format(n, trk.name))
             else:
                 n = note2val(trk, acctable, n)
 
@@ -317,7 +317,7 @@ def insertNote(trk, ln):
         track.addToTrack(gbl.tickOffset + offset + duration, offEvent)
 
     if neomma.MMA.debug.debug:
-        dPrint("MidiNote Note %s: inserted note %s at offset %s." % (trk.name, notes, offset))
+        dPrint("MidiNote Note {}: inserted note {} at offset {}.".format(trk.name, notes, offset))
 
 
 def insertPB(trk, ln):
@@ -339,7 +339,7 @@ def insertPB(trk, ln):
     track.addToTrack(gbl.tickOffset + offset, packBytes((0xe0 | channel-1, v % 128, v // 128)))
 
     if neomma.MMA.debug.debug:
-        dPrint("MidiNote PB %s: inserted bend %s at offset %s." % (trk.name, v-8192, offset))
+        dPrint("MidiNote PB {}: inserted bend {} at offset {}.".format(trk.name, v-8192, offset))
 
 
 def insertPBrange(trk, ln):

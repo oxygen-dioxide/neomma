@@ -216,7 +216,7 @@ def tempo(ln):
         lastChange = gbl.tickOffset + startOffset
 
         if neomma.MMA.debug.debug:
-            dPrint("Tempo: Set to %s, offset=%s beats" % (gbl.tempo, startOffset/gbl.BperQ))
+            dPrint("Tempo: Set to {}, offset={} beats".format(gbl.tempo, startOffset/gbl.BperQ))
 
     else:              # Do a tempo change over bar count
         numbeats = stotick(ln[1], 'B', "TEMPO Offset: '%s' is not recognized."
@@ -284,7 +284,7 @@ def beatAdjust(ln):
     gbl.totTime += (adj / gbl.BperQ) / gbl.tempo   # adjust total time
 
     if neomma.MMA.debug.debug:
-        dPrint("BeatAdjust: inserted %s ticks at bar %s." % (adj, gbl.barNum + 1))
+        dPrint("BeatAdjust: inserted {} ticks at bar {}.".format(adj, gbl.barNum + 1))
 
 def cut(ln):
     """ Insert a all-note-off into ALL tracks. """
@@ -320,10 +320,10 @@ def trackCut(name, ln):
     if len(ln) != 1:
         error("Cut %s: Offset missing." % name)
 
-    offset = stof(ln[0], "Cut %s: Expecting value, (not '%s') for offset." % (name, ln[0]))
+    offset = stof(ln[0], "Cut {}: Expecting value, (not '{}') for offset.".format(name, ln[0]))
 
     if offset < -gbl.QperBar or offset > gbl.QperBar:
-        warning("Cut %s: %s is a large beat offset" % (name, offset))
+        warning("Cut {}: {} is a large beat offset".format(name, offset))
 
     moff = int(gbl.tickOffset + (gbl.BperQ * offset))
 
@@ -339,7 +339,7 @@ def trackCut(name, ln):
         gbl.mtrks[m].addNoteOff(moff)
 
         if neomma.MMA.debug.debug:
-            dPrint("Cut %s: Beat %s, Bar %s" % (name, offset, gbl.barNum + 1))
+            dPrint("Cut {}: Beat {}, Bar {}".format(name, offset, gbl.barNum + 1))
 
 
 def fermata(ln):

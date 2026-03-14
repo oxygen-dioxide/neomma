@@ -169,7 +169,7 @@ def writeSplitTrack(channel, out):
         if channel == 10:
             m = "%s" % neomma.MMA.midiC.valueToDrum(a)
         else:
-            m = "%s-%s" % (gbl.mtrks[channel].trackname, a)
+            m = "{}-{}".format(gbl.mtrks[channel].trackname, a)
 
         notes[a].addTrkName(0, m)
 

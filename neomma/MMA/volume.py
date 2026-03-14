@@ -1,5 +1,3 @@
-
-
 """
 This module is an integeral part of the program
 MMA - Musical Midi Accompaniment.
@@ -81,9 +79,9 @@ def adjvolume(ln):
             error("ADJUSTVOLUME DYNAMIC: '%s' for AdjustVolume is unknown" % v)
 
     if neomma.MMA.debug.debug:
-        dPrint("Volume Ratio: %s%% Track / %s%% Master" % (vTRatio * 100, vMRatio * 100))
+        dPrint("Volume Ratio: {}% Track / {}% Master".format(vTRatio * 100, vMRatio * 100))
         dPrint("Volume table: %s" % 
-              ' '.join([ "%s=%s" % (a, int(vols[a] * 100)) for a in sorted(vols)]))
+              ' '.join([ "{}={}".format(a, int(vols[a] * 100)) for a in sorted(vols)]))
 
 
 calcVolumeRePat = re.compile(

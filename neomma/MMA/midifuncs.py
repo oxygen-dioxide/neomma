@@ -78,7 +78,7 @@ def rawMidi(ln):
         if a < 0 or a > 0xff:
             error("All values must be in the range 0 to 0xff, not '%s'" % a)
         mb.append(a)
-    mb = neomma.MMA.midiM.packBytes((mb))   # save value for debug
+    mb = neomma.MMA.midiM.packBytes(mb)   # save value for debug
     gbl.mtrks[0].addToTrack(gbl.tickOffset, mb)
 
     if neomma.MMA.debug.debug:
@@ -123,7 +123,7 @@ def setMidiFileType(ln):
             a = 'ON'
         else:
             a = 'OFF'
-        dPrint("MIDIFile: SMF=%s RUNNING=%s" % (gbl.midiFileType, a))
+        dPrint("MIDIFile: SMF={} RUNNING={}".format(gbl.midiFileType, a))
 
 
 def setChPref(ln):
@@ -147,7 +147,7 @@ def setChPref(ln):
 
     if neomma.MMA.debug.debug:
         dPrint("ChannelPref: %s" % 
-              ' '.join(["%s=%s" % (n, c) for n, c in gbl.midiChPrefs.items()]))
+              ' '.join(["{}={}".format(n, c) for n, c in gbl.midiChPrefs.items()]))
 
 
 def setMidiCopyright(ln):
@@ -206,7 +206,7 @@ def doMidiTrackCresc(ln, dir, func):
                 error("%s: Step rate must be >0." % func)
 
         else:
-            error("%s: Unknow option '%s'." % (func, o))
+            error("{}: Unknow option '{}'.".format(func, o))
 
     if len(ln) not in (2, 3):
         error("%s: usage -  [<start>] <end> <count>" % (func))
@@ -299,7 +299,7 @@ def setChannelInit(ln):
                     if c2 < c1:
                         c1, c2 = c2, c1
                     if c1 <= 0 or c2 > 16:
-                        error("ChannelInit: Valid channels range 1..16, not %s-%s." % (c1, c2))
+                        error("ChannelInit: Valid channels range 1..16, not {}-{}.".format(c1, c2))
                     channels.extend(range(c1, c2+1))
                 else:
                     c = stoi(c)
@@ -352,7 +352,7 @@ def trackMidiVolume(name, ln):
 
     v = neomma.MMA.volume.calcMidiVolume(ln[0])
     if v < 0 or v > 127:
-        error("%s MidiVolume: Volumes need to be 0..127, not %s." % (name, v))
+        error("{} MidiVolume: Volumes need to be 0..127, not {}.".format(name, v))
 
     gbl.tnames[name].midiPending.append(("CVOLUME", gbl.tickOffset, v))
     gbl.tnames[name].cVolume = v
@@ -379,7 +379,7 @@ def doMidiCresc(name, ln, dir, func):
     tptr = gbl.tnames[name]
 
     if len(ln) not in (2, 3):
-        error("%s %s: usage -  [<start>] <end> <count>" % (name, func))
+        error("{} {}: usage -  [<start>] <end> <count>".format(name, func))
 
     if len(ln) == 2:
         # If passing only one param we're doing a change from the
@@ -401,19 +401,19 @@ def doMidiCresc(name, ln, dir, func):
 
     v1 = neomma.MMA.volume.calcMidiVolume(ln[0])
     if v1 < 0 or v1 > 127:
-        error("%s %s: Volume must be 0..127." % (name, v1))
+        error("{} {}: Volume must be 0..127.".format(name, v1))
     v2 = neomma.MMA.volume.calcMidiVolume(ln[1])
     if v2 < 0 or v2 > 127:
-        error("%s %s: Volume must be 0..127." % (name, v1))
+        error("{} {}: Volume must be 0..127.".format(name, v1))
 
     count = stof(ln[2])
     if count <= 0:
-        error("%s %s: count must be >0" % (name, func))
+        error("{} {}: count must be >0".format(name, func))
 
     if dir == -1 and v1 < v2:
-        warning("%s %s: dest volume > start" % (name, func))
+        warning("{} {}: dest volume > start".format(name, func))
     elif dir == 1 and v1 > v2:
-        warning("%s %s: dest volume < start" % (name, func))
+        warning("{} {}: dest volume < start".format(name, func))
 
     t = abs(v2-v1)
     step = (count * gbl.barLen) // t  # step rate
@@ -429,7 +429,7 @@ def doMidiCresc(name, ln, dir, func):
         p += step
 
     if neomma.MMA.debug.debug:
-        dPrint("%s MidiVolume: Added %s changes" % (name, t))
+        dPrint("{} MidiVolume: Added {} changes".format(name, t))
 
 def trackGlis(name, ln):
     """ Enable/disable portamento. """
@@ -445,7 +445,7 @@ def trackGlis(name, ln):
     gbl.tnames[name].midiPending.append(("GLIS", gbl.tickOffset, v))
 
     if neomma.MMA.debug.debug:
-        dPrint("Set %s MIDIGlis to %s" % (name, v))
+        dPrint("Set {} MIDIGlis to {}".format(name, v))
 
 
 def trackWheel(name, ln):
@@ -470,7 +470,7 @@ def trackWheel(name, ln):
         if len(ln) == 1 and ln[0] == 'RESET':
             opts.append(('SET', 'CENTER'))
         else:
-            error("%s MidiWheel: Unrecognized command(s) '%s'." % (name, ' '.join(ln)))
+            error("{} MidiWheel: Unrecognized command(s) '{}'.".format(name, ' '.join(ln)))
 
     for o, v in opts:
         if o == 'OFFSET':
@@ -516,7 +516,7 @@ def trackWheel(name, ln):
             elif v in ('YES', '1', 'ON'):
                 reset = 1
             else:
-                error("%s MidiWheel Reset: Use ON or OFF, not '%s'." % (name, v))
+                error("{} MidiWheel Reset: Use ON or OFF, not '{}'.".format(name, v))
 
         elif o == 'RATE':
             rate = neomma.MMA.notelen.getNoteLen(v)
@@ -527,9 +527,9 @@ def trackWheel(name, ln):
             elif v in ('YES', '1', 'ON'):
                 cycle = True
             else:
-                error("%s MidiWheel Cycle: Use ON or OFF, not '%s'." % (name, v))
+                error("{} MidiWheel Cycle: Use ON or OFF, not '{}'.".format(name, v))
         else:
-            error("%s MidiWheel: Unrecognized command '%s'." % (name, o))
+            error("{} MidiWheel: Unrecognized command '{}'.".format(name, o))
 
     if setOnly is not None:
         if len(opts) > 2 or len(opts) > 1 and startOffset is None:
@@ -555,10 +555,10 @@ def trackWheel(name, ln):
         error("%s MidiWheel: No start/end value set." % name)
 
     if startValue < 0 or startValue > 16383:
-        error("%s MidiWheel: Start must be 0 ... 16383, not '%s'." % (name, startValue))
+        error("{} MidiWheel: Start must be 0 ... 16383, not '{}'.".format(name, startValue))
 
     if endValue < 0 or endValue > 16383:
-        error("%s MidiWheel: End must be 0 ... 16383, not '%s'." % (name, endValue))
+        error("{} MidiWheel: End must be 0 ... 16383, not '{}'.".format(name, endValue))
 
     if rate is None:
         repeat = 1
@@ -683,7 +683,7 @@ def trackPan(name, ln):
             dPrint("Set %s MIDIPan from %s to %s over %s beats." % 
                 (name, initPan, newPan, beats))
         else:
-            dPrint("Set %s MIDIPan to %s" % (name, newPan))
+            dPrint("Set {} MIDIPan to {}".format(name, newPan))
 
 
 def trackMidiText(name, ln):
@@ -696,7 +696,7 @@ def trackMidiText(name, ln):
     gbl.tnames[name].midiPending.append(("MIDITEXT", gbl.tickOffset, ln))
 
     if neomma.MMA.debug.debug:
-        dPrint("Set %s MIDIText '%s'." % (name, ln))
+        dPrint("Set {} MIDIText '{}'.".format(name, ln))
 
 
 def trackMidiCue(name, ln):
@@ -709,7 +709,7 @@ def trackMidiCue(name, ln):
     gbl.tnames[name].midiPending.append(("MIDICUE", gbl.tickOffset, ln))
 
     if neomma.MMA.debug.debug:
-        dPrint("Set %s MIDICue '%s'." % (name, ln))
+        dPrint("Set {} MIDICue '{}'.".format(name, ln))
 
 
 def trackMidiExt(ln):
@@ -791,4 +791,4 @@ def trackMidiName(name, ln):
     gbl.tnames[name].midiPending.append(('TNAME', 0, ln[0]))
 
     if neomma.MMA.debug.debug:
-        dPrint("Set %s MIDI Track Name to %s" % (name, ln[0]))
+        dPrint("Set {} MIDI Track Name to {}".format(name, ln[0]))

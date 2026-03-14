@@ -1,4 +1,3 @@
-
 # patChord.py
 
 """
@@ -178,7 +177,7 @@ class Chord(PC):
                             % (self.name, v))
 
                 if v < -9 or v > 9:
-                    error("%s DupRoot: '%s' out-of-range; must be -9 to 9." % (self.name, v))
+                    error("{} DupRoot: '{}' out-of-range; must be -9 to 9.".format(self.name, v))
 
                 if v:
                     ll.append(v * 12)
@@ -188,7 +187,7 @@ class Chord(PC):
         self.dupRoot = seqBump(tmp)
 
         if neomma.MMA.debug.debug:
-            dPrint("%s DupRoot set to: %s" % (self.name, self.getDupRootSetting()))
+            dPrint("{} DupRoot set to: {}".format(self.name, self.getDupRootSetting()))
 
     def getDupRootSetting(self):
         """ Need to convert nested list ints to string. """

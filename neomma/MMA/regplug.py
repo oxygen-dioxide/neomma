@@ -40,8 +40,7 @@ from neomma.MMA.alloc import trkClasses
 import neomma.MMA.appdirs   # not mine, but it works!
 
 # In python3 raw_input() has been renamed input()
-if sys.version_info[0] == 3:
-    raw_input = input
+raw_input = input
 
 # Set the name of the entry point module. Each plugin must
 # have this module (with a .py ending) in its directory.
@@ -98,7 +97,7 @@ def findPlugin(targ):
                   and the module name (hello.plugin).
     """
 
-    plugEntry = "%s.%s" % (entry, 'py')
+    plugEntry = "{}.{}".format(entry, 'py')
     
     def matchName(d):
         """ Find a directory entry in 'd' matching the plugin name """
@@ -114,7 +113,7 @@ def findPlugin(targ):
                     for b in os.listdir(os.path.join(d, a)):
                         if b.lower() == plugEntry.lower():
                             # Create a module name based on the case of the files found
-                            mName = "%s.%s" % (a, b[0:-3])
+                            mName = "{}.{}".format(a, b[0:-3])
                             return os.path.join(a, b), mName
 
         return None, None
@@ -204,7 +203,7 @@ def getPermission(path, name):
     # This is done for each PLUGIN call. Not a big deal, but could be optimized.
     if permFile:
         try:
-            f = open(permFile, 'r')
+            f = open(permFile)
             f.readline()    # Read/discard comment line
             permlist = json.load(f)
             f.close()

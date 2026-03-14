@@ -145,7 +145,7 @@ def plistgm():
 
     for v in sorted(voiceNames.keys()):
         if v <= 127:
-            print("%s=%s" % (neomma.MMA.midiC.extVocStr(v), voiceNames[v]))
+            print("{}={}".format(neomma.MMA.midiC.extVocStr(v), voiceNames[v]))
 
 
 def plistext():
@@ -153,7 +153,7 @@ def plistext():
 
     for v in sorted(voiceNames.keys()):
         if v > 127:
-            print("%s=%s" % (neomma.MMA.midiC.extVocStr(v), voiceNames[v]))
+            print("{}={}".format(neomma.MMA.midiC.extVocStr(v), voiceNames[v]))
 
 
 def plistall():

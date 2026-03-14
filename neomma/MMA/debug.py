@@ -215,8 +215,8 @@ def trackSet(track, func):
     from MMA.macro import macros
     from MMA.common import dPrint
     
-    dPrint("Set %s %s: %s" % (track, func,
-            macros.sysvar("%s_%s" % (track, func.upper()))))
+    dPrint("Set {} {}: {}".format(track, func,
+            macros.sysvar("{}_{}".format(track, func.upper()))))
 
 
 

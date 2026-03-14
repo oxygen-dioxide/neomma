@@ -1,4 +1,3 @@
-
 # auto.py
 
 """
@@ -166,7 +165,7 @@ def libUpdate():
 
         try:
             outpath = open(os.path.join(lib, mmadir), 'wb')
-        except IOError:
+        except OSError:
             print("     Skipping '%s', no write access." % lib)
             noAccess += 1
             continue
@@ -219,7 +218,7 @@ def loadDB(d):
         f.readline()    # Read/discard comment line
         g = pickle.load(f)
         f.close()
-    except IOError:
+    except OSError:
         g = {}
     except ValueError:
         error("Incompatible database found. Maybe a result"

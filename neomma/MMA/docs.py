@@ -1,4 +1,3 @@
-
 # docs.py
 
 """
@@ -43,11 +42,11 @@ def docDrumNames(order):
 
     if order == "a":
         for a, v, m in sorted(n):
-            print("\\insline{%s} {%s$^{%s}$}" % (a, v, m))
+            print("\\insline{{{}}} {{{}$^{{{}}}$}}".format(a, v, m))
 
     else:
         for a, v, m in n:
-            print("\\insline{%s} {%s$^{%s}$}" % (v, a, m))
+            print("\\insline{{{}}} {{{}$^{{{}}}$}}".format(v, a, m))
 
 
 def docCtrlNames(order):
@@ -57,11 +56,11 @@ def docCtrlNames(order):
 
     if order == "a":
         for a, v in sorted(n):
-            print("\\insline{%s} {%02x}" % (a, v))
+            print("\\insline{{{}}} {{{:02x}}}".format(a, v))
 
     else:
         for a, v in n:
-            print("\\insline{%02x} {%s}" % (v, a))
+            print("\\insline{{{:02x}}} {{{}}}".format(v, a))
 
 
 def docInstNames(order):
@@ -70,13 +69,13 @@ def docInstNames(order):
     n = zip(neomma.MMA.midiC.voiceNames, range(len(neomma.MMA.midiC.voiceNames)))
     if order == "a":
         for a, v in sorted(n):
-            a = a.replace('&', '\&')
-            print("\\insline{%s} {%s}" % (a, v))
+            a = a.replace('&', r'\&')
+            print("\\insline{{{}}} {{{}}}".format(a, v))
 
     else:
         for a, v in n:
-            a = a.replace('&', '\&')
-            print("\\insline{%s} {%s}" % (v, a))
+            a = a.replace('&', r'\&')
+            print("\\insline{{{}}} {{{}}}".format(v, a))
 
 
 """ Whenever MMA encounters a DOC command, or if it defines
@@ -175,12 +174,12 @@ def docDump():
             notes = notes.replace("<p>", "\\\\[.5ex]")
             if fname.endswith(gbl.EXT):
                 fname = '.'.join(fname.split('.')[:-1])
-            print("\\filehead{%s}{%s}\n" % (totex(fname), totex(notes)))
+            print("\\filehead{{{}}}{{{}}}\n".format(totex(fname), totex(notes)))
 
         if variables:
             print("  \\variables{")
             for l in variables:
-                print("     \\insvar{%s}{%s}" % (totex(l[0]), totex(l[1])))
+                print("     \\insvar{{{}}}{{{}}}".format(totex(l[0]), totex(l[1])))
             print("  }\n")
 
         if defs:
@@ -196,7 +195,7 @@ def docDump():
                 print("     \\instable{%s}{%s}{%s}{%s}{" % 
                     (totex(l[0]), totex(l[2]), l[1], alias))
                 for c, v, s in l[3:]:  # we ignore the seqence data here
-                    print("       \\insline{%s}{%s}" % (c.title(), totex(v[0])))
+                    print("       \\insline{{{}}}{{{}}}".format(c.title(), totex(v[0])))
                 print("     }")
 
     elif gbl.createDocs == 2:    # html docs
@@ -229,32 +228,32 @@ def docDump():
         if defs:
             print("<ul>")
             for l in defs:
-                print("<LI><A Href=#%s>%s</a>" % (l[0], l[0]))
+                print("<LI><A Href=#{}>{}</a>".format(l[0], l[0]))
             print("</ul>")
             for l in defs:
                 gg = l[0]
                 iname = os.path.basename(gbl.infile)
                 iname, ext = os.path.splitext(iname)
-                gfile = "%s_%s.html" % (iname, gg.lower())
-                print('<!-- GROOVE=%s FILE=%s SRC=%s -->' % (gg.lower(), gfile, gbl.infile))
+                gfile = "{}_{}.html".format(iname, gg.lower())
+                print('<!-- GROOVE={} FILE={} SRC={} -->'.format(gg.lower(), gfile, gbl.infile))
                 print('<A Name=%s></a>' % gg)
                 print('<Table Border=3 CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="60%">')
                 print('  <TR><TD>')
-                print('    <H2> <A Href=%s> %s </a> </H2> ' % (gfile, l[0]))
+                print('    <H2> <A Href={}> {} </a> </H2> '.format(gfile, l[0]))
                 alias = neomma.MMA.grooves.getAlias(l[0])
                 if alias:
                     if len(alias) > 1:
                         ll = "Aliases"
                     else:
                         ll = "Alias"
-                    print(' <H4> %s: %s </H4>' % (ll, alias))
+                    print(' <H4> {}: {} </H4>'.format(ll, alias))
 
-                print('    %s <B>(%s)</B> ' % (l[2], l[1]))
+                print('    {} <B>({})</B> '.format(l[2], l[1]))
                 print('  </TD></TR>')
                 print('  <TR><TD>')
                 print('    <Table CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="10%">')
                 for c,v,s in l[3:]:
-                    print("       <TR><TD> %s </TD> <TD> %s </TD></TR>" % (c.title(), v[0]))
+                    print("       <TR><TD> {} </TD> <TD> {} </TD></TR>".format(c.title(), v[0]))
                 print('    </Table>')
                 print('  </TD></TR>')
                 print('</Table>')
@@ -293,7 +292,7 @@ def docDump():
         print(notes)
 
         for l in defs:
-            print("%s\n %s" % (l[0], l[2]))
+            print("{}\n {}".format(l[0], l[2]))
 
     else:
         return
@@ -310,7 +309,7 @@ def totex(s):
         Also handles proper quotation style.
     """
 
-    s = s.replace("$", "\$")
+    s = s.replace("$", r"\$")
     s = s.replace("*", "$*$")
     s = s.replace("_", "\\_")
     #s = s.replace("\\", "\\\\")
@@ -336,7 +335,7 @@ def htmlGraph(f):
         if abs(x1) == abs(x2):
             return "%s" % abs(x1)
         else:
-            return "%s,%s" % (x1, x2)
+            return "{},{}".format(x1, x2)
 
     def docol(lab, data):
         if lab == '':
@@ -449,7 +448,7 @@ def htmlGraph(f):
 
         print(r'<div style="position:relative;background-color:#99bdf4;')
         print(r'padding:0; border:.1em solid black; left:5em;')
-        print(r'height:%sem; width:%sem">' % (boxy, boxx))
+        print(r'height:{}em; width:{}em">'.format(boxy, boxx))
 
         if gbl.seqSize > 1:
             for a in range(1, gbl.seqSize):

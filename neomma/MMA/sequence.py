@@ -287,7 +287,7 @@ def trackSeqRnd(name, ln):
             a = "On"
         else:
             a = "Off"
-        dPrint("%s SeqRnd: %s" % (self.name, a))
+        dPrint("{} SeqRnd: {}".format(self.name, a))
 
 
 def trackSeqRndWeight(name, ln):

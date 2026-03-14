@@ -1,4 +1,3 @@
-
 # chords.py
 
 """
@@ -85,7 +84,7 @@ def defChord(ln):
     chordlist[name] = (notes, scale, "User Defined")
 
     if neomma.MMA.debug.debug:
-        dPrint("ChordType '%s', %s" % (name, chordlist[name]))
+        dPrint("ChordType '{}', {}".format(name, chordlist[name]))
 
 
 def printChord(ln):
@@ -412,7 +411,7 @@ class ChordNotes:
                 wmessage = "The slash chord note '%s' not in chord or scale '%s'" % \
                          (slash, name)
 
-                t = "%s/%s" % (name, slash )
+                t = "{}/{}".format(name, slash )
                 if t not in slashPrinted:
                     note = r % 12
                     ll = []
@@ -422,9 +421,9 @@ class ChordNotes:
                         # We need 'adj' to convert the chords from "C" to the current tonic.
                         adj = cdAdjust[self.tonic]
                         if note in  [(x % 12) + adj for x in chordlist[c][0]]:
-                            ll.append("%s%s" % (self.tonic, c))
+                            ll.append("{}{}".format(self.tonic, c))
                     if ll:
-                        wmessage += "\nChords with '%s': %s" % (slash, ' '.join(sorted(ll)))
+                        wmessage += "\nChords with '{}': {}".format(slash, ' '.join(sorted(ll)))
 
                     slashPrinted.append(t)  # only print this chord/slash once
                 if not neomma.MMA.debug.rmShow:

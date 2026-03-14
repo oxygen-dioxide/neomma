@@ -203,7 +203,7 @@ class Plectrum(PC):
                 o.octave = i * 12
 
             else:
-                error("%s FretNoise: Unknown option '%s'." % (self.name, cmd))
+                error("{} FretNoise: Unknown option '{}'.".format(self.name, cmd))
 
 
         # no strings specified, set to the top 3
@@ -258,7 +258,7 @@ class Plectrum(PC):
         for pitchName in stringPitchNames:
             midiPitch = noteNameToMidiPitch(pitchName)
             if midiPitch is None:
-                error("%s TUNING: Illegal/unknown string name '%s'." % (self.name, pitchName))
+                error("{} TUNING: Illegal/unknown string name '{}'.".format(self.name, pitchName))
 
             self._tuning.append(midiPitch)
             vibration = PlecStruct()
@@ -307,7 +307,7 @@ class Plectrum(PC):
             if chord in self._chordShapes:
                 self._chordShapes.pop(chord)
             else:
-                warning("%s: Chord %s was not shaped" % (self.name, chord))
+                warning("{}: Chord {} was not shaped".format(self.name, chord))
             return
 
         if len(shape) != len(self._tuning):
@@ -771,7 +771,7 @@ class Plectrum(PC):
         if startFretNo < 0:
             printStart = startFretNo
 
-        dPrint("%s %s chord %s" % (self.name, chordTable.name,  chordList))
+        dPrint("{} {} chord {}".format(self.name, chordTable.name,  chordList))
         for stringNo, openNote in enumerate(reversed(self._tuning)):
             openNote = self.adjustNote(openNote)  # puts into middle octave 60==5*12
             note = notes[stringNo].pitch

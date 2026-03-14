@@ -235,7 +235,7 @@ def opts(l=None):
 
             op.write("Groove %s\n" % groove)
             for g in cmds:
-                op.write("%s %s \n" % (g[0], g[1]))
+                op.write("{} {} \n".format(g[0], g[1]))
             chords = chords.split(',')
             while len(chords) < count:
                 chords += chords

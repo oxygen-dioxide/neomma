@@ -65,7 +65,7 @@ def defCall(l):
     #                           join together with space delims (skip func name)
     #                           split up at ','
 
-    p = ' '.join(l[1:]).replace('\,', chr(255)).split(',')
+    p = ' '.join(l[1:]).replace(r'\,', chr(255)).split(',')
 
     # Convert the param names so they have a leading '$'. The '$'
     # is not permitted in a param name.
@@ -112,7 +112,7 @@ def defCall(l):
             try:
                 i = params.index(a)
             except:
-                error("DefCall Default: param '%s' does not exist in '%s'." % (a, fname))
+                error("DefCall Default: param '{}' does not exist in '{}'.".format(a, fname))
             if defaults[i]:
                 warning("DefCall Default: param '%s' default value '%s' was set in param list."
                         " Overriding with '%s'." % (a, defaults[i], d))
@@ -125,7 +125,7 @@ def defCall(l):
     
     if neomma.MMA.debug.debug: 
         t = [ a[1:] for a in params]
-        dPrint("DefCall: Created function '%s': %s" % (fname, ', '.join(t)))
+        dPrint("DefCall: Created function '{}': {}".format(fname, ', '.join(t)))
 
 
 def callFunction(l):
@@ -140,7 +140,7 @@ def callFunction(l):
         error("Call: '%s' has not been defined." % fname)
 
     # Convert any escaped '\,' into $ff ... see explanation in defCall()
-    p = ' '.join(l[1:]).replace('\,', chr(255)).split(',')
+    p = ' '.join(l[1:]).replace(r'\,', chr(255)).split(',')
 
     # Validate calling params
     params = funcList[fname].params
@@ -157,7 +157,7 @@ def callFunction(l):
                 a = '$'+a.strip().upper()
                 d = d.strip()
                 if a not in params:
-                    error("Call: '%s' is not a param of '%s'." % (a, fname))
+                    error("Call: '{}' is not a param of '{}'.".format(a, fname))
                 namedParams[a] = d
             elif usingDefaults:
                 error("Call: cannot use a non-named param after a named one.")

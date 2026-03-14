@@ -356,7 +356,7 @@ class Lyric:
         lyrics = lyrics.replace('     ', ' ')
 
         if self.karmode:
-            lyrics = lyrics.replace('\-', chr(1))
+            lyrics = lyrics.replace(r'\-', chr(1))
             lyrics = lyrics.replace('-', chr(0)+' ')
 
         if self.barsplit:
@@ -378,7 +378,7 @@ class Lyric:
                 if beat < 1 or beat > gbl.QperBar+1:
                     error("Offset in lyric <> must be 1 to %s" % gbl.QperBar)
                 beat -= 1
-                bstep = (gbl.QperBar-beat)/float((len(lyrics)-t))
+                bstep = (gbl.QperBar-beat)/float(len(lyrics)-t)
 
             a = a.replace('\\r', '\r')
             a = a.replace('\\n', '\n')

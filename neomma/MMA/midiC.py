@@ -40,7 +40,7 @@ def decodeVoice(n):
             emsg = "(Note: %s is a valid DRUM tone.)" % n
         else:
             emsg = ''
-        error("Voice '%s' is not defined. %s" % (n, emsg))
+        error("Voice '{}' is not defined. {}".format(n, emsg))
         
     if voc < 0:  # not a valid name, assume vv.msb(ctrl0).lsb(ctrl32) value
         nn = n.split('.')

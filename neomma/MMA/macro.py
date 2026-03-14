@@ -1,4 +1,3 @@
-
 # macros.py
 
 """
@@ -74,7 +73,7 @@ def sliceVariable(p, sl):
     except IndexError:
         error("Index '%s' out of range." % sl)
     except:
-        error("Index error '%s' in '%s' Check the array being sliced." % (sl,p) )
+        error("Index error '{}' in '{}' Check the array being sliced.".format(sl,p) )
 
     if ":" not in sl:
         new = [new]
@@ -113,7 +112,7 @@ class Macros:
         # Simple/global     system values
 
         if s == 'CHORDADJUST':
-            return ' '.join([ "%s=%s" % (a, neomma.MMA.chords.cdAdjust[a]) 
+            return ' '.join([ "{}={}".format(a, neomma.MMA.chords.cdAdjust[a]) 
                               for a in sorted(neomma.MMA.chords.cdAdjust)])
 
         elif s == 'FILENAME':
@@ -167,7 +166,7 @@ class Macros:
             return str(int(neomma.MMA.volume.volume * 100))  # INT() is important
 
         elif s == 'VOLUMERATIO':
-            return str((neomma.MMA.volume.vTRatio * 100))
+            return str(neomma.MMA.volume.vTRatio * 100)
 
         elif s == 'LASTVOLUME':
             return str(int(neomma.MMA.volume.lastVolume * 100))
@@ -247,7 +246,7 @@ class Macros:
             x = []
             for c, n in sorted(gbl.midiAssigns.items()):
                 if n:
-                    x.append("%s=%s" % (c, ','.join(n)))
+                    x.append("{}={}".format(c, ','.join(n)))
             return ' '.join(x)
 
         elif s == 'SEQRNDWEIGHT':
@@ -372,7 +371,7 @@ class Macros:
             return ' '.join([str(x) for x in t.invert])
 
         elif func == 'LIMIT':
-            return "%s mode=%s" % (t.chordLimit[0], t.chordLimit[1])
+            return "{} mode={}".format(t.chordLimit[0], t.chordLimit[1])
 
         elif func == 'MALLET':
             if t.vtype not in ("SOLO", "MELODY"):
@@ -416,7 +415,7 @@ class Macros:
                 if a1 == a2:
                     tmp.append('%s' % abs(a1))
                 else:
-                    tmp.append('%s,%s' % (a1, a2))
+                    tmp.append('{},{}'.format(a1, a2))
 
             return ' '. join(tmp)
 
@@ -426,7 +425,7 @@ class Macros:
                 if a1 == a2:
                     tmp.append('%s' % abs(a1))
                 else:
-                    tmp.append('%s,%s' % (a1, a2))
+                    tmp.append('{},{}'.format(a1, a2))
             return ' '.join(tmp)
 
         elif func == 'RVOLUME':
@@ -437,7 +436,7 @@ class Macros:
                 if a1 == a2:
                     tmp.append('%s' % abs(a1))
                 else:
-                    tmp.append('%s,%s' % (a1, a2))
+                    tmp.append('{},{}'.format(a1, a2))
             return ' '.join(tmp)
 
         elif func == 'RPITCH':
@@ -460,7 +459,7 @@ class Macros:
             return ' '.join([str(x) for x in t.seqRndWeight])
 
         elif func == 'SPAN':
-            return "%s %s" % (t.spanStart, t.spanEnd)
+            return "{} {}".format(t.spanStart, t.spanEnd)
 
         elif func == 'STICKY':
             if t.sticky:
@@ -479,7 +478,7 @@ class Macros:
                     if a == b:
                         r.append("%s" % a)
                     else:
-                        r.append("%s,%s" % (a, b))
+                        r.append("{},{}".format(a, b))
 
             return ' '.join(r)
 
@@ -682,7 +681,7 @@ class Macros:
             for a in ln:
                 a = a.upper()
                 if a in self.vars:
-                    print("$%s: %s" % (a, self.vars[a]))
+                    print("${}: {}".format(a, self.vars[a]))
                 else:
                     print("$%s - not defined" % a)
 
@@ -724,7 +723,7 @@ class Macros:
         self.vars[v] = random.choice(ln[1:])
 
         if neomma.MMA.debug.debug:
-            dPrint("Variable $%s randomly set to '%s'" % (v, self.vars[v]))
+            dPrint("Variable ${} randomly set to '{}'".format(v, self.vars[v]))
 
     def newsetvar(self, ln):
         """ Set a new variable. Ignore if already set. """
@@ -768,7 +767,7 @@ class Macros:
         self.vars[v] = t
 
         if neomma.MMA.debug.debug:
-            dPrint("Variable $%s == '%s'" % (v, self.vars[v]))
+            dPrint("Variable ${} == '{}'".format(v, self.vars[v]))
 
     def msetvar(self, ln):
         """ Set a variable to a number of lines. """
@@ -861,7 +860,7 @@ class Macros:
         self.vars[v] = str(vl)
 
         if neomma.MMA.debug.debug:
-            dPrint("Variable '%s' INC to %s" % (v, self.vars[v]))
+            dPrint("Variable '{}' INC to {}".format(v, self.vars[v]))
 
     def vardec(self, ln):
         """ Decrement a varaiable. """
@@ -892,7 +891,7 @@ class Macros:
         self.vars[v] = str(vl)
 
         if neomma.MMA.debug.debug:
-            dPrint("Variable '%s' DEC to %s" % (v, self.vars[v]))
+            dPrint("Variable '{}' DEC to {}".format(v, self.vars[v]))
 
     def varIF(self, ln):
         """ Conditional variable if/then. """

@@ -1,4 +1,3 @@
-
 # ornament.py
 
 """
@@ -96,7 +95,7 @@ def setOrnament(self, ln):
                        '3AFTER', 'FALL', 'GLISS', 'GLISSAFTER' ):
                 o['type'] = opt
             else:
-                error("%s Ornament Type: '%s' is an unknown type." % (self.name, opt))
+                error("{} Ornament Type: '{}' is an unknown type.".format(self.name, opt))
 
         elif cmd == 'COUNT':
             o['count'] = stoi(opt)
@@ -119,7 +118,7 @@ def setOrnament(self, ln):
             for v in opt.split(',', 1):
                 v = stof(v)
                 if v < -100 or v > 100:
-                    error("%s Ornament Pad: values must be -100...100, not '%s'." % (self.name, v))
+                    error("{} Ornament Pad: values must be -100...100, not '{}'.".format(self.name, v))
                 o['pad'].append(v / 100)
             if len(o['pad']) == 1:
                 o['pad'] += o['pad']
@@ -150,7 +149,7 @@ def setOrnament(self, ln):
         elif cmd == 'RSKIP':
             v = stof(opt)
             if v < 0 or v > 100:
-                error("%s Ornament Rskip: must be 0 .. 100, not '%s'." % (self.name, v))
+                error("{} Ornament Rskip: must be 0 .. 100, not '{}'.".format(self.name, v))
             o['rskip'] = v / 100
 
         elif cmd == 'RVOLUME':
@@ -177,10 +176,10 @@ def setOrnament(self, ln):
             o['offset'] = v
 
         else:
-            error("%s Ornament: '%s' is an unknown option." % (self.name, cmd))
+            error("{} Ornament: '{}' is an unknown option.".format(self.name, cmd))
 
     if neomma.MMA.debug.debug:
-        dPrint("%s Ornament: %s" % (self.name, getOrnOpts(self)))
+        dPrint("{} Ornament: {}".format(self.name, getOrnOpts(self)))
 
 
 def getNote(o, orig, scale, off):

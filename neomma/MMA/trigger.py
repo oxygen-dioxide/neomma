@@ -264,7 +264,7 @@ def setTrigger(name, ln):
             self.sticky = getTF(opt, "Trigger 'Sticky'")
 
         else:
-            error("%s Trigger '%s' is an unknown command." % (self.name, cmd))
+            error("{} Trigger '{}' is an unknown command.".format(self.name, cmd))
 
     # opts without args
     for cmd in ln:
@@ -280,7 +280,7 @@ def setTrigger(name, ln):
             trigger.mode = 'REST'
 
         else:
-            error("%s Trigger '%s' is an unknown command." % (self.name, cmd))
+            error("{} Trigger '{}' is an unknown command.".format(self.name, cmd))
 
     if neomma.MMA.debug.debug:
         neomma.MMA.debug.trackSet(self.name, "TRIGGER")

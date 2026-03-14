@@ -58,7 +58,7 @@ def getOpts(self):
     else:
         offsets = ','.join([str(a) for a in offsets])
 
-    return "Rate=%s ScaleType=%s Offsets=%s Bars=%s Beats=%s" % (rate, scale, offsets, bars, beats)
+    return "Rate={} ScaleType={} Offsets={} Bars={} Beats={}".format(rate, scale, offsets, bars, beats)
 
 def setRPitch(name, ln):
     """ Set the pitch modifer.
@@ -90,7 +90,7 @@ def setRPitch(name, ln):
         ln, opts = opt2pair(ln, toupper=True)
 
         if ln:
-            error("%s all settings must be Cmd=Opt pairs, not '%s'" % (msg, ln))
+            error("{} all settings must be Cmd=Opt pairs, not '{}'".format(msg, ln))
 
         for o,c in opts:
             if o == 'SCALETYPE' or o == 'SCALE':
@@ -105,7 +105,7 @@ def setRPitch(name, ln):
                     for a in c.split(','):
                         a = stoi(a)
                         if a < 0:
-                            error("%s Bars must be positive values, not '%s'." % (msg, a))
+                            error("{} Bars must be positive values, not '{}'.".format(msg, a))
                         if a < 1 or a > gbl.seqSize:
                             warning("%s Bars: setting of %s may be ignored since "
                             "SeqSize is %s." % (msg, a, gbl.seqSize))
@@ -124,7 +124,7 @@ def setRPitch(name, ln):
             elif o == 'RATE':
                 v = stoi(c)
                 if v < 0:
-                    error("% must be positive, not '%s'." % (msg, v))
+                    error("{: m}ust be positive, not '{}'.".format(msg, v))
                 rp.rate = v / 100.
 
             elif o == 'OFFSETS':
@@ -150,12 +150,12 @@ def setRPitch(name, ln):
                             l.append(a)
                 for a in l:
                     if a < -12 or a > 12:
-                        warning("%s value of %s is large." % (msg, a))
+                        warning("{} value of {} is large.".format(msg, a))
                         break
                 rp.offsets = l[:]
 
             else:
-                error("%s '%s' is an  unknown option." % (msg, o))
+                error("{} '{}' is an  unknown option.".format(msg, o))
 
     if not rp.offsets:
         warning("%s No offsets have been set, command will have no effect." % msg)

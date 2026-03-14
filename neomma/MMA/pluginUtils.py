@@ -48,7 +48,7 @@ except NameError:
 # # Plugin configuration            #
 # ###################################
 
-class _pluginInfo (object):
+class _pluginInfo :
     def __init__(self):
         self.NAME = None
         self.DESCRIPTION = ""

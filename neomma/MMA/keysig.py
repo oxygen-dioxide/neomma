@@ -106,7 +106,7 @@ class KeySig:
                     t = 'minor'
                 else:
                     t = 'major'
-                error("KeySigs: keysignature '%s %s' is unknown/impossible." % (kname, t))
+                error("KeySigs: keysignature '{} {}' is unknown/impossible.".format(kname, t))
             self.kName[0] = kname  # save name ('C', "Eb", etc)
 
         elif kname[0] in "01234567":
@@ -164,7 +164,7 @@ class KeySig:
     def getKeysig(self):
         """ Create a key sig string. """
 
-        return "%s %s" % (self.kName[0], ('Major', 'Minor')[self.kName[1]])
+        return "{} {}".format(self.kName[0], ('Major', 'Minor')[self.kName[1]])
 
     def setAccList(self):
         """ Create a keysig table. This table is created in __init__ and
@@ -203,9 +203,9 @@ def getTranspose(ln, err):
         
     # Simple semi-tone transpose. Just make sure it's 0 to 12
     if len(ln) == 1:
-        value = stoi(ln[0], "%s: Argument must be an integer, not '%s'" % (err, ln[0]))
+        value = stoi(ln[0], "{}: Argument must be an integer, not '{}'".format(err, ln[0]))
         if value < -12 or value > 12:
-            error("%s: %s out-of-range; must be -12..12" % (err, value))
+            error("{}: {} out-of-range; must be -12..12".format(err, value))
 
     # interval transposition uses "up/down interval
     # this needs exactly 3 args. eg: "Up Perfect 3"
@@ -223,9 +223,9 @@ def getTranspose(ln, err):
                     mcount += 1
                     match = f
             if mcount > 1:
-                error("%s: '%s' is not a unique abreviation." % (err, i))
+                error("{}: '{}' is not a unique abreviation.".format(err, i))
             if mcount < 1:
-                error("%s: '%s' is unregonized for interval notation." % (err,i))
+                error("{}: '{}' is unregonized for interval notation.".format(err,i))
             return match
 
         num2text = {"1": "UNISON",
@@ -272,15 +272,15 @@ def getTranspose(ln, err):
         elif dir == 'DOWN':
             mul = -1
         else:
-            error("%s: Interval transpose needs 'UP/DOWN' as first arg, not '%s'." % (err, dir))
+            error("{}: Interval transpose needs 'UP/DOWN' as first arg, not '{}'.".format(err, dir))
 
         # Get the interval
 
         if ln[2] in num2text:
             ln[2] = num2text[ln[2]]
             
-        interval = '%s %s' % (getAbrev(ln[1], set([ a.split()[0] for a in ttable.keys()])),
-                getAbrev(ln[2], set([ a.split()[1] for a in ttable.keys()])))
+        interval = '{} {}'.format(getAbrev(ln[1], { a.split()[0] for a in ttable.keys()}),
+                getAbrev(ln[2], { a.split()[1] for a in ttable.keys()}))
        
         if interval in ttable:
             value = ttable[interval]

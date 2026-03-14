@@ -112,7 +112,7 @@ def grooveDefine(ln):
                   % (slot, aliaslist[slot]))
 
     if neomma.MMA.debug.gvShow and slot in glist:
-        dPrint("Redefining groove %s, line %s." % (slot, gbl.lineno))
+        dPrint("Redefining groove {}, line {}.".format(slot, gbl.lineno))
 
     grooveDefineDo(slot)
 
@@ -203,7 +203,7 @@ def groove(ln):
 
             if l:
                 if neomma.MMA.debug.debug:
-                    dPrint("Attempting to load groove '%s' from '%s'." % (slot, l))
+                    dPrint("Attempting to load groove '{}' from '{}'.".format(slot, l))
 
                 reportFutureVols()
                 neomma.MMA.parse.usefile([l])
@@ -400,7 +400,7 @@ def trackGroove(name, ln):
         warning("'%s' Track Groove has no sequence. Track name error?" % name)
 
     if neomma.MMA.debug.debug:
-        dPrint("%s Groove settings restored from '%s'." % (name, slot))
+        dPrint("{} Groove settings restored from '{}'.".format(name, slot))
 
 
 def getAlias(al):
@@ -589,7 +589,7 @@ def trackCopyDo(name, ln):
                   (name, gr, gbl.QperBar, otime))
         
     if not cp in gbl.tnames:
-        error("Copy %s: Track '%s' is not defined." % (name, cp))
+        error("Copy {}: Track '{}' is not defined.".format(name, cp))
 
     cp = gbl.tnames[cp]   # point to the track object
 
@@ -625,4 +625,4 @@ def trackCopyDo(name, ln):
         self.restoreGroove(COPYGROOVE)
 
     if neomma.MMA.debug.debug:
-        dPrint("Copy: Settings duplicated from %s to %s" % (cp.name, self.name))
+        dPrint("Copy: Settings duplicated from {} to {}".format(cp.name, self.name))

@@ -116,9 +116,9 @@ def setSeqRnd(ln):
         for a in ln:
             a = a.upper()
             if not a in gbl.tnames:
-                error("SeqRnd: Track '%s' does not exist, %s" % (a, emsg))
+                error("SeqRnd: Track '{}' does not exist, {}".format(a, emsg))
             if a in seqRnd:
-                error("SeqRnd: Duplicate track '%s' specified, %s" % (a, emsg))
+                error("SeqRnd: Duplicate track '{}' specified, {}".format(a, emsg))
             seqRnd.append(a)
 
     if neomma.MMA.debug.debug:
@@ -151,7 +151,7 @@ def getweights(ln, msg):
                 tmp = [0] * gbl.seqSize
                 a = a.split(',')
                 for s in a:
-                    s = stoi(s, "%s FROM expecting integer, not '%s'." % (msg, s))
+                    s = stoi(s, "{} FROM expecting integer, not '{}'.".format(msg, s))
                     if s<1 or s> gbl.seqSize:
                         error("%s FROM must only have values "
                               "in the sequence size (%s), not '%s'."
@@ -159,7 +159,7 @@ def getweights(ln, msg):
                     tmp[s-1] +=1
 
             else:
-                error("%s %s is not a valid option." % (msg, v))
+                error("{} {} is not a valid option.".format(msg, v))
 
 
     else:
@@ -168,7 +168,7 @@ def getweights(ln, msg):
 
         tmp = []
         for n in ln:
-            n = stoi(n, "%s expecting integer, not '%s'." % (msg, n))
+            n = stoi(n, "{} expecting integer, not '{}'.".format(msg, n))
             if n < 0:
                 error("%s: Values must be 0 or greater" % msg)
             tmp.append(n)
@@ -180,7 +180,7 @@ def getweights(ln, msg):
         error("%s Using all '0's is not permitted." % msg)
     
     if neomma.MMA.debug.debug:
-        dPrint("Set %s: %s" % (msg, ' '.join([str(x) for x in tmp])))
+        dPrint("Set {}: {}".format(msg, ' '.join([str(x) for x in tmp])))
 
     return tmp
 

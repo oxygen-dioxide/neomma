@@ -3,6 +3,7 @@
 **English** | [简体中文](readme_zh.md)
 
 Neomma is a music accompaniment generator, similar to the accompaniment function found in electronic keyboards. It can generate MIDI accompaniment tracks for soloists or singers based on user input files containing chords and MMA commands. Neomma comes with a rich collection of built-in accompaniment templates, and users can also create their own templates.
+
 Neomma is based on [MMA—Musical MIDI Accompaniment](https://www.mellowood.ca/mma/).
 
 ## Installation

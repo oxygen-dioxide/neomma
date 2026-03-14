@@ -130,7 +130,7 @@ class Melody(PC):
                 try:
                     self.rootChord = neomma.MMA.chords.cdAdjust[val.upper()]
                 except KeyError:
-                    error("Voicing %s: Chord name %s not valid." % (self.name, val))
+                    error("Voicing {}: Chord name {} not valid.".format(self.name, val))
 
             else:
                 error("Voicing %s: Only valid options are 'FollowChord', 'FollowKey' and 'Root'."
@@ -298,7 +298,7 @@ class Melody(PC):
                 thisvel = stoi(newvel)
 
                 if thisvel < 0 or thisvel > 127:
-                    error("%s: Velocity must be 0..127, not '%s'." % (self.name, newvel))
+                    error("{}: Velocity must be 0..127, not '{}'.".format(self.name, newvel))
             else:
                 thisvel = velocity
 
@@ -520,10 +520,10 @@ class Melody(PC):
                         if vo in neomma.MMA.volume.vols:   # arg was a volume 'FF, 'mp', etc.
                             velocity = defaultVelocity * neomma.MMA.volume.vols[vo]
                         else:
-                            error("%s: No volume '%s'." % (self.name, vo))
+                            error("{}: No volume '{}'.".format(self.name, vo))
 
                     elif vc == 'GRACE':
-                        isgrace = stof(vo, "%s: Expecting a value, not %s." % (self.name, vo))
+                        isgrace = stof(vo, "{}: Expecting a value, not {}.".format(self.name, vo))
                         if isgrace <= 0:
                             error("%s: Offset modifier must be greater than 0."
                                   % self.name)
@@ -549,7 +549,7 @@ class Melody(PC):
                         articulation /= 100.
 
                     else:
-                        error("%s: Unknown command '%s'." % (self.name, vv))
+                        error("{}: Unknown command '{}'.".format(self.name, vv))
 
             if offset >= barEnd:
                 error("Attempt to start Solo note '%s' after end of bar" % a)
@@ -944,6 +944,6 @@ def extractSolo(ln, rptcount):
                 gbl.tnames[t].setRiff(firstSolo[:])
 
                 if neomma.MMA.debug.debug:
-                    dPrint("%s duplicated to %s for HarmonyOnly." % (trk, t))
+                    dPrint("{} duplicated to {} for HarmonyOnly.".format(trk, t))
 
     return ln

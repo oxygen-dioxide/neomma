@@ -67,7 +67,7 @@ def setChordTabs(l):
 
     global chordTabs
 
-    chordTabs = tuple(( int((x-1) * gbl.BperQ) for x in l ))
+    chordTabs = tuple( int((x-1) * gbl.BperQ) for x in l )
 
 def parseChordLine(l):
     """ Parse a line of chord symbols and determine start/end points. """
@@ -91,7 +91,7 @@ def parseChordLine(l):
             if beat < 1:
                 error("Beat after @ must be 1 or greater, not '%s'." % beat)
             if beat >= gbl.QperBar + 1:
-                error("Beat after @ must be less than %s, not '%s'." % (gbl.QperBar + 1, beat))
+                error("Beat after @ must be less than {}, not '{}'.".format(gbl.QperBar + 1, beat))
 
             # tick offset for this chord
             beat = int((beat - 1) * quarter)

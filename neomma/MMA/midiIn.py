@@ -238,7 +238,7 @@ def midiinc(ln):
                   "track must be specified")
 
     if (istart >= iend) or (istart < 0) or (iend < 0):
-        error("MidiInc: Range invalid, start=%s, end=%s" % (istart, iend))
+        error("MidiInc: Range invalid, start={}, end={}".format(istart, iend))
 
     if neomma.MMA.debug.debug:
         dPrint("MidiInc: File=%s, Volume=%s, Octave=%s, Transpose=%s, Lyric=%s, " 
@@ -254,7 +254,7 @@ def midiinc(ln):
                 o = ',sequence'
             elif printriff:
                 o += ',print'
-            msg.append("MidiInc: Channel %s-->%s%s" % (ch+1, t, o))
+            msg.append("MidiInc: Channel {}-->{}{}".format(ch+1, t, o))
         dPrint(' '.join(msg))
 
     if stretch:
@@ -296,7 +296,7 @@ def midiinc(ln):
                 disc += 1
 
         if neomma.MMA.debug.debug:
-            dPrint("MidiInc text events: %s inserted, %s out of range." % (inst, disc))
+            dPrint("MidiInc text events: {} inserted, {} out of range.".format(inst, disc))
 
     if doLyric:
         inst = 0
@@ -311,11 +311,11 @@ def midiinc(ln):
             else:
                 disc += 1
         if neomma.MMA.debug.debug:
-            dPrint("MidiInc lyric events: %s inserted, %s out of range." % (inst, disc))
+            dPrint("MidiInc lyric events: {} inserted, {} out of range.".format(inst, disc))
 
     for n, c, riffmode, printriff in channels:
         if not len(mf.events[c]):
-            warning("No data to assign from imported channel %s to track %s" % (c+1, n))
+            warning("No data to assign from imported channel {} to track {}".format(c+1, n))
 
     inst = 0
     disc = 0
@@ -414,7 +414,7 @@ def midiinc(ln):
                 txt = []
             for a in sorted(evlist):
                 if printriff and riffmode == 1:
-                    print("%s Riff %s" % (tr, evlist[a]))
+                    print("{} Riff {}".format(tr, evlist[a]))
                 elif riffmode == 2:   # sequence mode, create sequence line and push into input
                     txt.append("{%s}" % evlist[a])
                 else:   # riffmode==1, printriff=0 - just add to the riff stack
@@ -422,12 +422,12 @@ def midiinc(ln):
 
             if riffmode == 2 and txt:
                 if printriff:
-                    print("%s Sequence %s" % (tr, ' '.join(txt)))
+                    print("{} Sequence {}".format(tr, ' '.join(txt)))
                 else:
                     neomma.MMA.sequence.trackSequence(tr, txt)
 
     if neomma.MMA.debug.debug:
-            dPrint("MidiInc events: %s inserted, %s out of range." % (inst, disc))
+            dPrint("MidiInc events: {} inserted, {} out of range.".format(inst, disc))
 
 
 def createRiff(riff, tname, riffTranspose):
@@ -464,7 +464,7 @@ def createRiff(riff, tname, riffTranspose):
                 missed += 1
 
     if missed:
-        warning("MidiInc Riff: conversion missed %s notes in track %s" % (missed, tname))
+        warning("MidiInc Riff: conversion missed {} notes in track {}".format(missed, tname))
 
     # We have a list of events: [offset, duration, pitch, velocity]...
     # create yet another list with the events put into bars. Easier

@@ -116,10 +116,10 @@ class ReadFile:
         else:
             try:
                 if PY3:
-                    inpath = open(fname, 'r', encoding=gbl.encoding)
+                    inpath = open(fname, encoding=gbl.encoding)
                 else:
-                    inpath = open(fname, 'r')
-            except IOError:
+                    inpath = open(fname)
+            except OSError:
                 error("Unable to open '%s' for input" % fname)
  
         if neomma.MMA.debug.debug or neomma.MMA.debug.showFilenames:

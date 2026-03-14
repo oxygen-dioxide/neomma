@@ -130,7 +130,7 @@ class Aria(PC):
             else:   # not random, has to be an integer -4 ... 4
                 a = stoi(a, "Expecting integer value or 'r', 'rr', 'rrr' or 'rrrr'.")
                 if a < -4 or a > 4:
-                    error("%s Direction: args must be 'r' or -4 to 4, not '%s'" % (self.name, a))
+                    error("{} Direction: args must be 'r' or -4 to 4, not '{}'".format(self.name, a))
                 self.selectDir.append(a)
 
         self.restart()

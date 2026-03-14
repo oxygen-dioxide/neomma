@@ -95,19 +95,19 @@ def getRndPair(l, trk, min, max):
             n1 = int(n1)
             n2 = int(n2)
         except:
-            error("%s: Expecting integers, not '%s' or '%s'." % (trk, n1, n2))
+            error("{}: Expecting integers, not '{}' or '{}'.".format(trk, n1, n2))
     else:
         try:
             n1 = int(l)
         except:
-            error("%s: Expecting integer, not '%s'." % (trk, n1))
+            error("{}: Expecting integer, not '{}'.".format(trk, n1))
         n2 = n1 * -1
 
     if n2 < n1:
         n1, n2 = n2, n1
 
     if n1 < min or n1 > max or n2 < min or n2 > max:
-        error("%s: Max range is %s to %s." % (trk, min, max))
+        error("{}: Max range is {} to {}.".format(trk, min, max))
 
     return (n1, n2)
 
@@ -201,14 +201,14 @@ class PC:
             if n == 0:
                 n = 1
             if n <= 0 or n >= 6:
-                error("Range %s out-of-range; must be between 0..6, not %s" % (self.name, n))
+                error("Range {} out-of-range; must be between 0..6, not {}".format(self.name, n))
 
             tmp.append(n)
 
         self.chordRange = seqBump(tmp)
 
         if self.vtype not in ("SCALE", "ARPEGGIO", "ARIA"):
-            warning("%s Range: ignored in '%s' tracks" % (self.name, self.vtype))
+            warning("{} Range: ignored in '{}' tracks".format(self.name, self.vtype))
 
         if self.vtype == 'ARIA':
             self.restart()
@@ -353,15 +353,15 @@ class PC:
         if n in ("OFF", "FALSE"):
             n = 0
         else:
-            n = stoi(n, "%s LIMIT argument for must be a value, not '%s'." % (tname, n))
+            n = stoi(n, "{} LIMIT argument for must be a value, not '{}'.".format(tname, n))
 
         if n != 0 and (n < 3 or n > 8):
-            error("%s LIMIT '%s' out-of-range; must be 0 or 3 to 8" % (self.name, n))
+            error("{} LIMIT '{}' out-of-range; must be 0 or 3 to 8".format(self.name, n))
 
         self.chordLimit = [n, mode, forceLen]
 
         if self.vtype not in ("CHORD", "ARPEGGIO"):
-            warning("%s LIMIT is ignored in %s tracks" % (tname, self.vtype))
+            warning("{} LIMIT is ignored in {} tracks".format(tname, self.vtype))
 
         if neomma.MMA.debug.debug:
             neomma.MMA.debug.trackSet(tname, "Limit")
@@ -412,7 +412,7 @@ class PC:
                     (self.name, ln))
 
             if c < 0 or c > 16:
-                error("%s Channel must be 0..16, not %s" % (self.name, ln))
+                error("{} Channel must be 0..16, not {}".format(self.name, ln))
 
         if c == 10:
             if self.vtype == 'DRUM':
@@ -446,7 +446,7 @@ class PC:
                     continue
 
                 if tr.channel == c:
-                    warning("Channel %s is being reassigned to %s" % (c, tr.name))
+                    warning("Channel {} is being reassigned to {}".format(c, tr.name))
 
         self.channel = c
         if not self.name in gbl.midiAssigns[c]:
@@ -472,7 +472,7 @@ class PC:
                 self.midiPending.append(('TNAME', 0, self.name.title()))
 
         if neomma.MMA.debug.debug:
-            dPrint("MIDI Channel %s assigned to %s" % (self.channel, self.name))
+            dPrint("MIDI Channel {} assigned to {}".format(self.channel, self.name))
 
     def setChShare(self, ln):
         """ Share midi-channel setting. """
@@ -655,13 +655,13 @@ class PC:
                 for b in beats:
                     b = stof(b)
                     if b < 1:
-                        error("%s: Beats must be => 1, not '%s'" % (msg, b))
+                        error("{}: Beats must be => 1, not '{}'".format(msg, b))
                     if b >= gbl.QperBar + 1:
-                        error("%s: Beats must less than %s, not '%s'" % (msg, gbl.QperBar + 1, b))
+                        error("{}: Beats must less than {}, not '{}'".format(msg, gbl.QperBar + 1, b))
                     self.rSkipBeats.append(int((b - 1) * gbl.BperQ))
 
             else:
-                error("%s: Unknown option %s." % (msg, cmd))
+                error("{}: Unknown option {}.".format(msg, cmd))
 
         ln = lnExpand(ln, msg)
         tmp = []
@@ -722,7 +722,7 @@ class PC:
         for n in ln:
             n = n.upper()
             if not n in ('UP', 'DOWN', 'BOTH', 'RANDOM'):
-                error("Unknown %s Direction '%s'" % (self.name, n))
+                error("Unknown {} Direction '{}'".format(self.name, n))
             tmp.append(n)
 
         self.direction = seqBump(tmp)
@@ -760,7 +760,7 @@ class PC:
                 try:
                     n1 = n2 = int(n)
                 except:
-                    error("Invert %s doesn't recognize '%s'." % (self.name, n))
+                    error("Invert {} doesn't recognize '{}'.".format(self.name, n))
             else:
                 n1, n2 = getRndPair(n, msg, -10, 10)
             if n1 == 0 and n2 == 0:
@@ -837,7 +837,7 @@ class PC:
         self.spanEnd = end
 
         if neomma.MMA.debug.debug:
-            dPrint("Set %s Span to %s...%s" % (self.name, self.spanStart, self.spanEnd))
+            dPrint("Set {} Span to {}...{}".format(self.name, self.spanStart, self.spanEnd))
 
     def setSeqSize(self):
         """ Expand existing pattern list.
@@ -942,7 +942,7 @@ class PC:
             self.midiClear = neomma.MMA.mdefine.mdef.get(ln[0])
 
         if neomma.MMA.debug.debug:
-            dPrint("%s MIDIClear: %s" % (self.name, self.midiSeqFmt(self.midiClear)))
+            dPrint("{} MIDIClear: {}".format(self.name, self.midiSeqFmt(self.midiClear)))
 
     def doMidiClear(self):
         """ Reset MIDI settings. """
@@ -1037,7 +1037,7 @@ class PC:
             return ''
         ret = ''
         for i in lst:
-            ret += "%s %s 0x%02x ; " % (i[0],
+            ret += "{} {} 0x{:02x} ; ".format(i[0],
                           neomma.MMA.midiC.valueToCtrl(i[1][0]), i[1][1])
         return ret.rstrip("; ")
 
@@ -1139,7 +1139,7 @@ class PC:
             try:
                 mode, val = l.upper().split('=')
             except:
-                error("%s Mallet: each option must contain a '=', not '%s'" % (self.name, l))
+                error("{} Mallet: each option must contain a '=', not '{}'".format(self.name, l))
 
             if mode == 'RATE':
                 if val == '0' or val.upper() == 'NONE':
@@ -1156,7 +1156,7 @@ class PC:
                 self.malletDecay = val / 100.
 
             else:
-                error("%s Mallet: %s is not a option." % (self.name, mode))
+                error("{} Mallet: {} is not a option.".format(self.name, mode))
 
         if neomma.MMA.debug.debug:
             dPrint("%s Mallet Rate:%s Decay:%s" %
@@ -1226,9 +1226,9 @@ class PC:
             for s in self.accent:
                 accList.append('{')
                 for b, v, in s:
-                    accList.append("%s %s" % (1 + (b / float(gbl.BperQ)), int(v * 100)))
+                    accList.append("{} {}".format(1 + (b / float(gbl.BperQ)), int(v * 100)))
                 accList.append('}')
-            dPrint("%s Accent: %s" % (self.name, ' '.join(accList)))
+            dPrint("{} Accent: {}".format(self.name, ' '.join(accList)))
 
     def setArtic(self, ln):
         """ Set the note articuation value. """
@@ -1250,10 +1250,10 @@ class PC:
                           (self.name, a))
             else:
                 if a < 1 or a > 500:
-                    error("%s: Articulation setting must be 1..500, not %s" % (self.name, a))
+                    error("{}: Articulation setting must be 1..500, not {}".format(self.name, a))
 
                 if a > 200:
-                    warning("%s: Articulation '%s' is a large value." % (self.name, a))
+                    warning("{}: Articulation '{}' is a large value.".format(self.name, a))
 
             tmp.append(a)
             i += 1
@@ -1457,7 +1457,7 @@ class PC:
 
         if self.riff:
             if len(self.riff) > 1:
-                warning("%s sequence clear deleting %s riffs" % (self.name, len(self.riff)))
+                warning("{} sequence clear deleting {} riffs".format(self.name, len(self.riff)))
             else:
                 warning("%s sequence clear deleting unused riff" % self.name)
 
@@ -1495,7 +1495,7 @@ class PC:
         pats[slot] = self.defPatRiff(ln)
 
         if neomma.MMA.debug.pshow:
-            dPrint("%s pattern %s: %s" % (self.name.title(), redef,
+            dPrint("{} pattern {}: {}".format(self.name.title(), redef,
                   self.formatPattern(pats[slot])))
 
     def dupRiff(self, ln):
@@ -1510,7 +1510,7 @@ class PC:
 
             t = ln[1].upper()
             if not t in gbl.tnames:
-                error("%s DupRiff: Source track '%s' does not exist." % (self.name, t))
+                error("{} DupRiff: Source track '{}' does not exist.".format(self.name, t))
             
             tr = gbl.tnames[t]
             
@@ -1528,7 +1528,7 @@ class PC:
             self.riff = copy.deepcopy(tr.riff)
 
             if neomma.MMA.debug.debug:
-                dPrint("%s DupRiff copied from %s." % (self.name, t))
+                dPrint("{} DupRiff copied from {}.".format(self.name, t))
 
         else:
             if ln and ln[0].upper() == 'TO':  # Optional keyword
@@ -1560,7 +1560,7 @@ class PC:
                 tr.riff = copy.deepcopy(self.riff)
 
                 if neomma.MMA.debug.debug:
-                    dPrint("%s DupRiff copied to %s." % (self.name, tr.name))
+                    dPrint("{} DupRiff copied to {}.".format(self.name, tr.name))
 
     def setRiff(self, ln):
         """ Define and set a Riff. """
@@ -1668,7 +1668,7 @@ class PC:
                     pt = pats[nm]
 
                 else:
-                    error("%s is not an existing %s pattern" % (nm[1], nm[0].title()))
+                    error("{} is not an existing {} pattern".format(nm[1], nm[0].title()))
 
             else:
                 pt = [self.getPgroup(ev)]
@@ -1728,7 +1728,7 @@ class PC:
                 elif p.addoctave < 0:
                     f += "-" * (p.addoctave // -12)
 
-                s.append("%s %g" % (f, p.vol))
+                s.append("{} {:g}".format(f, p.vol))
 
             elif self.vtype in ('ARPEGGIO', 'SCALE', 'DRUM', 'WALK'):
                 s.append("%g " % p.vol)
@@ -1934,17 +1934,17 @@ class PC:
             elif c == 'MIDITEXT':
                 gbl.mtrks[self.channel].addText(off, v)
                 if neomma.MMA.debug.debug:
-                    dPrint("%s MidiText inserted at %s." % (self.name, off))
+                    dPrint("{} MidiText inserted at {}.".format(self.name, off))
 
             elif c == 'MIDICUE':
                 gbl.mtrks[self.channel].addCuePoint(off, v)
                 if neomma.MMA.debug.debug:
-                    dPrint("%s MidiCue inserted at %s." % (self.name, off))
+                    dPrint("{} MidiCue inserted at {}.".format(self.name, off))
 
             elif c == 'WHEEL':
                 gbl.mtrks[self.channel].addWheel(off, v)
                 if neomma.MMA.debug.debug:
-                    dPrint("%s Wheel inserted at %s." % (self.name, off))
+                    dPrint("{} Wheel inserted at {}.".format(self.name, off))
 
             else:
                 error("Unknown midi command pending. Call Bob")
@@ -2098,7 +2098,7 @@ class PC:
                 error("%sValue for %s bar offset must be 0 or greater, not '%s'" %
                       (emsg, self.name, v/gbl.BperQ+1))
             else:
-                warning("Offset in '%s' is '%s ticks' before bar start!" % (self.name, -v))
+                warning("Offset in '{}' is '{} ticks' before bar start!".format(self.name, -v))
 
         if v >= gbl.barLen:
             error("%sValue for %s bar offset must be less than %s, not '%s'." %

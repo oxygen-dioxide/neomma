@@ -210,3 +210,5 @@ __marimo__/
 
 # Custom ignore files for this project
 .mmaDB
+testtemp/
+.vscode/

@@ -142,7 +142,7 @@ def listGrooves(arg):
                             break
                     if filename.endswith(gbl.EXT):
                         filename = filename[:-len(gbl.EXT)]
-                    matching.append("%s:%s" % (filename,x))
+                    matching.append("{}:{}".format(filename,x))
                 
     for a in sorted(matching):
         print(a)
@@ -162,7 +162,7 @@ def printVars():
         else:
             error("Only system variables (with a leading _) are defined, not %s." % a)
 
-        print("$%s = %s" % (a, ex))
+        print("${} = {}".format(a, ex))
     sys.exit(0)
     
 def xoption(opt, args):
@@ -203,7 +203,7 @@ def xoption(opt, args):
             else:
                 error("Only system variables (with a leading _) are defined, not %s." % a)
 
-            print("$%s = %s" % (a, ex))
+            print("${} = {}".format(a, ex))
         sys.exit(0)
 
     elif opt == "TSPLIT":

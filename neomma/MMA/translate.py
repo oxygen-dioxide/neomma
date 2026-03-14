@@ -46,7 +46,7 @@ class Vtable:
 
         l = []
         for n in sorted(self.table.keys()):
-            l.append("%s=%s" % (n.title(), self.table[n]))
+            l.append("{}={}".format(n.title(), self.table[n]))
 
         return ' '.join(l)
 
@@ -68,7 +68,7 @@ class Vtable:
             self.table[v] = a
 
         if neomma.MMA.debug.debug:
-            dPrint("Voice Translations: %s" % ' '.join(["%s=%s" % (v, a) for v, a in opts]))
+            dPrint("Voice Translations: %s" % ' '.join(["{}={}".format(v, a) for v, a in opts]))
 
     def get(self, name):
         """ Return a translation or original. """
@@ -97,7 +97,7 @@ class Dtable:
 
         l = []
         for n in sorted(self.table.keys()):
-            l.append("%s=%s" % (neomma.MMA.midiC.valueToDrum(n),
+            l.append("{}={}".format(neomma.MMA.midiC.valueToDrum(n),
                                 neomma.MMA.midiC.valueToDrum(self.table[n])))
 
         return ' '.join(l)
@@ -130,7 +130,7 @@ class Dtable:
 
         if neomma.MMA.debug.debug:
             dPrint("TONETR Translations: %s" % 
-                  ' '.join(["%s(%s)=%s" % (v, neomma.MMA.midiC.drumToValue(v), 
+                  ' '.join(["{}({})={}".format(v, neomma.MMA.midiC.drumToValue(v), 
                                            neomma.MMA.midiC.drumToValue(a)) for v, a in opts]))
 
 
@@ -146,7 +146,7 @@ class Dtable:
                 emsg = "(Note: %s is a valid TONE name.)" % name
             else:
                 emsg = ''
-            error("Drum Tone '%s' not defined. %s" % (name, emsg))
+            error("Drum Tone '{}' not defined. {}".format(name, emsg))
 
         try:
             return self.table[v]
@@ -171,7 +171,7 @@ class VoiceVolTable:
     def retlist(self):
         l = []
         for n in sorted(self.table.keys()):
-            l.append("%s=%s" % (neomma.MMA.midiC.valueToInst(n), self.table[n]))
+            l.append("{}={}".format(neomma.MMA.midiC.valueToInst(n), self.table[n]))
 
         return ' '.join(l)
 
@@ -203,7 +203,7 @@ class VoiceVolTable:
             self.table[val] = a / 100.
 
         if neomma.MMA.debug.debug:
-            dPrint("VOICEVOLTR: %s" % ' '.join(["%s=%s" % (v.upper(), a) for v, a in opts]))
+            dPrint("VOICEVOLTR: %s" % ' '.join(["{}={}".format(v.upper(), a) for v, a in opts]))
 
     def get(self, v, vol):
         """ Return an adjusted value or original. """
@@ -225,7 +225,7 @@ class DrumVolTable:
 
         l = []
         for n in sorted(self.table.keys()):
-            l.append("%s=%s" % (neomma.MMA.midiC.valueToDrum(n), self.table[n]))
+            l.append("{}={}".format(neomma.MMA.midiC.valueToDrum(n), self.table[n]))
 
         return ' '.join(l)
 
@@ -258,7 +258,7 @@ class DrumVolTable:
 
         if neomma.MMA.debug.debug:
             dPrint("DRUMVOLTR: %s" %
-                  ' '.join(["%s=%s" % (neomma.MMA.midiC.valueToDrum(val), a) for v, a in opt]))
+                  ' '.join(["{}={}".format(neomma.MMA.midiC.valueToDrum(val), a) for v, a in opt]))
 
 
     def get(self, v, vol):

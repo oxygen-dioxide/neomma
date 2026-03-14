@@ -189,7 +189,7 @@ def parse(inpath):
             elif action in simpleFuncs:  # opps, not track func
                 error("%s is not a track function. Use global form." % action)
             else:  # opps, not any kind of func
-                error("%s is not a %s track function." % (action, name))
+                error("{} is not a {} track function.".format(action, name))
 
 
         ### Gotta be a chord data line!
@@ -497,7 +497,7 @@ def repeat(ln):
                     error("%s count must be 0 or greater" % act)
 
                 elif count > 10 and warn:
-                    warning("%s is a large value for %s" % (count, act))
+                    warning("{} is a large value for {}".format(count, act))
 
             else:
                 count = 2
@@ -644,7 +644,7 @@ def lnPrint(ln):
 def printActive(ln):
     """ Print a list of the active tracks. """
 
-    print("Active tracks, groove: %s %s" % (neomma.MMA.grooves.currentGroove, ' '.join(ln)))
+    print("Active tracks, groove: {} {}".format(neomma.MMA.grooves.currentGroove, ' '.join(ln)))
     print("%15s  %2s   %s" % ("Track", "Ch", "Events"))
     for a in sorted(gbl.tnames.keys()):
         f = gbl.tnames[a]
@@ -696,7 +696,7 @@ def trackDefPattern(name, ln):
         error("Names with a leading underscore are reserved")
 
     if not ln:
-        error("No pattern list given for '%s %s'" % (name, pattern))
+        error("No pattern list given for '{} {}'".format(name, pattern))
 
     ln = ' '.join(ln)
     gbl.tnames[name].definePattern(pattern, ln)

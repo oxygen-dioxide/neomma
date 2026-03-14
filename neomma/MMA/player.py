@@ -101,7 +101,7 @@ def playMidi(file):
         m = "default windows MIDI player"
     else:
         m = pl
-    print("Playing MIDI '%s' with %s." % (file, m))
+    print("Playing MIDI '{}' with {}.".format(file, m))
 
     if gbl.platform == "Windows":
         sh = True

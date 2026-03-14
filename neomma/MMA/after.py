@@ -120,7 +120,7 @@ def create(ln):
         afterData.append(dat)  # our stack (actually a list of events)
 
     if neomma.MMA.debug.debug:
-        dPrint("After: Added event '%s' at bar %s." % (' '.join(dat.cmd), dat.bar))
+        dPrint("After: Added event '{}' at bar {}.".format(' '.join(dat.cmd), dat.bar))
 
         
 def check(recurse=False):

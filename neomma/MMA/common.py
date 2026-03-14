@@ -55,7 +55,7 @@ def cleanPrintBuffer():
     """ Write an existing stored buffer (debug/error/warning). """
     
     if outBuffer and gbl.logFile:
-        outBuffer.insert(0, "\n**** Run log: '%s' %s" % ( gbl.infile, time.asctime()))
+        outBuffer.insert(0, "\n**** Run log: '{}' {}".format( gbl.infile, time.asctime()))
         
         opath = open(gbl.logFile, 'a')    # Open output for append
         try:
@@ -94,7 +94,7 @@ def error(msg):
     else:
         file = ''
 
-    prettyPrint("Error: %s %s %s" % (linno, file, msg))
+    prettyPrint("Error: {} {} {}".format(linno, file, msg))
 
     # Parse though the error message and check for illegal characters.
     # Report (first only) if any found.
@@ -124,7 +124,7 @@ def warning(msg):
         else:
             file = ''
 
-        prettyPrint("Warning: %s %s %s" % (linno, file, msg))
+        prettyPrint("Warning: {} {} {}".format(linno, file, msg))
 
 
 def dPrint(msg):
@@ -267,7 +267,7 @@ def lnExpand(ln, msg):
     
     if len(ln) > gbl.seqSize:
         if not gbl.inAllGrooves:
-            warning("%s list truncated to %s patterns" % (msg, gbl.seqSize) )
+            warning("{} list truncated to {} patterns".format(msg, gbl.seqSize) )
         ln = ln[:gbl.seqSize]
 
     last = None
@@ -352,5 +352,5 @@ def getTF(option, e=''):
 
     if e:
         e+=": "
-    error("%sRequires True or False, not '%s'." % (e,option))
+    error("{}Requires True or False, not '{}'.".format(e,option))
          

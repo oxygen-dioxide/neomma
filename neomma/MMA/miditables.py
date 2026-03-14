@@ -1,4 +1,3 @@
-
 # miditables.py
 
 """
@@ -56,7 +55,7 @@ drumNames = {
     81: 'OpenTriangle', 82: 'Shaker', 83: 'JingleBell',
     84: 'Castanets', 85: 'MuteSurdo', 86: 'OpenSurdo'}
 
-drumInx = dict((v.upper(), k) for (k, v) in drumNames.items())
+drumInx = {v.upper(): k for (k, v) in drumNames.items()}
 
 # Standard GM voice names.
 
@@ -106,7 +105,7 @@ voiceNames = {
     126: 'Applause/Noise', 127: 'GunShot',
     NONETONE: 'None'}
 
-voiceInx = dict((v.upper(), k) for (k, v) in voiceNames.items())
+voiceInx = {v.upper(): k for (k, v) in voiceNames.items()}
 # fix an unfortunate spelling error.
 voiceInx['DISTORTONGUITAR']=voiceInx['DISTORTIONGUITAR']
 
@@ -163,7 +162,7 @@ ctrlNames = {
     123: 'AllNotesOff', 124: 'OmniOff', 125: 'OmniOn',
     126: 'PolyOff', 127: 'PolyOn'}
 
-ctrlInx = dict((v.upper(), k) for (k, v) in ctrlNames.items())
+ctrlInx = {v.upper(): k for (k, v) in ctrlNames.items()}
 
 # These are the names of the drumkits. Those marked
 # with 'RS' are Roland standard, others are known to

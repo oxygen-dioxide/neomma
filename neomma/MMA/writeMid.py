@@ -56,7 +56,7 @@ def createMIDI(outfile):
     
     try:
         out = open(outfile, 'wb')
-    except IOError:
+    except OSError:
         error("Can't open file '%s' for writing" % outfile)
 
     neomma.MMA.midi.writeTracks(out)
@@ -66,7 +66,7 @@ def createOutName(name, subname):
     if name.endswith(".mid"):
         name = name.replace(".mid", "-%s.mid" % subname)
     else:
-        name = "%s-%s" % (name, subname)
+        name = "{}-{}".format(name, subname)
     return name
 
    
@@ -142,10 +142,10 @@ def maker():
     if (not outfile.startswith('/')) and gbl.outPath \
             and not gbl.outfile and not gbl.playFile:
         if gbl.outPath[0] in '.\\/':
-            outfile = "%s/%s" % (gbl.outPath, outfile)
+            outfile = "{}/{}".format(gbl.outPath, outfile)
         else:
             head, tail = os.path.split(outfile)
-            outfile = "%s/%s/%s" % (head, gbl.outPath, tail)
+            outfile = "{}/{}/{}".format(head, gbl.outPath, tail)
 
     fileExist = os.path.exists(outfile)
 

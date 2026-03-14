@@ -99,7 +99,7 @@ class TimeSig:
         if not self.lastsig[0]:
             return "Not Set"
         n, d = self.lastsig
-        return "%s/%s" % (n, ['1', '2', '4', '8',  '16', '32', '64'][d] )
+        return "{}/{}".format(n, ['1', '2', '4', '8',  '16', '32', '64'][d] )
 
 
 timeSig = TimeSig()  # singleton 

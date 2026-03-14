@@ -60,9 +60,9 @@ def init():
         """
         for t in paths:
             if not os.path.exists(t):
-                warning("%s '%s' does not exist." % (msg, t))
+                warning("{} '{}' does not exist.".format(msg, t))
             elif not os.path.isdir(t):
-                warning("%s '%s' is not a directory." % (msg, t))
+                warning("{} '{}' is not a directory.".format(msg, t))
 
     # set libpath
     t = safeEnv('MMA_LIBPATH')

@@ -3,10 +3,13 @@ authors = [{ name = "oxygendioxide", email = "oxygen-dioxide@outlook.com" }]
 license-files = ["LICENSE*"]
 requires-python = ">=3.0,<3.15"
 classifiers = []
-dependencies = []
+dependencies = ["mido"]
 name = "neomma"
 dynamic = ["version"]
 description = "Musical MIDI Accompaniment"
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-console-scripts", "coverage"]
 
 [project.urls]
 repository = "https://github.com/oxygen-dioxide/neomma"

@@ -1,4 +1,3 @@
-
 # alloc.py
 
 """
@@ -83,7 +82,7 @@ def trackAlloc(name, err):
         f = trkClasses[base]
     except KeyError:
         if err:
-            error("There is no track class '%s' for trackname '%s'" % (base, name))
+            error("There is no track class '{}' for trackname '{}'".format(base, name))
         else:
             return
 

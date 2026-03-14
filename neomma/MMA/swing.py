@@ -223,7 +223,7 @@ def swingSolo(notes):
             # check that all notes are 8ths by comparing a set of all
             # the durations in both offsets with set([len8])
 
-            if set([nev.duration for nev in notes[beat0] + notes[beat1]]) == set([len8]):
+            if {nev.duration for nev in notes[beat0] + notes[beat1]} == {len8}:
 
                 # lengthen notes on-the-beat
 
