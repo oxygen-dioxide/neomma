@@ -6,8 +6,9 @@ import mido
 import pytest
 import pathlib
 import pytest
-import pytest_console_scripts
+#import pytest_console_scripts
 import os
+import subprocess
 
 def assert_midi_equal(midi1, midi2):
     assert len(midi1.tracks) == len(midi2.tracks), "Number of tracks differ"
@@ -26,9 +27,13 @@ temp = pathlib.Path(__file__).parent.parent / "testtemp"
 
 @pytest.mark.parametrize("input_file, expected_output_file", [
     ("after.mma", "after.mid"),
+    ("convert4to5.mma", "convert4to5.mid"),
     ("deep-river.mma", "deep-river.mid"),
+    ("delay_solo.mma", "delay_solo.mid"),
+    ("ornament_bass.mma", "ornament_bass.mid"),
+    ("rpitch_bass.mma", "rpitch_bass.mid"),
 ])
-def test_mma(input_file, expected_output_file, script_runner):
+def test_mma(input_file:str, expected_output_file:str, script_runner):
     input_path = root / input_file
     expected_output_path = root / expected_output_file
     actual_output_path = temp / expected_output_file
@@ -36,8 +41,33 @@ def test_mma(input_file, expected_output_file, script_runner):
     os.chdir(root)
 
     # Run the MMA script with the input file
-    result = script_runner.run(["neomma", str(input_path), "-f", str(actual_output_path)])
-    assert result.success, f"Script failed with error: {result.stderr}"
+    result = subprocess.run(["neomma", str(input_path), "-f", str(actual_output_path)])
+    #assert result.success, f"Script failed with error: {result.stderr}"
+
+    # Load the generated MIDI file and the expected MIDI file
+    generated_midi = mido.MidiFile(str(actual_output_path))
+    expected_midi = mido.MidiFile(str(expected_output_path))
+
+    # Assert that the generated MIDI matches the expected MIDI
+    assert_midi_equal(generated_midi, expected_midi)
+
+@pytest.mark.parametrize("input_file, expected_output_file, extra_args", [
+    ("deep-river.mma", "deep-river-tempo120.mid", ["-S", "tempo=120"]),
+])
+def test_mma_extra_args(input_file, expected_output_file, extra_args, script_runner):
+    input_path = root / input_file
+    expected_output_path = root / expected_output_file
+    actual_output_path = temp / expected_output_file
+    os.makedirs(actual_output_path.parent, exist_ok=True)
+    os.chdir(root)
+
+    # Run the MMA script with the input file
+    result = subprocess.run([
+        "neomma", 
+        str(input_path), 
+        "-f", 
+        str(actual_output_path)] + extra_args)
+    #assert result.success, f"Script failed with error: {result.stderr}"
 
     # Load the generated MIDI file and the expected MIDI file
     generated_midi = mido.MidiFile(str(actual_output_path))

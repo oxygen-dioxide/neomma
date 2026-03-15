@@ -80,8 +80,8 @@ def setDebug(ln):
     """ Set debugging options dynamically. """
 
     # This needs to be here to avoid circular import problem
-    from MMA.common import opt2pair
-    from MMA.common import dPrint
+    from neomma.MMA.common import opt2pair
+    from neomma.MMA.common import dPrint
     
     global Ldebug, debug, LshowFilenames, showFilenames, \
         Lpshow, pshow, Lseqshow, seqshow, Lshowrun, showrun, \
@@ -94,7 +94,7 @@ def setDebug(ln):
            "RUNTIME, WARNINGS, EXPAND, ROMAN or PLECTRUM.")
 
     if not len(ln):
-        from MMA.common import error
+        from neomma.MMA.common import error
         error(msg)
 
     # save current flags
