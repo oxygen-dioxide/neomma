@@ -1,8 +1,8 @@
 # Demo for using the data plugin
 
 # We import the plugin utilities
-from MMA import pluginUtils as pu
-import MMA.gbl as gbl
+from neomma.MMA import pluginUtils as pu
+import neomma.MMA.gbl as gbl
 
 def dataRun(ln):
     """ The actual plugin code. Note that it is called 

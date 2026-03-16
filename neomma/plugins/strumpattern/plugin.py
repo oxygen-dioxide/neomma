@@ -28,7 +28,7 @@ Bob van der Poel <bob@mellowood.ca>
 # ###################################
 
 # We import the plugin utilities
-from MMA import pluginUtils as pu
+from neomma.MMA import pluginUtils as pu
 
 
 # ###################################

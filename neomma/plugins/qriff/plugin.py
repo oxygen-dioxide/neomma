@@ -7,20 +7,20 @@
 
 # We import the plugin utilities
 
-from MMA import pluginUtils as pu
+from neomma.MMA import pluginUtils as pu
 
 # and some other things we'll need
 
-import MMA.alloc
-import MMA.gbl
+import neomma.MMA.alloc
+import neomma.MMA.gbl
 import re
 
 # ###################################
 # # Documentation and arguments     #
 # ###################################
 
-# Minimum MMA required version.
-pu.setMinMMAVersion(15, 12)
+# Minimum neomma.MMA required version.
+pu.setMinneomma.MMAVersion(15, 12)
 
 # A short plugin description.
 pu.setDescription("Separate quarter tone solo riff lines into 3 parts.")
@@ -71,12 +71,12 @@ def setTuning(trk):
 
     if not tuningSet:
         
-        if not fTrack.upper() in MMA.gbl.tnames:
-            MMA.alloc.trackAlloc('%s' % fTrack, 0)
+        if not fTrack.upper() in neomma.MMA.gbl.tnames:
+            neomma.MMA.alloc.trackAlloc('%s' % fTrack, 0)
             pu.addCommand("%s Copy %s" % (fTrack, trk))
 
-        if not sTrack.upper() in MMA.gbl.tnames:
-            MMA.alloc.trackAlloc('%s' % sTrack, 0)
+        if not sTrack.upper() in neomma.MMA.gbl.tnames:
+            neomma.MMA.alloc.trackAlloc('%s' % sTrack, 0)
             pu.addCommand("%s Copy %s" % (sTrack, trk))
 
         pu.addCommand( '%s MidiNote PB 0 -2048' % fTrack)
@@ -142,7 +142,7 @@ def trackRun(tr, line):
     pu.addCommand( ''.join(out3) )
 
 
-    if MMA.debug.debug:
+    if neomma.MMA.debug.debug:
         print(''.join(out1));
         print(''.join(out2));
         print(''.join(out3));

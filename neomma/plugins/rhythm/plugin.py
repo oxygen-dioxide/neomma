@@ -1,7 +1,7 @@
 # We import the plugin utilities
-from MMA import pluginUtils as pu
-from MMA import parse
-from MMA import macro
+from neomma.MMA import pluginUtils as pu
+from neomma.MMA import parse
+from neomma.MMA import macro
 import re
 
 # A short plugin description.

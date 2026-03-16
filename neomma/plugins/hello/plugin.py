@@ -3,7 +3,7 @@
 # This import will access the global variables in MMA.
 # You can BUT SHOULD NOT change things. 
 
-import MMA.gbl as gbl
+import neomma.MMA.gbl as gbl
 
 # Things outside of functions are done just one when the
 # module is loaded.

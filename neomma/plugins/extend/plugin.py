@@ -12,9 +12,9 @@
 #   22 E9
 #   
 
-import MMA.gbl as gbl
-import MMA.timesig
-from MMA.common import *
+import neomma.MMA.gbl as gbl
+import neomma.MMA.timesig
+from neomma.MMA.common import *
 
 def run(ln):
     barLen = None     # We do need to fill this value
@@ -86,11 +86,11 @@ def run(ln):
     if len2<1:
         len2=barLen
 
-    # Generate input for MMA. 
+    # Generate input for neomma.MMA. 
     ret = []
     
     if timesig:
-        oldtime=MMA.timesig.timeSig.getAscii()
+        oldtime=neomma.MMA.timesig.timeSig.getAscii()
         ret.append(["Timesig", timesig])
 
     if len2 <= gbl.QperBar:
