@@ -31,8 +31,6 @@ from struct import pack, unpack
 from neomma.MMA.common import *
 from . import gbl
 
-PY3 = sys.version_info[0] == 3
-
 # this is for the join() in packBtyes(). By predefining
 # we only call the bytearry() function once. Yes, it is quicker.
 BCAT = bytearray(b'')
@@ -72,10 +70,7 @@ def packBytes(*args):
         # In py3 this will handle str. The else will not be done
         # but we'll leave it just in case :)
         elif ty == str:
-            if PY3:
-                ret.append(pack('%ss' % len(a), a.encode(encoding=gbl.encoding)))
-            else:
-                ret.append(a)
+            ret.append(pack('%ss' % len(a), a.encode(encoding=gbl.encoding)))
 
         else:
             error("Call Bob: Unknown type '%s' for midi string encode." % ty)

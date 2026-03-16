@@ -39,13 +39,13 @@ import neomma.MMA.debug
 # A buffer for various debug/warning/error messages
 # this is only used if MMA_LOGFILE has been set. The
 # buffer is dumped at exit.
-outBuffer = []
+outBuffer: list[str] = []
 
 # having the term width is nice for pretty print error/warning
 from neomma.MMA.termsize import getTerminalSize
 termwidth = getTerminalSize()[0]-1
 
-def bufferPrint(a):
+def bufferPrint(a:str):
     if gbl.logFile:
         outBuffer.append(a)
     else:
@@ -66,7 +66,7 @@ def cleanPrintBuffer():
         opath.write('\n'.join(outBuffer))   # dump entire buffer
         opath.close()                       # this will release lock as well
 
-def prettyPrint(msg):
+def prettyPrint(msg:str|list[str]):
     """ Simple formatter for error/warning messages."""
 
     if isinstance(msg, list):
@@ -77,7 +77,7 @@ def prettyPrint(msg):
     except:
         bufferPrint(msg)
 
-def error(msg):
+def error(msg:str):
     """ Print an error message and exit.
 
         If the global line number is >=0 then print the line number
@@ -99,8 +99,8 @@ def error(msg):
     # Parse though the error message and check for illegal characters.
     # Report (first only) if any found.
 
-    for a in msg:
-        a = ord(a)
+    for ch in msg:
+        a = ord(ch)
         if a < 0x20 or a >= 0x80:
             bufferPrint("Corrupt input file? Illegal character 'x%02x' found." % a)
             break
@@ -110,7 +110,7 @@ def error(msg):
     
     sys.exit(1)
 
-def warning(msg):
+def warning(msg:str):
     """ Print warning message and return. """
 
     if not neomma.MMA.debug.noWarn:
@@ -163,7 +163,7 @@ def getOffset(ticks, ranLow=None, ranHigh=None):
     return p
 
 
-def stoi(s, errmsg=None):
+def stoi(s:str, errmsg:str|None=None) -> int:
     """ string to integer. """
 
     try:
@@ -173,9 +173,10 @@ def stoi(s, errmsg=None):
             error(errmsg)
         else:
             error("Expecting integer value, not %s" % s)
+        return 0
 
 
-def stof(s, errmsg=None):
+def stof(s:str, errmsg:str|None=None) -> float:
     """ String to floating point. """
 
     try:
@@ -188,8 +189,9 @@ def stof(s, errmsg=None):
                 error(errmsg)
             else:
                 error("Expecting a  value, not %s" % s)
+        return 0.0
 
-def stotick(s, default='B', emsg=None):
+def stotick(s:str, default:str='B', errmsg:str|None=None) -> int:
     """ Convert string to midi ticks. Will apply default M, B, or T if
         not given to string ending in a digit.
     """
@@ -209,7 +211,7 @@ def stotick(s, default='B', emsg=None):
 
     # convert digits to value
     try:
-        v = stof(s, emsg)
+        v = stof(s, errmsg)
     except ValueError:
         if errmsg is not None:
             error(errmsg)
@@ -219,7 +221,7 @@ def stotick(s, default='B', emsg=None):
     return int(v * mult)  # return ticks as int
 
 
-def pextract(s, open, close, onlyone=None, insert=''):
+def pextract(s:str, open:str, close:str, onlyone=None, insert:str=''):
     """ Extract a parenthesized set of substrings.
 
         s        - original string
@@ -262,7 +264,7 @@ def seqBump(l):
     return l[:gbl.seqSize]
 
 
-def lnExpand(ln, msg):
+def lnExpand(ln:list[str], msg:str) -> list[str]:
     """ Validate and expand a list passed to a set command. """
     
     if len(ln) > gbl.seqSize:
@@ -284,7 +286,11 @@ def lnExpand(ln, msg):
     return ln
 
 
-def opt2pair(ln, toupper=False, notoptstop=False):
+def opt2pair(
+        ln:list[str], 
+        toupper:bool=False, 
+        notoptstop:bool=False
+    ) -> tuple[list[str], list[tuple[str, str]]]:
     """ Parse a list of options. Separate out "=" option pairs.
 
         Returns:
@@ -297,8 +303,8 @@ def opt2pair(ln, toupper=False, notoptstop=False):
                 word which is not a xx=yy pair.
     """
 
-    opts = []
-    newln = []
+    opts: list[tuple[str, str]] = []
+    newln: list[str] = []
 
     # Permit the user to use stuff like "Beats = 1 , 3, 4" or "opt1 = 44 opt2 = 99"
     # So, join the line with space delminters, then strip out spaces before/after
@@ -309,19 +315,19 @@ def opt2pair(ln, toupper=False, notoptstop=False):
     #     Beats = $Macro1 , $Macro2
     # since macros need to have spaces around them.
 
-    ln = ' '.join(ln)
-    ln = ln.replace('  ', ' ')  # strip double spaces
-    ln = ln.replace('= ', '=')  # spaces after/before =
-    ln = ln.replace(' =', '=')
-    ln = ln.replace(', ', ',')  # spaces after/before ,
-    ln = ln.replace(' ,', ',')
-    ln = ln.split()
+    ln = ' '.join(ln)\
+        .replace('  ', ' ')\
+        .replace('= ', '=')\
+        .replace(' =', '=')\
+        .replace(', ', ',')\
+        .replace(' ,', ',')\
+        .split()\
 
-    for v, a in enumerate(ln):
+    for i, a in enumerate(ln):
         if toupper:
             a = a.upper()
         if a == '--':   # Just in case user needs opt=val passed
-            newln.extend(ln[v+1:])  # Drop/ignore '--'
+            newln.extend(ln[i+1:])  # Drop/ignore '--'
             break
         try:
             o, v = a.split('=', 1)
@@ -329,13 +335,13 @@ def opt2pair(ln, toupper=False, notoptstop=False):
         except ValueError:   # this means no '=', split() failed
             newln.append(a)
             if notoptstop:
-                newln.extend(ln[v+1:])
+                newln.extend(ln[i+1:])
                 break
 
     return newln, opts
 
 
-def getTF(option, e=''):
+def getTF(option:str, e:str='') -> bool:
     """ Test the STRING option for a true/false value and return the boolean
          True, On, 1 -- True
          False, Off, 0 -- False
@@ -353,4 +359,5 @@ def getTF(option, e=''):
     if e:
         e+=": "
     error("{}Requires True or False, not '{}'.".format(e,option))
+    return False  # Added to satisfy function return type
          

@@ -28,10 +28,8 @@ from . import gbl
 from   neomma.MMA.common import *
 import neomma.MMA.debug
 
-PY3 = sys.version_info[0] == 3
 
-
-def fixfname(f):
+def fixfname(f:str) -> str:
     """ Convert embedded space characters in filename to real spaces and
         expand ~ for user home directory.
 
@@ -46,7 +44,7 @@ def fixfname(f):
     return os.path.expanduser(f)
 
 
-def locFile(name, lib):
+def locFile(name:str, lib:str) -> str | None:
     """ Locate a filename.
 
         This checks, in order:
@@ -115,10 +113,7 @@ class ReadFile:
             inpath = sys.stdin
         else:
             try:
-                if PY3:
-                    inpath = open(fname, encoding=gbl.encoding)
-                else:
-                    inpath = open(fname)
+                inpath = open(fname, encoding=gbl.encoding)
             except OSError:
                 error("Unable to open '%s' for input" % fname)
  

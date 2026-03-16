@@ -33,3 +33,4 @@ The MIDI file will be output to the same directory as the MMA file.
 This repository aims to modernize MMA. Currently, Neomma differs from the original MMA in the following ways:
 
 - Supports installation via pip
+- Only supports python 3.10 and above

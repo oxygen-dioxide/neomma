@@ -34,7 +34,7 @@ import re
     are (most likely) sounded with a maximum velocity.
 """
 
-vols = {'OFF': 0.00, 'PPPP': 0.05, 'PPP': 0.10,
+vols: dict[str, float] = {'OFF': 0.00, 'PPPP': 0.05, 'PPP': 0.10,
         'PP': 0.25, 'P': 0.40, 'MP': 0.70,
         'M': 1.00, 'MF': 1.10, 'F': 1.30,
         'FF': 1.60, 'FFF': 1.80, 'FFFF': 2.00}
@@ -44,12 +44,12 @@ nextVolume = None         # main parser sets this to the next volume
                           # when future volumes are stacked. It's used
                           # by the volume adjust to smooth out (de)crescendos.
 lastVolume = volume
-futureVol = []
+futureVol: list[float] = []
 vTRatio = .6
 vMRatio = 1 - vTRatio
 
 
-def adjvolume(ln):
+def adjvolume(ln: list[str]):
     """ Adjust the ratio used in the volume table and track/global ratio. """
 
     global vols, vTRatio, vMRatio
@@ -57,14 +57,14 @@ def adjvolume(ln):
     if not ln:
         error("Use: AdjustVolume DYN=RATIO [..]")
 
-    notopt, ln = opt2pair(ln, toupper=True)
+    notopt, opts = opt2pair(ln, toupper=True)
 
     if notopt:
         error("ADJUSTVOLUME: Expecting DYNAMIC=RATIO pairs")
 
-    for v, r in ln:
+    for v, opt_str in opts:
         if v == 'RATIO':
-            r = stof(r)
+            r = stof(opt_str)
 
             if r < 0 or r > 100:
                 error("ADJUSTVOLUME RATIO: value must be 0 to 100")
@@ -73,7 +73,7 @@ def adjvolume(ln):
             vMRatio = 1 - vTRatio
 
         elif v in vols:
-            vols[v] = calcVolume(r, vols[v])
+            vols[v] = calcVolume(opt_str, vols[v])
 
         else:
             error("ADJUSTVOLUME DYNAMIC: '%s' for AdjustVolume is unknown" % v)
@@ -134,7 +134,7 @@ def calcVolume(new, old):
 
     return v
 
-def setVolume(ln):
+def setVolume(ln: list[str]):
     """ Set master volume. """
 
     global volume, lastVolume, futureVol
@@ -219,7 +219,7 @@ def setCrescendo(dir, ln):
 # Used by both the 2 funcs above and from TRACK.setCresc()
 
 
-def fvolume(dir, startvol, ln):
+def fvolume(dir: int, startvol: float, ln: list[str]) -> list[float]:
     """ Create a list of future vols. Called by (De)Cresc. """
 
     # Get destination volume
@@ -257,7 +257,7 @@ def fvolume(dir, startvol, ln):
     return volList
 
 
-def calcMidiVolume14(s):
+def calcMidiVolume14(s:str) -> int:
     """ Convert a mnemonic volume to value for MIDI channel.
         This function uses a 14 bit (0..0x3fff). See below for
         the 7 bit version.
@@ -277,7 +277,7 @@ def calcMidiVolume14(s):
     return v
 
 
-def calcMidiVolume(s):
+def calcMidiVolume(s:str) -> int:
     """ Convert a mnemonic volume to value for MIDI channel. """
 
     s = s.upper()

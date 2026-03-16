@@ -1,9 +1,9 @@
 [project]
 authors = [{ name = "oxygendioxide", email = "oxygen-dioxide@outlook.com" }]
 license-files = ["LICENSE*"]
-requires-python = ">=3.0,<3.15"
+requires-python = ">=3.10,<3.15"
 classifiers = []
-dependencies = ["mido"]
+dependencies = ["mido", "py-linq"]
 name = "neomma"
 dynamic = ["version"]
 description = "Musical MIDI Accompaniment"

@@ -167,7 +167,7 @@ ctrlInx = {v.upper(): k for (k, v) in ctrlNames.items()}
 # These are the names of the drumkits. Those marked
 # with 'RS' are Roland standard, others are known to
 # Yamaha and Casio. Duplicate names are okay.
-drumKits = {
+drumKits:dict[str,int] = {
     'STANDARD'   :  0,   # RS
     'STANDARD2'  :  1,
     'ROOM'       :  8,   # RS

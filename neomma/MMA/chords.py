@@ -23,12 +23,14 @@ Bob van der Poel <bob@mellowood.ca>
 """
 
 from neomma.MMA.common import *
-from neomma.MMA.chordtable import chordlist
+from neomma.MMA.chordtable import Chord, chordlist
 import neomma.MMA.roman
 from neomma.MMA.keysig import keySig  # needed for voicing mode keycenter()
 import neomma.MMA.debug
 
 import copy
+
+from py_linq.py_linq import Enumerable
 
 slashPrinted = []  # for slash chord error message
 
@@ -36,7 +38,7 @@ slashPrinted = []  # for slash chord error message
 # Convert a roman numeral chord to standard notation
 
 
-def defChord(ln):
+def defChord(ln:list[str]):
     """ Add a new chord type to the chords{} dict. """
 
     emsg = "DefChord needs NAME (NOTES) (SCALE)"
@@ -61,33 +63,40 @@ def defChord(ln):
     if ln[0] or len(ln[1]) != 2:
         error(emsg)
 
-    notes = ln[1][0].split(',')
-    if len(notes) < 2 or len(notes) > 8:
-        error("There must be 2..8 notes in a chord, not '%s'" % len(notes))
+    def parse_note(v:str) -> int:
+        v_value = stoi(v, "Note offsets in chord must be integers, not '%s'" % v)
+        if v_value < 0 or v_value > 24:
+            error("Note offsets in chord must be 0..24, not '%s'" % v_value)
+        return v_value
 
-    for i, v in enumerate(notes):
-        v = stoi(v, "Note offsets in chord must be integers, not '%s'" % v)
-        if v < 0 or v > 24:
-            error("Note offsets in chord must be 0..24, not '%s'" % v)
-        notes[i] = v
+    notestrs = ln[1][0].split(',')
+    if len(notestrs) < 2 or len(notestrs) > 8:
+        error("There must be 2..8 notes in a chord, not '%s'" % len(notestrs))
+    notes = Enumerable(notestrs)\
+        .select(parse_note)\
+        .to_list()
+    
+    def parse_scale(v:str) -> int:
+        v_value = stoi(v, "Scale offsets in chord must be integers, not '%s'" % v)
+        if v_value < 0 or v_value > 24:
+            error("Scale offsets in chord must be 0..24, not '%s'" % v_value)
+        return v_value
 
-    scale = ln[1][1].split(',')
-    if len(scale) != 7:
-        error("There must be 7 offsets in chord scale, not '%s'" % len(scale))
+    scalestrs = ln[1][1].split(',')
+    if len(scalestrs) != 7:
+        error("There must be 7 offsets in chord scale, not '%s'" % len(scalestrs))
 
-    for i, v in enumerate(scale):
-        v = stoi(v, "Scale offsets in chord must be integers, not '%s'" % v)
-        if v < 0 or v > 24:
-            error("Scale offsets in chord must be 0..24, not '%s'" % v)
-        scale[i] = v
+    scale = Enumerable(scalestrs)\
+        .select(parse_scale)\
+        .to_list()
 
-    chordlist[name] = (notes, scale, "User Defined")
+    chordlist[name] = Chord(notes, scale, "User Defined")
 
     if neomma.MMA.debug.debug:
         dPrint("ChordType '{}', {}".format(name, chordlist[name]))
 
 
-def printChord(ln):
+def printChord(ln:list[str]):
     """ Display the note/scale/def for chord(s). """
 
     for c in ln:
@@ -125,14 +134,14 @@ cdAdjust = {
 ### DON'T WRITE TO THIS. IT'S USED TO RESTORE ORIGINAL!
 cdAdjustOrig = copy.copy(cdAdjust)
 
-def chordAdjust(ln):
+def chordAdjust(ln:list[str]):
     """ Adjust the selected chord point(s) up/down one octave. """
 
     global cdAdjust
 
-    args, ln = opt2pair(ln)
+    args, opts = opt2pair(ln)
 
-    if not ln and not args:
+    if not opts and not args:
         error("ChordAdjust: Needs at least one argument.")
 
     for a in args:
@@ -143,8 +152,8 @@ def chordAdjust(ln):
             error("ChordAdjust: %s is not a valid argument." % a)
 
 
-    for p, octave in ln:
-        octave = stoi(octave, "ChordAdjust: expecting integer (-1, 0 or 1), not '%s'" % octave)
+    for p, octave_str in opts:
+        octave = stoi(octave_str, "ChordAdjust: expecting integer (-1, 0 or 1), not '%s'" % octave_str)
         if octave not in (-1, 0, 1):
             error("ChordAdjust: '%s' is not a valid octave. Use 1, 0 or -1" % octave)
 
@@ -230,7 +239,7 @@ class ChordNotes:
     ### Functions ###
     #################
 
-    def __init__(self, name):
+    def __init__(self, name:str):
         """ Create a chord object. Pass the chord name as the only arg.
 
         NOTE: Chord names ARE case-sensitive!
@@ -263,7 +272,8 @@ class ChordNotes:
         if name == 'z':
             self.tonic = self.chordType = None
             self.noteListLen = 0
-            self.notesList = self.bnoteList = []
+            self.notesList = []
+            self.bnoteList = ()
             return
 
         if '|' in name:
@@ -276,16 +286,16 @@ class ChordNotes:
             error("You cannot use both an inversion and a slash in the same chord")
 
         if ':' in name:
-            name, barre = name.split(':', 1)
-            barre = stoi(barre, "Expecting integer after ':'")
+            name, barre_str = name.split(':', 1)
+            barre = stoi(barre_str, "Expecting integer after ':'")
             if barre < -127 or barre > 127:
                 error("Chord barres limited to -127 to 127 (more than about +/-20 is silly)")
         else:
             barre = 0
 
         if '>' in name:
-            name, inversion = name.split('>', 1)
-            inversion = stoi(inversion, "Expecting integer after '>'")
+            name, inversion_str = name.split('>', 1)
+            inversion = stoi(inversion_str, "Expecting integer after '>'")
             if inversion < -5 or inversion > 5:
                 error("Chord inversions limited to -5 to 5 (more seems silly)")
 

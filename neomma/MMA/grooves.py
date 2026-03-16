@@ -162,7 +162,7 @@ def grooveAlias(ln):
     aliaslist[a] = g
 
 
-def groove(ln):
+def groove(ln:list[str]):
     """ Select a previously defined groove. """
 
     global groovesList, groovesCount, lastGroove, currentGroove

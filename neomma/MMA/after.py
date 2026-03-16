@@ -40,10 +40,10 @@ class AfterData:
         self.id = None         # a name used by the remove function
         self.finished = False  # flag. If true this event is done
         
-afterData = []          # stack of after events
+afterData: list[AfterData] = []          # stack of after events
 afterDataFinished = 0   # counter of dead events
 
-def create(ln):
+def create(ln:list[str]):
     """ Set an After event. """
 
     global afterData, afterDataFinished 
@@ -52,20 +52,20 @@ def create(ln):
     selected = []
 
     ln, opts = opt2pair(ln, toupper=False, notoptstop=True)
-    for cmd, opt in opts:
+    for cmd, opt_str in opts:
         cmd = cmd.upper()
         if cmd == 'BAR':
-            if opt.upper() == 'EOF':
+            if opt_str.upper() == 'EOF':
                 dat.bar = 'EOF'
             else:
-                opt = stoi(opt)
+                opt = stoi(opt_str)
                 if opt < 1:
                     error("After: Destination bar must be positive, not '%s'." % opt)
                     dat.bar = opt
             selected.append('Bar')
                 
         elif cmd == 'REPEAT':
-            opt = stoi(opt)
+            opt = stoi(opt_str)
             if opt < 1:
                 error("After: Repeat value must be positive, not '%s'." % opt)
             dat.repeat = opt
@@ -73,7 +73,7 @@ def create(ln):
             selected.append('Repeat')
 
         elif cmd == 'COUNT':
-            opt = stoi(opt)
+            opt = stoi(opt_str)
             if opt < 1:
                 error("After: Count must be positive, not '%s'." % opt)
             dat.count = opt
@@ -81,12 +81,12 @@ def create(ln):
             selected.append('Count')
 
         elif cmd == 'ID':         # set a string id for this event. 
-            dat.id = opt.upper()  # duplicates are fine
+            dat.id = opt_str.upper()  # duplicates are fine
 
         elif cmd == 'REMOVE':  # delete all saved items with id==opt.
             t = False
             for a in afterData:
-                if not a.finished and a.id == opt.upper():
+                if not a.finished and a.id == opt_str.upper():
                     a.finished = True
                     afterDataFinished += 1
                     t = True
@@ -94,7 +94,7 @@ def create(ln):
             if len(opts) > 1 or ln:
                 warning("After: Remove is ignoring other options/cmds in line.")
             if not t:
-                warning("After: No events with ID=%s found to delete." % opt)
+                warning("After: No events with ID=%s found to delete." % opt_str)
             return   # ignore any other commands
 
         else:
@@ -115,7 +115,7 @@ def create(ln):
     dat.lineno = gbl.lineno
 
     if dat.bar == 'EOF':
-         gbl.inpath.pushEOFline(dat.cmd)
+        gbl.inpath.pushEOFline(dat.cmd)
     else:
         afterData.append(dat)  # our stack (actually a list of events)
 

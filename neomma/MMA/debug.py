@@ -41,7 +41,7 @@ plecShow       =     LplecShow  = 0  # not a command line setting
 rmShow         =     LrmShow    = 0  # not command
 gvShow         =     LgvShow    = 0
 
-def cmdLineDebug(o):
+def cmdLineDebug(o:str):
     """ Set a command line debug option. Called from options.py """
 
     global debug, Ldebug, showFilenames, LshowFilenames, \
@@ -76,7 +76,7 @@ def cmdLineDebug(o):
     elif o == 'c':
         chshow = Lchshow = 1
     
-def setDebug(ln):
+def setDebug(ln:list[str]):
     """ Set debugging options dynamically. """
 
     # This needs to be here to avoid circular import problem
@@ -112,14 +112,14 @@ def setDebug(ln):
     LrmShow = rmShow
     LgvShow = gvShow
 
-    ln, opts = opt2pair(ln, 1)
+    ln, opts = opt2pair(ln, True)
     if ln:
         error("Each debug option must be a opt=value pair.")
 
-    for cmd, val in opts:
-        if val == 'ON' or val == '1':
+    for cmd, val_str in opts:
+        if val_str == 'ON' or val_str == '1':
             val = 1
-        elif val == 'OFF' or val == '0':
+        elif val_str == 'OFF' or val_str == '0':
             val = 0
         else:
             error("Debug: %s needs ON, 1, OFF, or 0 arg." % cmd)
@@ -175,7 +175,6 @@ def setDebug(ln):
                 dPrint("Plectrum display=%s" % val)
 
         else:
-            from MMA.common import error
             error(msg)
 
             
@@ -212,8 +211,8 @@ def trackSet(track, func):
     """
 
     # Need to do this way to avoid circular import problem
-    from MMA.macro import macros
-    from MMA.common import dPrint
+    from neomma.MMA.macro import macros
+    from neomma.MMA.common import dPrint
     
     dPrint("Set {} {}: {}".format(track, func,
             macros.sysvar("{}_{}".format(track, func.upper()))))

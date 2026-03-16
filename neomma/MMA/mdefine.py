@@ -32,7 +32,7 @@ from . import gbl
 from   neomma.MMA.common import *
 
 
-def mdefine(ln):
+def mdefine(ln:list[str]):
     """ Set a midi seq pattern. """
 
     if not ln:
@@ -48,7 +48,7 @@ def mdefine(ln):
     mdef.create(name, ' '.join(ln[1:]))
 
 
-def trackMdefine(name, ln):
+def trackMdefine(name, ln:list[str]):
     """ Set a midi seq pattern. Ignore track name."""
 
     mdefine(ln)
@@ -67,7 +67,7 @@ class Mdefine:
         except:
             error("The MDEFINE pattern %s has not been defined" % name)
 
-    def create(self, name, ln):
+    def create(self, name:str, ln:str):
         """ Parse a MDEFINE line.
 
             The line must be in the form:
@@ -79,10 +79,9 @@ class Mdefine:
         name = name.upper()
 
         ln = ln.rstrip('; ')     # dump trailing ';' and whitespace
-        ln = ln.split(';')
         evs = []
-        for l in ln:
-            l = l.split()
+        for linestr in ln.split(';'):
+            l = linestr.split()
 
             if len(l) == 1:
                 evs.extend(self.get(l[0].upper()))

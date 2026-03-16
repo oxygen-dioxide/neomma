@@ -26,18 +26,17 @@ from neomma.MMA.common import *
 import neomma.MMA.debug
 import random
 
-def setHarmony(self, ln):
+from py_linq.py_linq import Enumerable
+
+def setHarmony(self, ln:list[str]):
     """ Set the harmony. """
 
     ln = lnExpand(ln, '%s Harmony' % self.name)
-    tmp = []
-
-    for n in ln:
-        n = n.upper()
-        if n in ('-', '0', 'NONE'):
-            n = None
-
-        tmp.append(n)
+    tmp:list[str|None] = Enumerable(ln)\
+        .select(lambda n: n.upper() 
+            if n.upper() not in ('-', '0', 'NONE') 
+            else None)\
+        .to_list()
 
     self.harmony = seqBump(tmp)
 
@@ -48,18 +47,15 @@ def setHarmony(self, ln):
         neomma.MMA.debug.trackSet(self.name, "Harmony")
 
         
-def setHarmonyOnly(self, ln):
+def setHarmonyOnly(self, ln:list[str]):
     """ Set the harmony only. """
 
     ln = lnExpand(ln, '%s HarmonyOnly' % self.name)
-    tmp = []
-
-    for n in ln:
-        n = n.upper()
-        if n in ('-', '0', 'NONE'):
-            n = None
-
-        tmp.append(n)
+    tmp:list[str|None] = Enumerable(ln)\
+        .select(lambda n: n.upper() 
+            if n.upper() not in ('-', '0', 'NONE') 
+            else None)\
+        .to_list()
 
     self.harmony = seqBump(tmp)
     self.harmonyOnly = seqBump(tmp)

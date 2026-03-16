@@ -97,13 +97,13 @@ defs      = []
 variables = []
 
 
-def docAuthor(ln):
+def docAuthor(ln:list[str]):
     global author
 
     author = ' '.join(ln)
 
 
-def docNote(ln):
+def docNote(ln:list[str]):
     """ Add a doc line. """
 
     global fname, notes
@@ -119,7 +119,7 @@ def docNote(ln):
     notes += ' '.join(ln)
 
 
-def docVars(ln):
+def docVars(ln:list[str]):
     """ Add a VARIABLE line (docs vars used in lib file)."""
 
     global fname, variables
@@ -131,7 +131,7 @@ def docVars(ln):
     variables.append([ln[0], ' '.join(ln[1:])])
 
 
-def docDefine(ln):
+def docDefine(ln:list[str]):
     """ Save a DEFGROOVE comment string.
 
         Entries are stored as a list. Each item in the list is
@@ -303,7 +303,7 @@ def docDump():
     author = ""
 
 
-def totex(s):
+def totex(s:str) -> str:
     """ Parse a string and quote tex stuff.
 
         Also handles proper quotation style.
