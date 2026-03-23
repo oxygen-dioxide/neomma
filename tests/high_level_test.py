@@ -42,7 +42,15 @@ def test_mma(input_file:str, expected_output_file:str, script_runner):
     os.chdir(root)
 
     # Run the MMA script with the input file
-    result = subprocess.run(["neomma", str(input_path), "-f", str(actual_output_path)])
+    result = subprocess.run(
+        ["neomma", str(input_path), "-f", str(actual_output_path)], 
+        capture_output=True, 
+        text=True
+    )
+    if result.stdout:
+        print(f"# stdout \n{result.stdout}")
+    if result.stderr:
+        print(f"# stderr \n{result.stderr}")
     #assert result.success, f"Script failed with error: {result.stderr}"
 
     # Load the generated MIDI file and the expected MIDI file
