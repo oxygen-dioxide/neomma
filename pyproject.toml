@@ -18,5 +18,8 @@ documentation = "https://github.com/oxygen-dioxide/neomma"
 [project.scripts]
 neomma = "neomma.mma:main"
 
+[tool.setuptools.packages.find]
+exclude = ["testtemp"]
+
 [tool.coverage.run]
 patch = ["subprocess"] 
