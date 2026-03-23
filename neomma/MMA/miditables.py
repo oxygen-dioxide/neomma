@@ -33,7 +33,7 @@ NONETONE = (127 << 16) + (127 < 8) + 127
 
 #  Standard GM drum tone  names.
 
-drumNames = {
+drumNames:dict[int,str] = {
     27: 'HighQ', 28: 'Slap', 29: 'ScratchPush',
     30: 'ScratchPull', 31: 'Sticks', 32: 'SquareClick',
     33: 'MetronomeClick', 34: 'MetronomeBell', 35: 'KickDrum2',
@@ -55,11 +55,11 @@ drumNames = {
     81: 'OpenTriangle', 82: 'Shaker', 83: 'JingleBell',
     84: 'Castanets', 85: 'MuteSurdo', 86: 'OpenSurdo'}
 
-drumInx = {v.upper(): k for (k, v) in drumNames.items()}
+drumInx:dict[str,int] = {v.upper(): k for (k, v) in drumNames.items()}
 
 # Standard GM voice names.
 
-voiceNames = {
+voiceNames:dict[int,str] = {
     0: 'Piano1', 1: 'Piano2', 2: 'Piano3',
     3: 'Honky-TonkPiano', 4: 'RhodesPiano', 5: 'EPiano',
     6: 'HarpsiChord', 7: 'Clavinet', 8: 'Celesta',
@@ -105,7 +105,7 @@ voiceNames = {
     126: 'Applause/Noise', 127: 'GunShot',
     NONETONE: 'None'}
 
-voiceInx = {v.upper(): k for (k, v) in voiceNames.items()}
+voiceInx:dict[str,int] = {v.upper(): k for (k, v) in voiceNames.items()}
 # fix an unfortunate spelling error.
 voiceInx['DISTORTONGUITAR']=voiceInx['DISTORTIONGUITAR']
 
@@ -117,7 +117,7 @@ voiceInx['DISTORTONGUITAR']=voiceInx['DISTORTIONGUITAR']
 #      64-119 Single Precise Controllers  (7-bits, 128 values)
 #      120-127 Channel Mode Messages
 
-ctrlNames = {
+ctrlNames:dict[int,str] = {
     0: 'Bank', 1: 'Modulation', 2: 'Breath',
     3: 'Ctrl3', 4: 'Foot', 5: 'Portamento',
     6: 'Data', 7: 'Volume', 8: 'Balance',
@@ -162,7 +162,7 @@ ctrlNames = {
     123: 'AllNotesOff', 124: 'OmniOff', 125: 'OmniOn',
     126: 'PolyOff', 127: 'PolyOn'}
 
-ctrlInx = {v.upper(): k for (k, v) in ctrlNames.items()}
+ctrlInx:dict[str,int] = {v.upper(): k for (k, v) in ctrlNames.items()}
 
 # These are the names of the drumkits. Those marked
 # with 'RS' are Roland standard, others are known to

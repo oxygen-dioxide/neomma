@@ -37,7 +37,7 @@ import neomma.MMA.debug
 from . import gbl
 from neomma.MMA.common import *
 
-trkClasses = {
+trkClasses:dict[str,type] = {
     'BASS'     : neomma.MMA.patBass.Bass,
     'CHORD'    : neomma.MMA.patChord.Chord,
     'ARPEGGIO' : neomma.MMA.patArpeggio.Arpeggio,
@@ -52,7 +52,7 @@ trkClasses = {
 }
 
 
-def trackAlloc(name, err):
+def trackAlloc(name:str, err:bool) -> None:
     """ Check existence of track and create if possible.
 
         If 'err' is set, the function will 'error out' if

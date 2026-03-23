@@ -32,12 +32,14 @@ from   neomma.MMA.readmidi import MidiData
 
 from   neomma.MMA.midiM import packBytes
 
+from   pathlib import Path
+
 ### FIXME ... some truly ugly code follows!!!
 
 ######################################################
 ## Main function, called from parser.
 
-def midiinc(ln):
+def midiinc(ln:list[str]):
     """ Include a MIDI file into MMA generated files. """
 
     filename = ''
@@ -56,12 +58,12 @@ def midiinc(ln):
     ignorePC = True   # ignore imported PC commands before insert point
     stretch = None
 
-    notopt, ln = opt2pair(ln)
+    notopt, opts = opt2pair(ln)
 
     if notopt:
         error("MidiInc: Expecting cmd=opt pairs, not '%s'." % ' '.join(notopt))
 
-    for cmd, opt in ln:
+    for cmd, opt in opts:
         cmd = cmd.upper()
 
         if cmd == 'FILE':
@@ -132,15 +134,15 @@ def midiinc(ln):
         # a trackname. Keep this as the last test!
 
         else:
-            trackAlloc(cmd, 0)
+            trackAlloc(cmd, False)
             if not cmd in gbl.tnames:
                 error("MidiInc: %s is not a valid MMA track" % cmd)
 
-            opt = opt.split(',')
+            optparts = opt.split(',')
             riffmode = 0
             printriff = 0
-            ch = None
-            for o in opt:
+            ch: int|None = None
+            for o in optparts:
                 o = o.upper()
                 if o == 'RIFF':
                     riffmode = 1
@@ -154,9 +156,12 @@ def midiinc(ln):
                     if ch is not None:
                         error("MidiInc: Only one channel assignment per track.")
                     ch = stoi(o)
-
+            if ch is None:
+                error("MidiInc: No MIDI channel specified for import of track %s." % cmd)
+                return
             if ch < 1 or ch > 16:
                 error("MidiInc: MIDI channel for import must be 1..16, not %s" % ch)
+                return
 
             channels.append((cmd, ch-1, riffmode, printriff))
 
@@ -178,8 +183,14 @@ def midiinc(ln):
     mf.velocityAdjust = velAdjust
     mf.ignorePC = ignorePC
 
+    filepath = Path(filename)
+    # If the path is not absolute, we assume it is relative to the current input file.
+    # This allows you to put MIDI files in the same directory as your input file and not have to worry about paths.
+    if(not(filepath.is_absolute())):
+        filepath = Path(gbl.inpath.fname).parent / filepath
+
     try:
-        mf.readFile(filename)
+        mf.readFile(str(filepath))
     except RuntimeError as e:
         error("MidiInc: %s" % e)
 

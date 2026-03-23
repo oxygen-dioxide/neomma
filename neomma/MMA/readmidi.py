@@ -64,6 +64,53 @@ You might look at beatDivision and adjust the offsets using
 import sys
 from . import gbl
 
+class Event:
+    def __init__(self, offset:int, eventType:str, data:list[int]):
+        self.offset = offset
+        self.eventType = eventType
+        self.data = data
+    
+    def __getitem__(self, index):
+        if index == 0:
+            return self.offset
+        elif index == 1:
+            return self.eventType
+        elif index == 2:
+            return self.data
+        else:
+            raise IndexError("Event only has three items: offset, eventType, and data")
+
+    def __setitem__(self, index, value):
+        if index == 0:
+            self.offset = value
+        elif index == 1:
+            self.eventType = value
+        elif index == 2:
+            self.data = value
+        else:
+            raise IndexError("Event only has three items: offset, eventType, and data")
+
+class TextEvent:
+    def __init__(self, offset:int, text:str):
+        self.offset = offset
+        self.text = text
+    
+    def __getitem__(self, index):
+        if index == 0:
+            return self.offset
+        elif index == 1:
+            return self.text
+        else:
+            raise IndexError("TextEvent only has two items: offset and text")
+    
+    def __setitem__(self, index, value):
+        if index == 0:
+            self.offset = value
+        elif index == 1:
+            self.text = value
+        else:
+            raise IndexError("TextEvent only has two items: offset and text")
+
 class MidiData:
     def __init__(self):
         # set these before reading the file
@@ -88,7 +135,7 @@ class MidiData:
         self.beatDivision = None
         self.firstNote = None  # offset of 1st note in file
 
-    def mvarlen(self):
+    def mvarlen(self) -> int:
         """ Convert variable length midi value to int. """
 
         x = 0
@@ -108,7 +155,7 @@ class MidiData:
 
         return int(x)
 
-    def strs(self, count):
+    def strs(self, count:int) -> str:
         """ Return a string of count chars. """
 
         s = self.midifile[self.offset:self.offset+count]
@@ -116,7 +163,7 @@ class MidiData:
         self.offset += count
         return s
 
-    def chars(self, count):
+    def chars(self, count:int):
         """ Return 'count' chars from file (updates global pointer). """
 
         b = list(self.midifile[self.offset:self.offset+count])
@@ -135,7 +182,7 @@ class MidiData:
         return b
 
 
-    def m32i(self):
+    def m32i(self) -> int:
         """ Convert 4 bytes to integer. """
 
         x = 0
@@ -151,7 +198,7 @@ class MidiData:
         return int(x)
 
 
-    def m16i(self):
+    def m16i(self) -> int:
         """ Convert 2 bytes to integer. """
 
         x = 0
@@ -160,7 +207,7 @@ class MidiData:
                 b = self.midifile[self.offset]
                 self.offset += 1
             except:
-                raise ("Invalid MIDI file include (i16->int, offset=%s)" % self.offset)
+                raise RuntimeError("Invalid MIDI file include (i16->int, offset=%s)" % self.offset)
             x = (x << 8) + b
 
         return int(x)
@@ -185,7 +232,7 @@ class MidiData:
 
     ### Main reader
 
-    def readFile(self, filename):
+    def readFile(self, filename:str) -> None:
         """ Read the midi file into memory and parse it. """
 
         try:
@@ -198,7 +245,6 @@ class MidiData:
         except:
             raise RuntimeError("Unable to read MIDI file '%s'." % filename)
 
-        self.midifile = bytearray(self.midifile)  # needed for python2, does nothing in 3
         inpath.close()
 
         # legit midi file?
@@ -213,7 +259,7 @@ class MidiData:
         self.MidiFormat = self.m16i()
 
         if self.MidiFormat not in (0, 1):
-            raise ("MIDI file format %s not recognized" % self.MidiFormat)
+            raise RuntimeError("MIDI file format %s not recognized" % self.MidiFormat)
 
         self.numTracks = self.m16i()
         self.beatDivision = self.m16i()

@@ -60,7 +60,7 @@ tnames = {}
     now this is only used in -c reporting.
 """
 
-midiAssigns = {}
+midiAssigns: dict[int,list[str]] = {}
 for c in range(0, 17):
     midiAssigns[c] = []
 
@@ -69,22 +69,22 @@ for c in range(0, 17):
     is inc/decremented.
 """
 
-midiAvail = [0] * 17   # slots 0..16, slot 0 is not used.
+midiAvail: list[int] = [0] * 17   # slots 0..16, slot 0 is not used.
 
-deletedTracks = []    # list of deleted tracks for -c report
+deletedTracks: list[str] = []    # list of deleted tracks for -c report
 
 """ This is a user constructed list of names/channels. The keys
     are names, data is a channel. Eg. midiChPrefs['BASS-SUS']==9
 """
 
-midiChPrefs = {}
+midiChPrefs: dict[str, int] = {}
 
 
 """ If the -T option is used only the tracks in this list
     are generated. All other tracks are muted (OFF)
 """
 
-muteTracks = []
+muteTracks: list[str] = []
 
 
 ############# String constants ####################
@@ -111,7 +111,7 @@ transpose   =  0      # Transpose is global (ignored by drum tracks)
 
 lineno      = -1      # used for error reporting
 
-barLabels   = []      # a list of bar (number) labels as encountered
+barLabels: list[str] = []      # a list of bar (number) labels as encountered
 barNum      =  0      # Current line number
 
 barPtrs     = {}      # for each bar, pointers to event start/end
@@ -136,7 +136,7 @@ logFile = ''    # this is set if user wants logging to be buffered.
     it hurts too much.
 """
 
-barRange       =     []      # both -B and -b use this
+barRange: list[str]       =     []      # both -B and -b use this
 
 printProcessed = False  # command line flag -L sets this
 

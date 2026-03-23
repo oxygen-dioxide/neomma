@@ -1,6 +1,6 @@
 
 // The tempo is different from both include midi files.
-
+Rndseed 0
 tempo 115
 
 // We could use a different rhythm, and we do change later.

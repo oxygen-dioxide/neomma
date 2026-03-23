@@ -30,6 +30,7 @@ temp = pathlib.Path(__file__).parent.parent / "testtemp"
     ("convert4to5.mma", "convert4to5.mid"),
     ("deep-river.mma", "deep-river.mid"),
     ("delay_solo.mma", "delay_solo.mid"),
+    ("frankie.mma", "frankie.mid"),
     ("ornament_bass.mma", "ornament_bass.mid"),
     ("rpitch_bass.mma", "rpitch_bass.mid"),
 ])

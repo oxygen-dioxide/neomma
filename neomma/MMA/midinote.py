@@ -34,7 +34,7 @@ from   neomma.MMA.common import *
 from   neomma.MMA.keysig import keySig
 
 
-def parse(name, ln):
+def parse(name, ln:list[str]):
     """ Called from parser for a <Track MidiNote> This figures the right routine."""
 
     if not len(ln):
