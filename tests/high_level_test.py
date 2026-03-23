@@ -6,7 +6,6 @@ import mido
 import pytest
 import pathlib
 import pytest
-#import pytest_console_scripts
 import os
 import subprocess
 

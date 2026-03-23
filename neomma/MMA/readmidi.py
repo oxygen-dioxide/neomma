@@ -64,76 +64,57 @@ You might look at beatDivision and adjust the offsets using
 import sys
 from . import gbl
 
-class Event:
-    def __init__(self, offset:int, eventType:str, data:list[int]):
-        self.offset = offset
-        self.eventType = eventType
-        self.data = data
-    
-    def __getitem__(self, index):
-        if index == 0:
-            return self.offset
-        elif index == 1:
-            return self.eventType
-        elif index == 2:
-            return self.data
-        else:
-            raise IndexError("Event only has three items: offset, eventType, and data")
-
-    def __setitem__(self, index, value):
-        if index == 0:
-            self.offset = value
-        elif index == 1:
-            self.eventType = value
-        elif index == 2:
-            self.data = value
-        else:
-            raise IndexError("Event only has three items: offset, eventType, and data")
 
 class TextEvent:
     def __init__(self, offset:int, text:str):
         self.offset = offset
         self.text = text
     
-    def __getitem__(self, index):
-        if index == 0:
+    def __getitem__(self, index:int):
+        if index == 0 or index == -2:
             return self.offset
-        elif index == 1:
+        elif index == 1 or index == -1:
             return self.text
         else:
             raise IndexError("TextEvent only has two items: offset and text")
     
-    def __setitem__(self, index, value):
-        if index == 0:
-            self.offset = value
-        elif index == 1:
-            self.text = value
+    def __setitem__(self, index:int, value:str|int):
+        if index == 0 or index == -2:
+            if(isinstance(value, int)):
+                self.offset = value
+            else:
+                raise ValueError("Offset must be an integer")
+        elif index == 1 or index == -1:
+            if(isinstance(value, str)):
+                self.text = value
+            else:
+                raise ValueError("Text must be a string")
         else:
             raise IndexError("TextEvent only has two items: offset and text")
 
 class MidiData:
-    def __init__(self):
+    def __init__(self) -> None:
         # set these before reading the file
         self.ignorePC = True     # skip (don't save) program changes
         self.octaveAdjust = 0    # octave adjustment values (should be -12,24,etc)
         self.velocityAdjust = 100  # Percentage to apply to velocities
 
         # storage
-        self.events = {}
+        self.events:dict[int, list[list[int]]] = {}
         for c in range(0, 16):
             self.events[c] = []
-        self.textEvents = []
-        self.lyricEvents = []
+        self.textEvents:list[TextEvent] = []
+        self.lyricEvents:list[TextEvent] = []
 
         # internal use, not for user
-        self.midifile = None
-        self.offset = 0
+        self.midifile:bytes = b''
+        self.offset:int = 0
 
         # useful things to examine after reading
-        self.MidiFormat = None
-        self.numTracks = None
-        self.beatDivision = None
-        self.firstNote = None  # offset of 1st note in file
+        self.MidiFormat:int = -1
+        self.numTracks:int = 0
+        self.beatDivision:int = 4
+        self.firstNote:int = 0  # offset of 1st note in file
 
     def mvarlen(self) -> int:
         """ Convert variable length midi value to int. """
@@ -158,8 +139,7 @@ class MidiData:
     def strs(self, count:int) -> str:
         """ Return a string of count chars. """
 
-        s = self.midifile[self.offset:self.offset+count]
-        s = s.decode(encoding=gbl.encoding)
+        s = self.midifile[self.offset:self.offset+count].decode(encoding=gbl.encoding)
         self.offset += count
         return s
 
@@ -191,7 +171,7 @@ class MidiData:
                 b = self.midifile[self.offset]
                 self.offset += 1
             except:
-                raise ("Invalid MIDI file include (i32->int, offset=%s)" % self.offset)
+                raise RuntimeError("Invalid MIDI file include (i32->int, offset=%s)" % self.offset)
 
             x = (x << 8) + b
 
@@ -219,11 +199,11 @@ class MidiData:
 
         for ch in self.events:
             for e in self.events[ch]:
-                e[0] = int(e[0] * adjustment)
+                e.time = int(e.time * adjustment)
         for e in self.textEvents:
-            e[0] = int(e[0] * adjustment)
+            e.time = int(e.time * adjustment)
         for e in self.lyricEvents:
-            e[0] = int(e[0] * adjustment)
+            e.time = int(e.time * adjustment)
 
         self.beatDivision = int(self.beatDivision * adjustment)
         self.firstNote = int(self.firstNote * adjustment)
@@ -305,7 +285,7 @@ class MidiData:
                             note += 12
                         while note > 127:
                             note -= 12
-                    self.events[channel].append([tm, ev & 0xf0, note, vel])
+                    self.events[channel].append(Event(tm, ev & 0xf0, note, vel))
 
                 elif sValue == 0x9:        # note on event
                     if tm < self.firstNote:
@@ -356,8 +336,8 @@ class MidiData:
                             self.offset += l
 
                         elif a == 0x01:  # text (could be lyrics)
-                            self.textEvents.append([tm, self.strs(self.mvarlen())])
-  
+                            self.textEvents.append(TextEvent(tm, self.strs(self.mvarlen())))
+
                         elif a == 0x02:  # copyright
                             l = self.mvarlen()
                             self.offset += l
@@ -371,7 +351,7 @@ class MidiData:
                             self.offset += l
 
                         elif a == 0x05:  # lyric
-                            self.lyricEvents.append([tm, self.strs(self.mvarlen())])
+                            self.lyricEvents.append(TextEvent(tm, self.strs(self.mvarlen())))
 
                         elif a == 0x06:  # marker
                             l = self.mvarlen()
