@@ -14,6 +14,7 @@ Neomma 基于 [MMA—Musical MIDI Accompaniment](https://www.mellowood.ca/mma/)
 git clone https://github.com/oxygen-dioxide/neomma
 cd neomma
 pip install .
+neomma -G
 ```
 
 ## 使用

@@ -37,6 +37,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e .[test]
+      
+      - name: Initialize neomma styles library
+        run: |
+          neomma -G
 
       - name: Run tests
         run: |

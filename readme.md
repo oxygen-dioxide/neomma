@@ -14,6 +14,7 @@ First, install [Python](https://www.python.org/), then run the following command
 git clone https://github.com/oxygen-dioxide/neomma
 cd neomma
 pip install .
+neomma -G
 ```
 
 ## Usage
