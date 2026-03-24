@@ -51,7 +51,7 @@ def cmdError(e):
 
     error("CmdLine: the command line option '%s' is not permitted in a MMA script." % e)
 
-def opts(l=None):
+def opts(l:list[str]|None=None) -> None:
     """ Option parser. 
          FIXME: this code segment is much too long!
     """
@@ -68,92 +68,92 @@ def opts(l=None):
     except getopt.GetoptError:
         usage()
 
-    for o, a in opts:
-        if o == '-b':
-            setBarRange(a)
+    for opt, arg in opts:
+        if opt == '-b':
+            setBarRange(arg)
 
-        elif o == '-B':
-            setBarRange(a)
+        elif opt == '-B':
+            setBarRange(arg)
             gbl.barRange.append("ABS")
 
-        elif o in ('-d', '-o', '-p', '-s', '-r', '-w', '-n', '-e', '-c'):
+        elif opt in ('-d', '-o', '-p', '-s', '-r', '-w', '-n', '-e', '-c'):
             import neomma.MMA.debug   # circular dep. problem
-            neomma.MMA.debug.cmdLineDebug(o[-1])
+            neomma.MMA.debug.cmdLineDebug(opt[-1])
         
-        elif o == '-S':
-            ln = a.split('=', 1)
+        elif opt == '-S':
+            ln = arg.split('=', 1)
             macros.setvar(ln)
 
-        elif o == '-L':
+        elif opt == '-L':
             gbl.printProcessed = True
 
-        elif o == '-f':
+        elif opt == '-f':
             import neomma.MMA.paths
-            gbl.outfile = a
+            gbl.outfile = arg
             if internal:
                 warning("Output filename overwritten by -f CmdLine option.")
                 neomma.MMA.paths.createOutfileName(".mid")
 
-        elif o == '-i':
+        elif opt == '-i':
             import neomma.MMA.paths
             if internal:
                 cmdError("-i")
-            neomma.MMA.paths.setRC(a)
+            neomma.MMA.paths.setRC(arg)
 
-        elif o == '-g':
+        elif opt == '-g':
             if internal:
                 cmdError("-g")
             gbl.makeGrvDefs = 1
 
-        elif o == '-G':
+        elif opt == '-G':
             if internal:
                 cmdError("-G")
             gbl.makeGrvDefs = 2
 
-        elif o == '-m':
+        elif opt == '-m':
             try:
-                a = int(a)
+                arg = int(arg)
             except:
                 error("Expecting -m arg to be a integer")
-            gbl.maxBars = a
+            gbl.maxBars = arg
 
-        elif o == '-v':
+        elif opt == '-v':
             print("%s" % gbl.version)
             if not internal:
                 sys.exit(0)
 
-        elif o == '-M':
+        elif opt == '-M':
             global cmdSMF
-            if a in ['0', '1']:
-                cmdSMF = a
+            if arg in ['0', '1']:
+                cmdSMF = arg
             else:
                 error("Only a '0' or '1' is permitted for the -M arg")
 
-        elif o == '-T':   # set tracks to generate, mute all others
-            gbl.muteTracks = a.upper().split(',')
+        elif opt == '-T':   # set tracks to generate, mute all others
+            gbl.muteTracks = arg.upper().split(',')
 
-        elif o == '-D':
+        elif opt == '-D':
             if internal:
                 cmdError("-D..")
-            if a == 'xl':
+            if arg == 'xl':
                 gbl.createDocs = 1
 
-            elif a == 'xh':
+            elif arg == 'xh':
                 gbl.createDocs = 2
 
-            elif a == 's':
+            elif arg == 's':
                 gbl.createDocs = 3
 
-            elif a == 'gh':
+            elif arg == 'gh':
                 gbl.createDocs = 4
 
-            elif a == 'js':
+            elif arg == 'js':
                 gbl.createDocs = 5
 
-            elif a == 'bo':
+            elif arg == 'bo':
                 gbl.createDocs = 99
 
-            elif a == 'k':
+            elif arg == 'k':
                 import neomma.MMA.alloc
                 # important! Needs a space before the trailing LF for mma.el
                 print("Base track names: %s \n" % 
@@ -166,38 +166,38 @@ def opts(l=None):
                 sys.exit(0)
 
             else:
-                print("Unknown option: '-D%s'." % a)
+                print("Unknown option: '-D%s'." % arg)
                 usage()
 
-        elif o == '-0':
+        elif opt == '-0':
             import neomma.MMA.sync
             neomma.MMA.sync.synchronize(['START'])
 
-        elif o == '-1':
+        elif opt == '-1':
             import neomma.MMA.sync
             neomma.MMA.sync.synchronize(['END'])
 
-        elif o == '-P':
+        elif opt == '-P':
             gbl.playFile = 1
 
-        elif o == '-I':
+        elif opt == '-I':
             # We use -I for plugin help and overload it to discard 
             # the plugin security. Use -II for security override.
             # It does mean you can't have plugin called "I", but
             # you could use "i" and it'll work.
             import neomma.MMA.regplug
-            if a == 'I':
+            if arg == 'I':
                 neomma.MMA.regplug.secOverRide = True
 
             # Plugin help. Note we have not loaded any plugins at this
             # point. pluginHelp() will find the plugin, register it and
             # call its help function.
             else: 
-                neomma.MMA.regplug.pluginHelp(a)
+                neomma.MMA.regplug.pluginHelp(arg)
                 sys.exit(0)
                 
 
-        elif o == '-V':
+        elif opt == '-V':
             import neomma.MMA.file
             
             if internal:   # can't have a -V in a -V :)
@@ -251,9 +251,9 @@ def opts(l=None):
 
             args = [tfile]  # fake the CLI so mma thinks the created file is yours
             
-        elif o=='-x':  # any one of some xtra, seldom used, options
+        elif opt=='-x':  # any one of some xtra, seldom used, options
             import neomma.MMA.xtra
-            neomma.MMA.xtra.xoption(a, args)
+            neomma.MMA.xtra.xoption(arg, args)
             
         else:
             usage()      # unreachable??

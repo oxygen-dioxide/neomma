@@ -39,7 +39,7 @@ import neomma.MMA.midi
 ######################################
 # Tempo/timing
 
-timeTable = {
+timeTable: dict[str, tuple[float, tuple[float, ...]]] = {
     # duple times
     '2/2': (4,    (1, 3)),
     '2/4': (2,    (1, 2)),
@@ -64,7 +64,7 @@ timeTable = {
     '7/4': (7,    (1, 2, 3, 4, 5, 6, 7) )
  }
 
-def setTime(ln):
+def setTime(ln:list) -> None:
     """ Set the 'time' value. This is NOT a time sig, it
         is the number of quarters/beat.
 
@@ -74,7 +74,7 @@ def setTime(ln):
     """
 
     
-    tabList = []
+    tabList:list[float] = []
     defaultTabs = (1,2,3,4,5,6,7,8,9,10,11,12)
     sigSet = False
 
@@ -107,24 +107,24 @@ def setTime(ln):
     if n in timeTable:
         i = timeTable[n]
         timeSig.setSig([n])
-        n = i[0]
+        time = i[0]
         if not tabList:
-            tabList = i[1]
+            tabList = list(i[1])
         sigSet = True
     else:
         if '/' in n:  # unknown time sig
             error("Time: Unknown timesignature '%s'. You may need "
                   "to set TIME and TIMESIG separately." % n)
-        n = stof(n)
+        time = stof(n)
 
-        if n < 1 or n > 12:
+        if time < 1 or time > 12:
             error("Time: Value must be 1..12.")
 
     # If no change, just ignore this.
 
     origTime = gbl.QperBar
-    if origTime != n:
-        gbl.QperBar = n
+    if origTime != time:
+        gbl.QperBar = time
         gbl.barLen =  int(gbl.QperBar * gbl.BperQ)
 
         # Time changes zap all predfined sequences
@@ -137,7 +137,7 @@ def setTime(ln):
             a.clearSequence()
 
     if not tabList:
-        tabList = (1,2,3,4,5,6,7,8,9,10,11,12)[:int(gbl.QperBar)]
+        tabList = [1,2,3,4,5,6,7,8,9,10,11,12][:int(gbl.QperBar)]
 
     # need to do this after setting time.
     if (tabList[-1]-1) * gbl.BperQ >= gbl.barLen:

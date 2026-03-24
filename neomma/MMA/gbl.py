@@ -98,7 +98,7 @@ EXT = ".mma"        # extension for song/lib files (STATIC).
 
 BperQ       =  192    # midi ticks per quarter note (STATIC)
 Bper128     =  BperQ/16  # a 1/128 note. Used for small timings (STATIC)
-QperBar     =  4      # Beats/bar, set with TIME (this is a fp value!)
+QperBar:float =  4      # Beats/bar, set with TIME (this is a fp value!)
 barLen      =  int(BperQ * QperBar)  # convenience (updated by TIME)
 tickOffset  =  0      # offset of current bar in ticks
 tempo       =  120    # current tempo

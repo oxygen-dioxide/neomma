@@ -46,7 +46,7 @@ def pathjoin(*a):
     from os import path
     return path.join(*[x.strip() for x in a])
 
-def safeEnv(var):
+def safeEnv(var:str) -> str:
     """ Return the value of an env variable. 
         On my system non-existant env vars register as None and
         vars set to '' return as '' ... so we convert them all to
@@ -54,9 +54,7 @@ def safeEnv(var):
     """
 
     ret = environ.get(var)
-    if ret == None:
-        ret == ''
-    return ret
+    return '' if ret == None else ret
 
 def safeEval(expr):
     toks = re.split(r'([a-zA-Z_\.]+|.)', expr)

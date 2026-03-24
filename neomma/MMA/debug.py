@@ -41,7 +41,7 @@ plecShow       =     LplecShow  = 0  # not a command line setting
 rmShow         =     LrmShow    = 0  # not command
 gvShow         =     LgvShow    = 0
 
-def cmdLineDebug(o:str):
+def cmdLineDebug(o:str) -> None:
     """ Set a command line debug option. Called from options.py """
 
     global debug, Ldebug, showFilenames, LshowFilenames, \

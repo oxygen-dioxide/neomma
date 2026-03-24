@@ -83,7 +83,7 @@ if gbl.infile:
         fileName = neomma.MMA.file.locFile(gbl.infile, None)
         if fileName and not gbl.noCredit:
             m.addTrkName(0, "%s" % fileName.rstrip(".mma"))
-            m.addText(0, "Created by neomma.MMA. Input filename: %s" % fileName)
+            m.addText(0, "Created by neomma.")
 
 
 m.addTempo(0, gbl.tempo)      # most user files will override this
@@ -171,44 +171,40 @@ if neomma.MMA.debug.chshow:
     msg.append("\nTracks allocated:\n")
     k = list(gbl.tnames.keys())
     k.sort()
-    max = 0
-    for a in k + gbl.deletedTracks:
-        if len(a) > max:
-            max = len(a)
-    max += 1
-    wrap = 0
+    cmax:int = max(len(a) for a in (k+gbl.deletedTracks)) + 1
+    cwrap:int = 0
     for a in k:
-        wrap += max
-        if wrap > 60:
-            wrap = max
+        cwrap += cmax
+        if cwrap > 60:
+            cwrap = cmax
             msg.append('\n')
-        msg.append(" %-*s" % (max, a))
+        msg.append(" %-*s" % (cmax, a))
     msg.append('\n')
     print(' '.join(msg))
     
     if gbl.deletedTracks:
         msg = ["Deleted Tracks:\n"]
-        wrap = 0
+        cwrap = 0
         for a in gbl.deletedTracks:
-            wrap += max
-            if wrap > 60:
-                wrap = max
+            cwrap += cmax
+            if cwrap > 60:
+                cwrap = cmax
                 msg.append('\n')
-            msg.append(" %-*s" % (max, a),)
+            msg.append(" %-*s" % (cmax, a),)
         msg.append('\n')
         print(' '.join(msg))
         
     msg=["Channel assignments:\n"]
     for c, n in sorted(gbl.midiAssigns.items()):
         if n:
-            wrap = 3
+            cwrap = 3
             msg.append(" %2s" % c)
             for nn in n:
-                wrap += max
-                if wrap > 63:
+                cwrap += cmax
+                if cwrap > 63:
                     msg.append('\n    ')
-                    wrap = max+3
-                msg.append(" %-*s" % (max, nn))
+                    cwrap = cmax+3
+                msg.append(" %-*s" % (cmax, nn))
             msg.append('\n')
     print(' '.join(msg))
 

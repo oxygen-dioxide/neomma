@@ -44,7 +44,7 @@ def fixfname(f:str) -> str:
     return os.path.expanduser(f)
 
 
-def locFile(name:str, lib:str) -> str | None:
+def locFile(name:str, lib:str|None) -> str | None:
     """ Locate a filename.
 
         This checks, in order:
