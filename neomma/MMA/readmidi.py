@@ -217,11 +217,11 @@ class MidiData:
 
         for ch in self.events:
             for e in self.events[ch]:
-                e[0] = int(e[0] * adjustment)
+                e.offset = int(e.offset * adjustment)
         for e in self.textEvents:
-            e.time = int(e.time * adjustment)
+            e.offset = int(e.offset * adjustment)
         for e in self.lyricEvents:
-            e.time = int(e.time * adjustment)
+            e.offset = int(e.offset * adjustment)
 
         self.beatDivision = int(self.beatDivision * adjustment)
         self.firstNote = int(self.firstNote * adjustment)
