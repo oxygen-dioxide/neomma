@@ -40,6 +40,9 @@ def test_mma(input_file:str, expected_output_file:str, script_runner):
     os.makedirs(actual_output_path.parent, exist_ok=True)
     os.chdir(root)
 
+    if actual_output_path.exists():
+        actual_output_path.unlink()
+
     # Run the MMA script with the input file
     result = subprocess.run(
         ["neomma", str(input_path), "-f", str(actual_output_path)], 
@@ -68,6 +71,9 @@ def test_mma_extra_args(input_file, expected_output_file, extra_args, script_run
     actual_output_path = temp / expected_output_file
     os.makedirs(actual_output_path.parent, exist_ok=True)
     os.chdir(root)
+
+    if actual_output_path.exists():
+        actual_output_path.unlink()
 
     # Run the MMA script with the input file
     result = subprocess.run([

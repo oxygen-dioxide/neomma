@@ -64,6 +64,24 @@ You might look at beatDivision and adjust the offsets using
 import sys
 from . import gbl
 
+class Event:
+    def __init__(self, offset:int, evtype:int, *data:int) -> None:
+        self.offset = offset
+        self.evtype = evtype
+        self.data:list[int] = list(data)
+    
+    def __getitem__(self, index:int) -> int:
+        return ([self.offset, self.evtype] + self.data)[index]
+    
+    def __setitem__(self, index:int, value:int) -> None:
+        if index == 0:
+            self.offset = value
+        elif index == 1:
+            self.evtype = value
+        elif index >= 2:
+            self.data[index - 2] = value
+        else:
+            raise IndexError("Event only has offset, evtype, and data items")
 
 class TextEvent:
     def __init__(self, offset:int, text:str):
@@ -100,7 +118,7 @@ class MidiData:
         self.velocityAdjust = 100  # Percentage to apply to velocities
 
         # storage
-        self.events:dict[int, list[list[int]]] = {}
+        self.events:dict[int, list[Event]] = {}
         for c in range(0, 16):
             self.events[c] = []
         self.textEvents:list[TextEvent] = []
@@ -199,7 +217,7 @@ class MidiData:
 
         for ch in self.events:
             for e in self.events[ch]:
-                e.time = int(e.time * adjustment)
+                e[0] = int(e[0] * adjustment)
         for e in self.textEvents:
             e.time = int(e.time * adjustment)
         for e in self.lyricEvents:
@@ -307,25 +325,25 @@ class MidiData:
                         if vel > 127:
                             vel = 127
 
-                    self.events[ev & 0xf].append([tm, ev & 0xf0, note, vel])
+                    self.events[ev & 0xf].append(Event(tm, ev & 0xf0, note, vel))
 
                 elif sValue == 0xa:        # key pressure
-                    self.events[ev & 0xf].append([tm, ev & 0xf0, self.chars(2)])
+                    self.events[ev & 0xf].append(Event(tm, ev & 0xf0, *self.chars(2)))
 
                 elif sValue == 0xb:        # control change
-                    self.events[ev & 0xf].append([tm, ev & 0xf0, self.chars(2)])
+                    self.events[ev & 0xf].append(Event(tm, ev & 0xf0, *self.chars(2)))
 
                 elif sValue == 0xc:        # program change
                     if self.ignorePC:      # default is to ignore these
                         self.offset += 1
                     else:                  # set with option ignorePC=1
-                        self.events[ev & 0xf].append([tm, ev & 0xf0, self.chars(1)])
+                        self.events[ev & 0xf].append(Event(tm, ev & 0xf0, *self.chars(1)))
 
                 elif sValue == 0xd:        # channel pressure
-                    self.events[ev & 0xf].append([tm, ev & 0xf0, self.chars(1)])
+                    self.events[ev & 0xf].append(Event(tm, ev & 0xf0, *self.chars(1)))
 
                 elif sValue == 0xe:        # pitch blend
-                    self.events[ev & 0xf].append([tm, ev & 0xf0, self.chars(2)])
+                    self.events[ev & 0xf].append(Event(tm, ev & 0xf0, *self.chars(2)))
 
                 elif sValue == 0xf:       # system, mostly ignored
                     if ev == 0xff:        # meta events
