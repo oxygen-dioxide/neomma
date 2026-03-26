@@ -64,6 +64,7 @@ def test_mma(input_file:str, expected_output_file:str, script_runner):
 
 @pytest.mark.parametrize("input_file, expected_output_file, extra_args", [
     ("deep-river.mma", "deep-river-tempo120.mid", ["-S", "tempo=120"]),
+    ("deep-river.mma", "deep-river-bar2-3.mid", ["-b", "2-3"]),
 ])
 def test_mma_extra_args(input_file, expected_output_file, extra_args, script_runner):
     input_path = root / input_file
