@@ -320,10 +320,6 @@ def parse(inpath):
             gbl.barNum += 1
             gbl.seqCount = (gbl.seqCount + 1) % gbl.seqSize
 
-            if gbl.barNum > gbl.maxBars:
-                error("Capacity exceeded. Maxbar setting is %s. Use -m option"
-                      % gbl.maxBars)
-
             neomma.MMA.grooves.nextGroove()   # using groove list? Advance.
 
             # Enabled with the -r command line option
@@ -1229,7 +1225,6 @@ simpleFuncs = {'ADJUSTVOLUME': neomma.MMA.volume.adjvolume,
                'CALL': neomma.MMA.func.callFunction,
                'CHANNELPREF': neomma.MMA.midifuncs.setChPref,
                'CHORDADJUST': neomma.MMA.chords.chordAdjust,
-               'CMDLINE': neomma.MMA.options.cmdLine,
                'COMMENT': comment,
                'CRESC': neomma.MMA.volume.setCresc,
                'CUT': neomma.MMA.tempo.cut,

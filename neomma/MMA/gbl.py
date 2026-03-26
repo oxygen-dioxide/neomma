@@ -143,7 +143,6 @@ printProcessed = False  # command line flag -L sets this
 outfile        =     None
 infile         =     None  # file NAME, probably from CLI
 createDocs     =     0
-maxBars        =     500
 makeGrvDefs    =     0
 
 #splitOutput    =     None  # xtra sets to 'TRACKS' or 'CHANNELS'

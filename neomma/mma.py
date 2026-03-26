@@ -29,15 +29,7 @@ import platform
 MMAdir = os.path.dirname(__file__)
 
 def main():
-    # Ensure a proper version is available.
-    # This test forces 2.6+ or 3.x
-    if sys.version_info[0] == 2 and sys.version_info[1] < 6:
-        print ("\nYou need a more current version of Python to run MMA.")
-        print ("We're looking for something equal or greater than version 2.6")
-        print ("Current Python version is %s\n" % sys.version)
-        sys.exit(0)
-
-    from .MMA import main as mmaMain    # this runs the program
+    from neomma.MMA import main as mmaMain    # this runs the program
 
 if __name__ == "__main__":
     main()

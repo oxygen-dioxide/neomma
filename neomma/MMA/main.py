@@ -62,9 +62,9 @@ gbl.logFile = safeEnv('MMA_LOGFILE')
 
 neomma.MMA.paths.init()   # initialize the lib/include paths
 
-# Get our command line stuff
+# Parse command line with click
 
-neomma.MMA.options.opts()
+neomma.MMA.options.cli(standalone_mode=False)
 
 
 #  LibPath and IncPath are set before option parsing, but
@@ -109,8 +109,8 @@ if gbl.makeGrvDefs:
 if not gbl.infile:
     if gbl.createDocs:
         gbl.lineno = -1
-        error("-D options require a filename.")
-    neomma.MMA.options.usage("No input filename specified.")
+        error("--doc options require a filename.")
+    error("No input filename specified.")
 
 ################################
 # Just extract docs (-Dxh, etc) to stdout.

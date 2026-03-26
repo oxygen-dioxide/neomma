@@ -3,7 +3,7 @@ authors = [{ name = "oxygendioxide", email = "oxygen-dioxide@outlook.com" }]
 license-files = ["LICENSE*"]
 requires-python = ">=3.10,<3.15"
 classifiers = []
-dependencies = ["mido", "py-linq"]
+dependencies = ["mido", "py-linq", "click"]
 name = "neomma"
 dynamic = ["version"]
 description = "Musical MIDI Accompaniment"
