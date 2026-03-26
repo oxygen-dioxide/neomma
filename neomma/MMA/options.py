@@ -22,334 +22,12 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-import getopt
 import sys
-import os
-import tempfile
-
-import neomma.MMA.docs
-import neomma.MMA.parse
-import neomma.MMA.chords
-import neomma.MMA.volume
-import neomma.MMA.exits
 
 from . import gbl
 from neomma.MMA.common import *
 from neomma.MMA.macro import macros
-
 cmdSMF = None
-
-def cmdLine(l):
-    """ Try to take a mma input line and parse it like a command line. 
-        An empty CmdLine is just ignored. """
-    
-    if l:
-        opts(l)
-
-def cmdError(e):
-    """ Illegal internal command line options."""
-
-    error("CmdLine: the command line option '%s' is not permitted in a MMA script." % e)
-
-def opts(l:list[str]|None=None) -> None:
-    """ Option parser. 
-         FIXME: this code segment is much too long!
-    """
-
-    if not l:
-        l = sys.argv[1:]
-        internal = False
-    else:
-        internal = True
-
-    try:
-        opts, args = getopt.gnu_getopt(
-                         l, "b:B:dpsS:ri:wneom:f:M:cLgGvVD:01PT:I:x:", [])
-    except getopt.GetoptError:
-        usage()
-
-    for opt, arg in opts:
-        if opt == '-b':
-            setBarRange(arg)
-
-        elif opt == '-B':
-            setBarRange(arg)
-            gbl.barRange.append("ABS")
-
-        elif opt in ('-d', '-o', '-p', '-s', '-r', '-w', '-n', '-e', '-c'):
-            import neomma.MMA.debug   # circular dep. problem
-            neomma.MMA.debug.cmdLineDebug(opt[-1])
-        
-        elif opt == '-S':
-            ln = arg.split('=', 1)
-            macros.setvar(ln)
-
-        elif opt == '-L':
-            gbl.printProcessed = True
-
-        elif opt == '-f':
-            import neomma.MMA.paths
-            gbl.outfile = arg
-            if internal:
-                warning("Output filename overwritten by -f CmdLine option.")
-                neomma.MMA.paths.createOutfileName(".mid")
-
-        elif opt == '-i':
-            import neomma.MMA.paths
-            if internal:
-                cmdError("-i")
-            neomma.MMA.paths.setRC(arg)
-
-        elif opt == '-g':
-            if internal:
-                cmdError("-g")
-            gbl.makeGrvDefs = 1
-
-        elif opt == '-G':
-            if internal:
-                cmdError("-G")
-            gbl.makeGrvDefs = 2
-
-        elif opt == '-m':
-            try:
-                arg = int(arg)
-            except:
-                error("Expecting -m arg to be a integer")
-            gbl.maxBars = arg
-
-        elif opt == '-v':
-            print("%s" % gbl.version)
-            if not internal:
-                sys.exit(0)
-
-        elif opt == '-M':
-            global cmdSMF
-            if arg in ['0', '1']:
-                cmdSMF = arg
-            else:
-                error("Only a '0' or '1' is permitted for the -M arg")
-
-        elif opt == '-T':   # set tracks to generate, mute all others
-            gbl.muteTracks = arg.upper().split(',')
-
-        elif opt == '-D':
-            if internal:
-                cmdError("-D..")
-            if arg == 'xl':
-                gbl.createDocs = 1
-
-            elif arg == 'xh':
-                gbl.createDocs = 2
-
-            elif arg == 's':
-                gbl.createDocs = 3
-
-            elif arg == 'gh':
-                gbl.createDocs = 4
-
-            elif arg == 'js':
-                gbl.createDocs = 5
-
-            elif arg == 'bo':
-                gbl.createDocs = 99
-
-            elif arg == 'k':
-                import neomma.MMA.alloc
-                # important! Needs a space before the trailing LF for mma.el
-                print("Base track names: %s \n" % 
-                      ' '.join([a for a in sorted(neomma.MMA.alloc.trkClasses)]))
-                print("Commands: %s BEGIN END DEFAULT\n" % 
-                      ' '.join([a for a in sorted(neomma.MMA.parse.simpleFuncs)]))
-                print("TrackCommands: %s \n" %
-                      ' '.join([a for a in sorted(neomma.MMA.parse.trackFuncs)]))
-                print("Not complete ... subcommands, comments, chords...")
-                sys.exit(0)
-
-            else:
-                print("Unknown option: '-D%s'." % arg)
-                usage()
-
-        elif opt == '-0':
-            import neomma.MMA.sync
-            neomma.MMA.sync.synchronize(['START'])
-
-        elif opt == '-1':
-            import neomma.MMA.sync
-            neomma.MMA.sync.synchronize(['END'])
-
-        elif opt == '-P':
-            gbl.playFile = 1
-
-        elif opt == '-I':
-            # We use -I for plugin help and overload it to discard 
-            # the plugin security. Use -II for security override.
-            # It does mean you can't have plugin called "I", but
-            # you could use "i" and it'll work.
-            import neomma.MMA.regplug
-            if arg == 'I':
-                neomma.MMA.regplug.secOverRide = True
-
-            # Plugin help. Note we have not loaded any plugins at this
-            # point. pluginHelp() will find the plugin, register it and
-            # call its help function.
-            else: 
-                neomma.MMA.regplug.pluginHelp(arg)
-                sys.exit(0)
-                
-
-        elif opt == '-V':
-            import neomma.MMA.file
-            
-            if internal:   # can't have a -V in a -V :)
-                cmdError("-V")
-                
-            gbl.playFile = 2  # signal create and play groove
-            if not args:
-                error("-V: option requires Groove Name.")
-
-            _, tfile = tempfile.mkstemp(prefix="MMA_", suffix=".mma")
-            op = open(tfile, "w")
-            groove = ''
-            cmds = []
-            chords = "I, vi, ii, V7"
-            count = 4
-            for g in args:
-                if '=' in g:
-                    c = g.split('=')
-                    if c[0].upper() == 'CHORDS':
-                        chords = c[1]
-                    elif c[0].upper() == "COUNT":
-                        count = c[1]
-                        try:
-                            count = int(count)
-                        except:
-                            error("-V: expecting integer for Count.")
-                    else:
-                        cmds.append(c)
-                elif groove:
-                    error("-V: Only one groove name permitted.")
-                else:
-                    groove = g
-            if not groove:
-                error("-V: no groove name specified.")
-
-            op.write("Groove %s\n" % groove)
-            for g in cmds:
-                op.write("{} {} \n".format(g[0], g[1]))
-            chords = chords.split(',')
-            while len(chords) < count:
-                chords += chords
-            chords = chords[:count]
-            for c in chords:
-                op.write("%s\n" % c)
-
-            op.close()
-
-            # we can only have one scratch file, so no fear of overload.
-            # otherwise we might need to explicity delete file here.
-            neomma.MMA.exits.files.append(tfile)
-
-            args = [tfile]  # fake the CLI so mma thinks the created file is yours
-            
-        elif opt=='-x':  # any one of some xtra, seldom used, options
-            import neomma.MMA.xtra
-            neomma.MMA.xtra.xoption(arg, args)
-            
-        else:
-            usage()      # unreachable??
-
-    if internal:
-        return
-
-    # a few sanity checks
-
-    #if  neomma.MMA.writeMid.splitOutput:
-    #    if gbl.playFile:
-    #        error("The -P (play) option is not compatible with channel/track splitting.")
-    #    if gbl.infile == 1:
-    #        error("The '-' (read from stdin) is not compatible with channel/track splitting.")
-            
-    # we have processed all the args. Should just have a filename left
-
-    if len(args) > 1:
-        usage("Only one input filename is permitted, %s given on command line." % len(args))
-
-    if gbl.infile:
-        usage("Input filename already assigned ... should not happen.")
-
-    if args:
-        gbl.infile = args[0]
-
-    # if a single '-' is left on the cmd line user want stdin. We set the
-    # the input filename to numeric 1 which can't be entered.
-
-    if gbl.infile == '-':
-        gbl.infile = 1
-        
-        if not gbl.outfile:
-            import neomma.MMA.debug   # circular dep. problem
-            if not(neomma.MMA.debug.noOutput):
-                error("Input from STDIN specified. Use -f to set an output filename.")
-
-    
-def usage(msg=''):
-    """ Usage message. """
-
-    txt = [
-        "MMA - Musical Midi Accompaniment",
-        "  Copyright 2003-22, Bob van der Poel. Version %s" % gbl.version,
-        "  Distributed under the terms of the GNU Public License.",
-        "  Usage: mma [opts ...] INFILE [opts ...]",
-        "",
-        "Options:",
-        " -b <n> Limit compilation to n1-n2 bars (comment numbers)",
-        " -B <n> Like -b but for absolute bar numbers",
-        " -c    display default Channel assignments",
-        " -d    enable lots of Debugging messages",
-        " -Dk   print list of MMA keywords",
-        " -Dxl  eXtract Latex doc blocks from file",
-        " -Dxh  eXtract HTML doc blocks from file",
-        " -Dgh  extract HTML Groove doc",
-        " -Djs  extract JSON Groove information from file",
-        " -Dbo  extract text for browser app",
-        " -Ds   extract sequence lists from file",
-        " -e    show parsed/Expanded lines",
-        " -f <file>  set output Filename",
-        " -g    update Groove dependency database",
-        " -G    create Groove dependency database",
-        " -i <file> specify init (mmarc) file",
-        " -I <plugin> print docs for plugin if available",
-        " -II   skip permissions test for plugins (Dangerous!)",
-        " -L    show order of bars processed",
-        " -m <x> set Maxbars (default == 500)",
-        " -M <x> set SMF to 0 or 1",
-        " -n    No generation of midi output",
-        " -o    show complete filenames when Opened",
-        " -p    display Patterns as they are defined",
-        " -P    play song (don't save) with player",
-        " -r    display Running progress",
-        " -s    display Sequence info during run",
-        " -S <var[=data]>  Set macro 'var' to 'data'",
-        " -T <tracks> Limit generation to specified tracks",
-        " -v    display Version number",
-        " -V <groove [options]> preview play groove",
-        " -w    disable Warning messages",
-        " -xCHORDS=<chord list> test listed chords for validity",
-        " -xNOCREDIT disable MMA credits in Midi Meta track",
-        " -xCHECKFILE=<filename> check chords in file",
-        " -xTSplit  create midi for each track",
-        " -xCSplit  create MIDI for each channel",
-        " -0    create sync at start of all channel tracks",
-        " -1    create sync at end of all channel tracks",
-        " -     a single hyphen signals to use STDIN instead of a file"]
-
-    for a in txt:
-        print(a)
-
-    if msg:
-        print("\n%s" % msg)
-    
-    sys.exit(1)
 
 
 def setBarRange(v):
@@ -368,7 +46,7 @@ def setBarRange(v):
                 s = int(s)
                 e = int(e)
             except:
-                usage("-B/b ranges must be integers, not '%s'." % l)
+                error("-B/b ranges must be integers, not '%s'." % l)
 
             for a in range(s, e + 1):
                 gbl.barRange.append(str(a))
@@ -377,8 +55,295 @@ def setBarRange(v):
             try:
                 s = int(l[0])
             except:
-                usage("-B/b range must be an integer, not '%s'." % l[0])
+                error("-B/b range must be an integer, not '%s'." % l[0])
             gbl.barRange.append(str(s))
 
         else:
-            usage("-B/b option expecting N1-N2,N3... not '%s'." % v)
+            error("-B/b option expecting N1-N2,N3... not '%s'." % v)
+
+
+def handle_doc_option(doc_type):
+    """Handle --doc option for documentation extraction."""
+    import neomma.MMA.alloc
+    import neomma.MMA.parse
+
+    if doc_type == "keywords":
+        print(
+            "Base track names: %s \n"
+            % " ".join([a for a in sorted(neomma.MMA.alloc.trkClasses)])
+        )
+        print(
+            "Commands: %s BEGIN END DEFAULT\n"
+            % " ".join([a for a in sorted(neomma.MMA.parse.simpleFuncs)])
+        )
+        print(
+            "TrackCommands: %s \n"
+            % " ".join([a for a in sorted(neomma.MMA.parse.trackFuncs)])
+        )
+        print("Not complete ... subcommands, comments, chords...")
+        sys.exit(0)
+    elif doc_type == "latex":
+        gbl.createDocs = 1
+    elif doc_type == "html":
+        gbl.createDocs = 2
+    elif doc_type == "sequence":
+        gbl.createDocs = 3
+    elif doc_type == "grooves":
+        gbl.createDocs = 99
+
+
+def handle_xoption(xopt, args):
+    """Handle extended options (formerly -x)."""
+    import neomma.MMA.xtra
+
+    neomma.MMA.xtra.xoption(xopt, args)
+
+
+def main(
+    bar_range,
+    bar_range_abs,
+    max_bars,
+    output,
+    init,
+    no_output,
+    play,
+    show_channels,
+    debug,
+    show_expanded,
+    show_patterns,
+    show_progress,
+    show_sequence,
+    show_bar_order,
+    no_warnings,
+    smf,
+    tracks,
+    groove_db,
+    create_groove_db,
+    doc,
+    tsplit,
+    csplit,
+    nocredit,
+    syncstart,
+    syncend,
+    infile,
+):
+    """Main CLI entry point."""
+
+    
+
+
+import click
+
+
+@click.command()
+@click.option(
+    "-b", "--bar-range", help="Limit compilation to bar range (comment numbers)"
+)
+@click.option(
+    "-B", "--bar-range-abs", help="Limit compilation to bar range (absolute numbers)"
+)
+@click.option(
+    "-c", "--show-channels", is_flag=True, help="Display default Channel assignments"
+)
+@click.option("-d", "--debug", is_flag=True, help="Enable debugging messages")
+@click.option(
+    "-D", "--doc",
+    type=click.Choice(["keywords", "latex", "html", "json", "sequence", "grooves"]),
+    help="Extract documentation: keywords, latex, html, json, sequence, grooves",
+)
+@click.option("-e", "--show-expanded", is_flag=True, help="Show parsed/Expanded lines")
+@click.option("-f", "--output", type=click.Path(), help="Set output filename")
+@click.option(
+    "-g", "--groove-db", is_flag=True, help="Update Groove dependency database"
+)
+@click.option(
+    "-G", "--create-groove-db", is_flag=True, help="Create Groove dependency database"
+)
+@click.option(
+    "-i", "--init", type=click.Path(exists=True), help="Specify init (mmarc) file"
+)
+@click.option(
+    "-L", "--show-bar-order", is_flag=True, help="Show order of bars processed"
+)
+@click.option(
+    "-m", "--max-bars", type=int, help="Set maximum number of bars (default: 500)"
+)
+@click.option("-M", "--smf", type=click.Choice(["0", "1"]), help="Set SMF to 0 or 1")
+@click.option("-n", "--no-output", is_flag=True, help="No generation of midi output")
+@click.option("-P", "--play", is_flag=True, help="Play song with player (dont save)")
+@click.option(
+    "-p", "--show-patterns", is_flag=True, help="Display Patterns as they are defined"
+)
+@click.option("-r", "--show-progress", is_flag=True, help="Display running progress")
+@click.option(
+    "-s", "--show-sequence", is_flag=True, help="Display Sequence info during run"
+)
+@click.option(
+    "-S", "--set-macro", multiple=True, help="Set macro 'var' to 'data'"
+)
+@click.option(
+    "-T", "--tracks", help="Limit generation to specified tracks (comma-separated)"
+)
+@click.option("-w", "--no-warnings", is_flag=True, help="Disable Warning messages")
+@click.option("--tsplit", is_flag=True, help="Create midi for each track")
+@click.option("--csplit", is_flag=True, help="Create MIDI for each channel")
+@click.option("--nocredit", is_flag=True, help="Disable MMA credits in Midi Meta track")
+@click.option(
+    "--syncstart", is_flag=True, help="Create sync at start of all channel tracks"
+)
+@click.option(
+    "--syncend", is_flag=True, help="Create sync at end of all channel tracks"
+)
+@click.option("-v", "--version", is_flag=True, help="Display version number")
+@click.argument("infile", required=False)
+def cli(
+    bar_range:str,
+    bar_range_abs:str,
+    max_bars:int,
+    output:str,
+    init:str,
+    no_output:bool,
+    play:bool,
+    show_channels:bool,
+    debug:bool,
+    show_expanded:bool,
+    show_patterns:bool,
+    show_progress:bool,
+    show_sequence:bool,
+    show_bar_order:bool,
+    no_warnings:bool,
+    smf:str,
+    tracks:str,
+    groove_db:bool,
+    create_groove_db:bool,
+    doc:str,
+    tsplit:bool,
+    csplit:bool,
+    nocredit:bool,
+    syncstart:bool,
+    syncend:bool,
+    version:bool,
+    infile:str,
+    set_macro:list[str],
+):
+    """MMA - Musical Midi Accompaniment.
+
+    Generate MIDI accompaniment from simple chord and groove definitions.
+    """
+    if version:
+        print("%s" % gbl.version)
+        sys.exit(0)
+
+    if bar_range:
+        setBarRange(bar_range)
+
+    if bar_range_abs:
+        setBarRange(bar_range_abs)
+        gbl.barRange.append("ABS")
+
+    if max_bars:
+        gbl.maxBars = max_bars
+
+    if output:
+        gbl.outfile = output
+
+    if init:
+        neomma.MMA.paths.setRC(init)
+
+    if no_output:
+        import neomma.MMA.debug
+
+        neomma.MMA.debug.cmdLineDebug("n")
+
+    if play:
+        gbl.playFile = 1
+
+    if show_channels:
+        import neomma.MMA.debug
+
+        neomma.MMA.debug.cmdLineDebug("c")
+
+    if debug:
+        import neomma.MMA.debug
+
+        neomma.MMA.debug.cmdLineDebug("d")
+
+    if show_expanded:
+        import neomma.MMA.debug
+
+        neomma.MMA.debug.cmdLineDebug("e")
+
+    if show_patterns:
+        import neomma.MMA.debug
+
+        neomma.MMA.debug.cmdLineDebug("p")
+
+    if show_progress:
+        import neomma.MMA.debug
+
+        neomma.MMA.debug.cmdLineDebug("r")
+
+    if show_sequence:
+        import neomma.MMA.debug
+
+        neomma.MMA.debug.cmdLineDebug("s")
+    
+    for opt in set_macro:
+        macros.setvar(opt.split("=", 1))
+
+    if show_bar_order:
+        gbl.printProcessed = True
+
+    if no_warnings:
+        import neomma.MMA.debug
+
+        neomma.MMA.debug.cmdLineDebug("w")
+
+    global cmdSMF
+    if smf:
+        if smf in ["0", "1"]:
+            cmdSMF = smf
+        else:
+            error("Only a '0' or '1' is permitted for the --smf option")
+
+    if tracks:
+        gbl.muteTracks = tracks.upper().split(",")
+
+    if groove_db:
+        gbl.makeGrvDefs = 1
+
+    if create_groove_db:
+        gbl.makeGrvDefs = 2
+
+    if doc:
+        handle_doc_option(doc)
+
+    if tsplit:
+        handle_xoption("TSplit", [])
+
+    if csplit:
+        handle_xoption("CSplit", [])
+
+    if nocredit:
+        handle_xoption("NOCREDIT", [])
+
+    if syncstart:
+        import neomma.MMA.sync
+
+        neomma.MMA.sync.synchronize(["START"])
+
+    if syncend:
+        import neomma.MMA.sync
+
+        neomma.MMA.sync.synchronize(["END"])
+
+    if infile and infile != "-":
+        gbl.infile = infile
+    elif infile == "-":
+        gbl.infile = 1
+
+    if gbl.infile == 1 and not gbl.outfile:
+        import neomma.MMA.debug
+
+        if not neomma.MMA.debug.noOutput:
+            error("Input from STDIN specified. Use --output to set an output filename.")
