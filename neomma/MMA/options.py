@@ -136,9 +136,6 @@ import click
 @click.option(
     "-L", "--show-bar-order", is_flag=True, help="Show order of bars processed"
 )
-@click.option(
-    "-m", "--max-bars", type=int, help="Set maximum number of bars (default: 500)"
-)
 @click.option("-M", "--smf", type=click.Choice(["0", "1"]), help="Set SMF to 0 or 1")
 @click.option("-n", "--no-output", is_flag=True, help="No generation of midi output")
 @click.option(
