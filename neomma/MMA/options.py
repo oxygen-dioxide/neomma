@@ -88,8 +88,12 @@ def handle_doc_option(doc_type):
         gbl.createDocs = 2
     elif doc_type == "sequence":
         gbl.createDocs = 3
+    elif doc_type == "json":
+        gbl.createDocs = 5
     elif doc_type == "grooves":
         gbl.createDocs = 99
+    else:
+        error("Invalid doc type '%s' for --doc option." % doc_type)
 
 
 def handle_xoption(xopt, args):
@@ -97,39 +101,6 @@ def handle_xoption(xopt, args):
     import neomma.MMA.xtra
 
     neomma.MMA.xtra.xoption(xopt, args)
-
-
-def main(
-    bar_range,
-    bar_range_abs,
-    max_bars,
-    output,
-    init,
-    no_output,
-    play,
-    show_channels,
-    debug,
-    show_expanded,
-    show_patterns,
-    show_progress,
-    show_sequence,
-    show_bar_order,
-    no_warnings,
-    smf,
-    tracks,
-    groove_db,
-    create_groove_db,
-    doc,
-    tsplit,
-    csplit,
-    nocredit,
-    syncstart,
-    syncend,
-    infile,
-):
-    """Main CLI entry point."""
-
-    
 
 
 import click
@@ -170,10 +141,10 @@ import click
 )
 @click.option("-M", "--smf", type=click.Choice(["0", "1"]), help="Set SMF to 0 or 1")
 @click.option("-n", "--no-output", is_flag=True, help="No generation of midi output")
-@click.option("-P", "--play", is_flag=True, help="Play song with player (dont save)")
 @click.option(
     "-p", "--show-patterns", is_flag=True, help="Display Patterns as they are defined"
 )
+@click.option("-P", "--play", is_flag=True, help="Play song with player (dont save)")
 @click.option("-r", "--show-progress", is_flag=True, help="Display running progress")
 @click.option(
     "-s", "--show-sequence", is_flag=True, help="Display Sequence info during run"
@@ -199,7 +170,6 @@ import click
 def cli(
     bar_range:str,
     bar_range_abs:str,
-    max_bars:int,
     output:str,
     init:str,
     no_output:bool,
@@ -240,9 +210,6 @@ def cli(
     if bar_range_abs:
         setBarRange(bar_range_abs)
         gbl.barRange.append("ABS")
-
-    if max_bars:
-        gbl.maxBars = max_bars
 
     if output:
         gbl.outfile = output
