@@ -33,24 +33,26 @@ from neomma.MMA.pat import PC, Pgroup
 
 
 class Arpeggio(PC):
-    """ Pattern class for an arpeggio track. """
+    """Pattern class for an arpeggio track."""
 
-    vtype = 'ARPEGGIO'
+    vtype = "ARPEGGIO"
     arpOffset = -1
     arpDirection = 1
     lastRange = 999
     lastDirection = 999
 
     def getPgroup(self, ev):
-        """ Get group for apreggio pattern.
+        """Get group for apreggio pattern.
 
-            Fields - start, length, volume
+        Fields - start, length, volume
         """
 
         a = Pgroup()
         if len(ev) != 3:
-            error("There must be exactly 3 items in each group "
-                  "for apreggio define, not '%s'" % ' '.join(ev))
+            error(
+                "There must be exactly 3 items in each group "
+                "for apreggio define, not '%s'" % " ".join(ev)
+            )
 
         a.offset = self.setBarOffset(ev[0])
         a.duration = neomma.MMA.notelen.getNoteLen(ev[1])
@@ -66,7 +68,7 @@ class Arpeggio(PC):
         lastDirection = 999
 
     def trackBar(self, pattern, ctable):
-        """ Do a arpeggio bar.
+        """Do a arpeggio bar.
 
         Called from self.bar()
 
@@ -92,7 +94,7 @@ class Arpeggio(PC):
             if tb.arpeggioZ:
                 continue
 
-            if direct == 'DOWN':
+            if direct == "DOWN":
                 self.arpDirection = -1
 
             if self.chordLimit[0]:
@@ -102,7 +104,9 @@ class Arpeggio(PC):
                 tb.chord.compress()
 
             if self.invert[sc]:
-                tb.chord.invert(random.randrange(self.invert[sc][0], self.invert[sc][1]+1))
+                tb.chord.invert(
+                    random.randrange(self.invert[sc][0], self.invert[sc][1] + 1)
+                )
 
             # This should be optimized, it recreates the chord for every pattern.
             # Problem is that one would need to check all the LIMIT, COMPRESS, etc
@@ -111,21 +115,21 @@ class Arpeggio(PC):
 
             octave = 0  # octave adjuster
             ourChord = []
-            
+
             # for the range, stack up chords
             for l in range(int(crange)):
-                ourChord.extend([x+octave for x in tb.chord.noteList])
+                ourChord.extend([x + octave for x in tb.chord.noteList])
                 octave += 12
 
             # fractional range, add partial chord
             fr = crange - int(crange)
-            if fr:      # for fractional  lengths
+            if fr:  # for fractional  lengths
                 fr = int(tb.chord.noteListLen * fr)
-                if fr < 2:   # important, min of 2 notes in arp.
+                if fr < 2:  # important, min of 2 notes in arp.
                     fr = 2
-                ourChord.extend([x+octave for x in tb.chord.noteList[:fr]])
+                ourChord.extend([x + octave for x in tb.chord.noteList[:fr]])
 
-            if direct == 'BOTH':
+            if direct == "BOTH":
                 if self.arpOffset < 0:
                     self.arpOffset = 1
                     self.arpDirection = 1
@@ -133,17 +137,17 @@ class Arpeggio(PC):
                     self.arpOffset = len(ourChord) - 2
                     self.arpDirection = -1
 
-            elif direct == 'UP':
+            elif direct == "UP":
                 if self.arpOffset >= len(ourChord) or self.arpOffset < 0:
                     self.arpOffset = 0
                     self.arpDirection = 1
 
-            elif direct == 'DOWN':
+            elif direct == "DOWN":
                 if self.arpOffset < 0 or self.arpOffset >= len(ourChord):
                     self.arpOffset = len(ourChord) - 1
                     self.arpDirection = -1
 
-            if direct == 'RANDOM':
+            if direct == "RANDOM":
                 note = random.choice(ourChord)
             else:
                 note = ourChord[self.arpOffset]
@@ -163,11 +167,15 @@ class Arpeggio(PC):
                 harmlist = []
 
             offset = p.offset
-            if self.ornaments['type']:
-                offset = neomma.MMA.ornament.doOrnament(self, notelist,
-                               self.getChordInPos(offset, ctable).chord.scaleList, p)
+            if self.ornaments["type"]:
+                offset = neomma.MMA.ornament.doOrnament(
+                    self,
+                    notelist,
+                    self.getChordInPos(offset, ctable).chord.scaleList,
+                    p,
+                )
                 notelist = []
 
             self.sendChord(notelist + harmlist, p.duration, offset)
 
-            tb.chord.reset()    # important, other tracks chord object
+            tb.chord.reset()  # important, other tracks chord object

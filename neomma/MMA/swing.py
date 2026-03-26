@@ -28,31 +28,50 @@ from neomma.MMA.common import *
 import neomma.MMA.debug
 from neomma.MMA.notelen import noteLenTable
 
-mode = 0      # defaults to 0, set to 1 for swing mode
-skew = None   # this is just for $_SwingMode macro
-accent1 = 1      # velocity % adjustments for 1st/2nd notes of swing pattern
+mode = 0  # defaults to 0, set to 1 for swing mode
+skew = None  # this is just for $_SwingMode macro
+accent1 = 1  # velocity % adjustments for 1st/2nd notes of swing pattern
 accent2 = 1
-delay1 = 0      # value, in ticks, for additional delay
+delay1 = 0  # value, in ticks, for additional delay
 delay2 = 0
-noteValue = 8    # this can be 8 or 16 for 8th swing or 16th swing
+noteValue = 8  # this can be 8 or 16 for 8th swing or 16th swing
 
 # These 2 funcs are called by the groove save/restore funcs. They
 # are used just to make the groove code a bit more readable.
 
 
 def gsettings():
-    return (mode, skew, accent1, accent2, delay1, delay2, noteLenTable['81'], noteLenTable['82'], noteValue)
+    return (
+        mode,
+        skew,
+        accent1,
+        accent2,
+        delay1,
+        delay2,
+        noteLenTable["81"],
+        noteLenTable["82"],
+        noteValue,
+    )
 
 
 def grestore(s):
     global mode, skew, accent1, accent2, delay1, delay2, noteValue
 
-    mode, skew, accent1, accent2, delay1, delay2, \
-        noteLenTable['81'], noteLenTable['82'], noteValue = s
+    (
+        mode,
+        skew,
+        accent1,
+        accent2,
+        delay1,
+        delay2,
+        noteLenTable["81"],
+        noteLenTable["82"],
+        noteValue,
+    ) = s
 
 
 def swingMode(ln):
-    """ Enable/Disable Swing timing mode. """
+    """Enable/Disable Swing timing mode."""
 
     global skew, mode, accent1, accent2, delay1, delay2, noteValue
 
@@ -76,39 +95,47 @@ def swingMode(ln):
             error(emsg)
 
     for v, o in opts:
-        if v == 'SKEW':
+        if v == "SKEW":
             skew = o
             a = int(stoi(o) * gbl.BperQ / 100)
-            noteLenTable['81'] = a
-            noteLenTable['82'] = gbl.BperQ - a
+            noteLenTable["81"] = a
+            noteLenTable["82"] = gbl.BperQ - a
 
-        elif v == 'ACCENT':
-            if o.count(',') != 1:
-                error("Swingmode: ACCENT expecting comma separated values, not '%s'." % o)
-            a1, a2 = o.split(',')
+        elif v == "ACCENT":
+            if o.count(",") != 1:
+                error(
+                    "Swingmode: ACCENT expecting comma separated values, not '%s'." % o
+                )
+            a1, a2 = o.split(",")
             a1 = stoi(a1)
             a2 = stoi(a2)
             if a1 < 1 or a1 > 200 or a2 < 1 or a2 > 200:
-                error("Swingmode: Both ACCENT values must be 1..200, not %s,%s."
-                      % (a1, a2))
+                error(
+                    "Swingmode: Both ACCENT values must be 1..200, not %s,%s."
+                    % (a1, a2)
+                )
 
-            accent1 = a1 / 100.
-            accent2 = a2 / 100.
+            accent1 = a1 / 100.0
+            accent2 = a2 / 100.0
 
-        elif v == 'DELAY':
-            if o.count(',') != 1:
-                error("Swingmode: DELAY expecting comma separated values, not '%s'." % o)
-            a1, a2 = o.split(',')
+        elif v == "DELAY":
+            if o.count(",") != 1:
+                error(
+                    "Swingmode: DELAY expecting comma separated values, not '%s'." % o
+                )
+            a1, a2 = o.split(",")
             a1 = stoi(a1)
             a2 = stoi(a2)
             if a1 < -20 or a1 > 20 or a2 < -20 or a2 > 20:
-                error("Swingmode: Both DELAY values must be -20..20, not %s,%s."
-                      % (a1, a2))
+                error(
+                    "Swingmode: Both DELAY values must be -20..20, not %s,%s."
+                    % (a1, a2)
+                )
 
             delay1 = a1
             delay2 = a2
 
-        elif v == 'NOTES':
+        elif v == "NOTES":
             o = stoi(o)
 
             if o not in (8, 16):
@@ -120,32 +147,49 @@ def swingMode(ln):
             error(emsg)
 
     if neomma.MMA.debug.debug:
-        dPrint("SwingMode: Status=%s; Accent=%s,%s; Delay=%s,%s; Skew Note lengths: " 
-            "%s and %s ticks. Notes=%s" % 
-            (mode, int(accent1 * 100), int(accent2 * 100), delay1, delay2,
-             noteLenTable['81'], noteLenTable['82'], noteValue))
+        dPrint(
+            "SwingMode: Status=%s; Accent=%s,%s; Delay=%s,%s; Skew Note lengths: "
+            "%s and %s ticks. Notes=%s"
+            % (
+                mode,
+                int(accent1 * 100),
+                int(accent2 * 100),
+                delay1,
+                delay2,
+                noteLenTable["81"],
+                noteLenTable["82"],
+                noteValue,
+            )
+        )
 
 
 def settings():
-    """ Return string of current settings. For macros. """
+    """Return string of current settings. For macros."""
 
     if mode:
         a = "On"
     else:
         a = "Off"
 
-    return "%s Accent=%s,%s Delay=%s,%s Skew=%s Notes=%s" % \
-        (a, int(accent1 * 100), int(accent2 * 100), delay1, delay2, skew, noteValue)
+    return "%s Accent=%s,%s Delay=%s,%s Skew=%s Notes=%s" % (
+        a,
+        int(accent1 * 100),
+        int(accent2 * 100),
+        delay1,
+        delay2,
+        skew,
+        noteValue,
+    )
 
 
 def getBeats():
-    """ Calc on and off beats for swing. This will work if "notevalue" is
-        set to 8 or 16.
+    """Calc on and off beats for swing. This will work if "notevalue" is
+    set to 8 or 16.
     """
 
-    len8 = noteLenTable['8']
-    len81 = noteLenTable['81']
-    len82 = noteLenTable['82']
+    len8 = noteLenTable["8"]
+    len81 = noteLenTable["81"]
+    len82 = noteLenTable["82"]
 
     rng = int(gbl.QperBar)
     cnt = gbl.BperQ
@@ -164,7 +208,7 @@ def getBeats():
 
 
 def pattern(plist, vtype):
-    """ Do swing adjustments for pattern defs. """
+    """Do swing adjustments for pattern defs."""
 
     len8, len81, len82, onBeats, offBeats = getBeats()
 
@@ -195,25 +239,24 @@ def pattern(plist, vtype):
 
 
 def swingSolo(notes):
-    """ Adjust an entire bar of solo note chords for swingmode.
+    """Adjust an entire bar of solo note chords for swingmode.
 
-        Check each chord in the array of chords for a bar for
-        successive 8ths on & off the beat. If found, the first is
-        converted to 'long' 8th, the 2nd to a 'short'
-        and the offset for the 2nd is adjusted to comp. for the 'long'.
+    Check each chord in the array of chords for a bar for
+    successive 8ths on & off the beat. If found, the first is
+    converted to 'long' 8th, the 2nd to a 'short'
+    and the offset for the 2nd is adjusted to comp. for the 'long'.
 
-        If there is a spurious offset between an on/off beat that pair
-        will NOT be adjusted. Not sure if that is right or not?
+    If there is a spurious offset between an on/off beat that pair
+    will NOT be adjusted. Not sure if that is right or not?
 
-        Only called from getLine(), this is a separate function for sanity.
+    Only called from getLine(), this is a separate function for sanity.
     """
 
     len8, len81, len82, onBeats, offBeats = getBeats()
 
-    nl = sorted(notes)   # list of offsets
+    nl = sorted(notes)  # list of offsets
 
     for i in range(len(nl) - 1):
-
         # Check for successive note event offsets on 8th note positions
 
         if nl[i] in onBeats and nl[i + 1] == nl[i] + len8:
@@ -224,7 +267,6 @@ def swingSolo(notes):
             # the durations in both offsets with set([len8])
 
             if {nev.duration for nev in notes[beat0] + notes[beat1]} == {len8}:
-
                 # lengthen notes on-the-beat
 
                 for nev in notes[beat0]:
@@ -259,4 +301,4 @@ def swingSolo(notes):
 # This forces our skew value default and in the process
 # it sets the durations for the 81/82 notes
 
-swingMode(['Skew=66'])
+swingMode(["Skew=66"])

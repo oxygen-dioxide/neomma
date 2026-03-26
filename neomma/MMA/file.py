@@ -25,40 +25,40 @@ Bob van der Poel <bob@mellowood.ca>
 import sys
 import os
 from . import gbl
-from   neomma.MMA.common import *
+from neomma.MMA.common import *
 import neomma.MMA.debug
 
 
-def fixfname(f:str) -> str:
-    """ Convert embedded space characters in filename to real spaces and
-        expand ~ for user home directory.
+def fixfname(f: str) -> str:
+    """Convert embedded space characters in filename to real spaces and
+    expand ~ for user home directory.
 
-        Originally this was done with .decode("string-escape") but that
-        doesn't work with windows path names. So, now we just replace
-        any \x20 sequences with single spaces.
+    Originally this was done with .decode("string-escape") but that
+    doesn't work with windows path names. So, now we just replace
+    any \x20 sequences with single spaces.
 
-        
+
     """
 
-    f = f.replace('\\x20', ' ')
+    f = f.replace("\\x20", " ")
     return os.path.expanduser(f)
 
 
-def locFile(name:str, lib:str|None) -> str | None:
-    """ Locate a filename.
+def locFile(name: str, lib: str | None) -> str | None:
+    """Locate a filename.
 
-        This checks, in order:
-          lib/name + .mma
-          lib/name
-          name + .mma
-          name
+    This checks, in order:
+      lib/name + .mma
+      lib/name
+      name + .mma
+      name
     """
 
     ext = gbl.EXT
     exists = os.path.exists
 
     name = fixfname(name)  # for ~ expansion only
-    
+
     if lib:
         if not name.endswith(ext):
             t = os.path.join(lib, name + ext)
@@ -85,10 +85,9 @@ def locFile(name:str, lib:str|None) -> str | None:
 
 
 class ReadFile:
-
     class FileData:
-        """ After reading the file in bulk it is parsed and stored in this
-            data structure. Blanks lines and comments are removed.
+        """After reading the file in bulk it is parsed and stored in this
+        data structure. Blanks lines and comments are removed.
         """
 
         def __init__(self, lnum, data, label):
@@ -103,9 +102,9 @@ class ReadFile:
         self.lineptr = None
         self.fname = None
 
-        self.que = []     # que for pushed lines (mainly for REPEAT)
+        self.que = []  # que for pushed lines (mainly for REPEAT)
         self.qnums = []
-        #self.atEOFlines = []
+        # self.atEOFlines = []
 
         dataStore = self.FileData  # shortcut to avoid '.'s
 
@@ -116,7 +115,7 @@ class ReadFile:
                 inpath = open(fname, encoding=gbl.encoding)
             except OSError:
                 error("Unable to open '%s' for input" % fname)
- 
+
         if neomma.MMA.debug.debug or neomma.MMA.debug.showFilenames:
             dPrint("Opening file '%s'." % fname)
 
@@ -130,15 +129,15 @@ class ReadFile:
         """
 
         lcount = 0
-        label = ''
-        labs = []     # track label defs, error if duplicate in same file
-        nlabs = []    # track linenumber label defs
+        label = ""
+        labs = []  # track label defs, error if duplicate in same file
+        nlabs = []  # track linenumber label defs
         inComment = False  # multiline comment flag
 
         while 1:
             l = inpath.readline()
 
-            if not l:        # EOF
+            if not l:  # EOF
                 if inComment:
                     error("Multiline comment (/* */) not terminated.")
                 break
@@ -151,27 +150,27 @@ class ReadFile:
 
             # join lines ending in '\' - the strip() makes this the last char
 
-            while l[-1] == '\\':
-                l = l[0:-1] + ' ' + inpath.readline().strip()
+            while l[-1] == "\\":
+                l = l[0:-1] + " " + inpath.readline().strip()
                 lcount += 1
 
             """ input cleanup ... for now the only cleanup is to convert
                 0xa0 (non-breakable space) to 0x20 (regular space).
             """
 
-            l = l.replace('\xa0', '\x20')
+            l = l.replace("\xa0", "\x20")
 
             # multiline comments
             if inComment:
                 if "/*" in l:
-                    warning ("Block comment start '/*' found inside comment.")
+                    warning("Block comment start '/*' found inside comment.")
                 if "*/" in l:
                     _, _, l = l.partition("*/")
                     inComment = False
                 else:
                     continue
 
-            l = l.split('//', 1)[0]  # Strip off line comment
+            l = l.split("//", 1)[0]  # Strip off line comment
 
             while "/*" in l:
                 if "*/" in l:
@@ -209,12 +208,12 @@ class ReadFile:
                 with only a NNN.
             """
 
-            if l[0].upper() == 'LABEL':
+            if l[0].upper() == "LABEL":
                 if len(l) != 2:
                     gbl.lineno = lcount
                     error("Usage: LABEL <string>")
                 label = l[1].upper()
-                if label[0] == '$':
+                if label[0] == "$":
                     gbl.lineno = lcount
                     error("Variables are not permitted as labels")
                 if label in labs:
@@ -237,7 +236,7 @@ class ReadFile:
                 else:
                     for i, a in enumerate(fdata):
                         if a.label == label:
-                            fdata[i].label = ''
+                            fdata[i].label = ""
 
             else:
                 label = None
@@ -252,24 +251,24 @@ class ReadFile:
         self.lastline = len(fdata)
 
     def toEof(self):
-        """ Move pointer to End of File. """
+        """Move pointer to End of File."""
 
-        self.lineptr = self.lastline+1
+        self.lineptr = self.lastline + 1
         self.que = []
         self.qnums = []
 
     def goto(self, l):
-        """ Do a goto jump.
+        """Do a goto jump.
 
-            This isn't perfect, but is probably the way most GOTOs work. If
-            inside a repeat/if then nothing more is processed. The jump is
-            immediate. Of course, you'll run into problems with missing
-            repeat/repeatend if you try it. Since all repeats are stacked
-            back into the que, we just delete the que. Then we look for a
-            matching label in the file line array.
+        This isn't perfect, but is probably the way most GOTOs work. If
+        inside a repeat/if then nothing more is processed. The jump is
+        immediate. Of course, you'll run into problems with missing
+        repeat/repeatend if you try it. Since all repeats are stacked
+        back into the que, we just delete the que. Then we look for a
+        matching label in the file line array.
 
-            Label search is linear. Not too efficient, but the lists
-            will probably never be that long either.
+        Label search is linear. Not too efficient, but the lists
+        will probably never be that long either.
 
         """
 
@@ -287,23 +286,23 @@ class ReadFile:
         error("Label '%s' has not been set" % l)
 
     def pushEOFline(self, ln):
-        self.fdata.append(self.FileData(gbl.lineno, ln, ''))
-        self.lastline+=1
+        self.fdata.append(self.FileData(gbl.lineno, ln, ""))
+        self.lastline += 1
 
     def push(self, q, nums):
-        """ Push a list of lines back into the input stream.
+        """Push a list of lines back into the input stream.
 
-            Note: This is a list of semi-processed lines, no comments, etc.
+        Note: This is a list of semi-processed lines, no comments, etc.
 
-            It's quicker to extend a list than to insert, so add to the end.
-            Note: we reverse the original, extend() then reverse again, just
-            in case the caller cares.
+        It's quicker to extend a list than to insert, so add to the end.
+        Note: we reverse the original, extend() then reverse again, just
+        in case the caller cares.
 
-            nums is a list of linenumbers. Needed to report error lines.
+        nums is a list of linenumbers. Needed to report error lines.
         """
 
         if not self.que:
-            self.que = ['']
+            self.que = [""]
             self.qnums = [gbl.lineno]
 
         q.reverse()
@@ -315,14 +314,14 @@ class ReadFile:
         nums.reverse()
 
     def read(self):
-        """ Return a line.
+        """Return a line.
 
-            This will return either a queued line or a line from the
-            file (which was stored/processed earlier).
+        This will return either a queued line or a line from the
+        file (which was stored/processed earlier).
         """
 
         while 1:
-            if self.que:            # Return a queued line if possible.
+            if self.que:  # Return a queued line if possible.
                 ln = self.que.pop(-1)
 
                 gbl.lineno = self.qnums.pop()

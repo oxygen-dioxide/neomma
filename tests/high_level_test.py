@@ -9,31 +9,43 @@ import pytest
 import os
 import subprocess
 
+
 def assert_midi_equal(midi1, midi2):
     assert len(midi1.tracks) == len(midi2.tracks), "Number of tracks differ"
     for track1, track2 in zip(midi1.tracks, midi2.tracks):
         assert len(track1) == len(track2), "Number of messages in track differ"
         for msg1, msg2 in zip(track1, track2):
             assert msg1.type == msg2.type, f"Message types differ: {msg1} vs {msg2}"
-            assert msg1.time == msg2.time, f"Message times differ: {msg1.time} vs {msg2.time}"
-            if hasattr(msg1, 'note'):
-                assert msg1.note == msg2.note, f"Notes differ: {msg1.note} vs {msg2.note}"
-            if hasattr(msg1, 'velocity'):
-                assert msg1.velocity == msg2.velocity, f"Velocities differ: {msg1.velocity} vs {msg2.velocity}"
+            assert msg1.time == msg2.time, (
+                f"Message times differ: {msg1.time} vs {msg2.time}"
+            )
+            if hasattr(msg1, "note"):
+                assert msg1.note == msg2.note, (
+                    f"Notes differ: {msg1.note} vs {msg2.note}"
+                )
+            if hasattr(msg1, "velocity"):
+                assert msg1.velocity == msg2.velocity, (
+                    f"Velocities differ: {msg1.velocity} vs {msg2.velocity}"
+                )
+
 
 root = pathlib.Path(__file__).parent / "files"
 temp = pathlib.Path(__file__).parent.parent / "testtemp"
 
-@pytest.mark.parametrize("input_file, expected_output_file", [
-    ("after.mma", "after.mid"),
-    ("convert4to5.mma", "convert4to5.mid"),
-    ("deep-river.mma", "deep-river.mid"),
-    ("delay_solo.mma", "delay_solo.mid"),
-    ("frankie.mma", "frankie.mid"),
-    ("ornament_bass.mma", "ornament_bass.mid"),
-    ("rpitch_bass.mma", "rpitch_bass.mid"),
-])
-def test_mma(input_file:str, expected_output_file:str, script_runner):
+
+@pytest.mark.parametrize(
+    "input_file, expected_output_file",
+    [
+        ("after.mma", "after.mid"),
+        ("convert4to5.mma", "convert4to5.mid"),
+        ("deep-river.mma", "deep-river.mid"),
+        ("delay_solo.mma", "delay_solo.mid"),
+        ("frankie.mma", "frankie.mid"),
+        ("ornament_bass.mma", "ornament_bass.mid"),
+        ("rpitch_bass.mma", "rpitch_bass.mid"),
+    ],
+)
+def test_mma(input_file: str, expected_output_file: str, script_runner):
     input_path = root / input_file
     expected_output_path = root / expected_output_file
     actual_output_path = temp / expected_output_file
@@ -45,15 +57,15 @@ def test_mma(input_file:str, expected_output_file:str, script_runner):
 
     # Run the MMA script with the input file
     result = subprocess.run(
-        ["neomma", str(input_path), "-f", str(actual_output_path)], 
-        capture_output=True, 
-        text=True
+        ["neomma", str(input_path), "-f", str(actual_output_path)],
+        capture_output=True,
+        text=True,
     )
     if result.stdout:
         print(f"# stdout \n{result.stdout}")
     if result.stderr:
         print(f"# stderr \n{result.stderr}")
-    #assert result.success, f"Script failed with error: {result.stderr}"
+    # assert result.success, f"Script failed with error: {result.stderr}"
 
     # Load the generated MIDI file and the expected MIDI file
     generated_midi = mido.MidiFile(str(actual_output_path))
@@ -62,10 +74,14 @@ def test_mma(input_file:str, expected_output_file:str, script_runner):
     # Assert that the generated MIDI matches the expected MIDI
     assert_midi_equal(generated_midi, expected_midi)
 
-@pytest.mark.parametrize("input_file, expected_output_file, extra_args", [
-    ("deep-river.mma", "deep-river-tempo120.mid", ["-S", "tempo=120"]),
-    ("deep-river.mma", "deep-river-bar2-3.mid", ["-b", "2-3"]),
-])
+
+@pytest.mark.parametrize(
+    "input_file, expected_output_file, extra_args",
+    [
+        ("deep-river.mma", "deep-river-tempo120.mid", ["-S", "tempo=120"]),
+        ("deep-river.mma", "deep-river-bar2-3.mid", ["-b", "2-3"]),
+    ],
+)
 def test_mma_extra_args(input_file, expected_output_file, extra_args, script_runner):
     input_path = root / input_file
     expected_output_path = root / expected_output_file
@@ -77,12 +93,10 @@ def test_mma_extra_args(input_file, expected_output_file, extra_args, script_run
         actual_output_path.unlink()
 
     # Run the MMA script with the input file
-    result = subprocess.run([
-        "neomma", 
-        str(input_path), 
-        "-f", 
-        str(actual_output_path)] + extra_args)
-    #assert result.success, f"Script failed with error: {result.stderr}"
+    result = subprocess.run(
+        ["neomma", str(input_path), "-f", str(actual_output_path)] + extra_args
+    )
+    # assert result.success, f"Script failed with error: {result.stderr}"
 
     # Load the generated MIDI file and the expected MIDI file
     generated_midi = mido.MidiFile(str(actual_output_path))

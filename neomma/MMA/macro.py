@@ -52,28 +52,28 @@ import neomma.MMA.lyric
 from neomma.MMA.safe_eval import safeEnv, safeEval
 from . import gbl
 
-from   neomma.MMA.notelen import getNoteLen
-from   neomma.MMA.keysig import keySig
-from   neomma.MMA.timesig import timeSig
-from   neomma.MMA.common import *
+from neomma.MMA.notelen import getNoteLen
+from neomma.MMA.keysig import keySig
+from neomma.MMA.timesig import timeSig
+from neomma.MMA.common import *
 
 
 def sliceVariable(p, sl):
-    """ Slice a variable. Used by macro expand. """
+    """Slice a variable. Used by macro expand."""
 
     # If slice is empty, return length.
-    if sl == '':
-        return [ str(len(p)) ]
+    if sl == "":
+        return [str(len(p))]
 
     try:
         # Important: We are using the non-safe version of eval()
         #            changing to safe_eval() will stop slice
         #            args from working!!! So, don't change it.
-        new = eval('p' + "[" + sl + "]")
+        new = eval("p" + "[" + sl + "]")
     except IndexError:
         error("Index '%s' out of range." % sl)
     except:
-        error("Index error '{}' in '{}' Check the array being sliced.".format(sl,p) )
+        error("Index error '{}' in '{}' Check the array being sliced.".format(sl, p))
 
     if ":" not in sl:
         new = [new]
@@ -82,8 +82,8 @@ def sliceVariable(p, sl):
 
 
 class Macros:
-    vars = {}            # storage
-    expandMode = 1        # flag for variable expansion
+    vars = {}  # storage
+    expandMode = 1  # flag for variable expansion
     pushstack = []
 
     def __init__(self):
@@ -98,377 +98,392 @@ class Macros:
             dPrint("All variable definitions cleared.")
 
     def stackValue(self, s):
-        self.pushstack.append(' '.join(s))
+        self.pushstack.append(" ".join(s))
 
     def sysvar(self, s):
-        """ Create an internal macro. """
+        """Create an internal macro."""
 
         # Check for system functions.
 
-        m = re.match( r'([^\(]+)\((.*)\)$', s )
+        m = re.match(r"([^\(]+)\((.*)\)$", s)
         if m:
-            return self.sysfun( m.group(1), m.group(2) )
-            
+            return self.sysfun(m.group(1), m.group(2))
+
         # Simple/global     system values
 
-        if s == 'CHORDADJUST':
-            return ' '.join([ "{}={}".format(a, neomma.MMA.chords.cdAdjust[a]) 
-                              for a in sorted(neomma.MMA.chords.cdAdjust)])
+        if s == "CHORDADJUST":
+            return " ".join(
+                [
+                    "{}={}".format(a, neomma.MMA.chords.cdAdjust[a])
+                    for a in sorted(neomma.MMA.chords.cdAdjust)
+                ]
+            )
 
-        elif s == 'FILENAME':
+        elif s == "FILENAME":
             a = gbl.inpath.fname
             if isinstance(a, int):
-                return ''
+                return ""
             else:
                 return str(gbl.inpath.fname)
 
-        elif s == 'FILEPATH':
+        elif s == "FILEPATH":
             a = gbl.inpath.fname
             if isinstance(a, int):
-                return ''
+                return ""
             else:
                 return path.abspath(gbl.inpath.fname)
 
-        elif s == 'SONGPATH':
+        elif s == "SONGPATH":
             a = gbl.infile
             if isinstance(a, int):
-                return ''
+                return ""
             else:
                 return path.abspath(gbl.infile)
-        
-        elif s == 'KEYSIG':
+
+        elif s == "KEYSIG":
             return keySig.getKeysig()
 
-        elif s == 'TIME':
+        elif s == "TIME":
             return str(gbl.QperBar)
 
-        elif s == 'CTABS':
-            return ','.join([ str((float(x) / gbl.BperQ) + 1) for x in neomma.MMA.parseCL.chordTabs])
+        elif s == "CTABS":
+            return ",".join(
+                [str((float(x) / gbl.BperQ) + 1) for x in neomma.MMA.parseCL.chordTabs]
+            )
 
-        elif s == 'TIMESIG':
+        elif s == "TIMESIG":
             return timeSig.getAscii()
 
-        elif s == 'TEMPO':  # get the current tempo via the record in midi.py
+        elif s == "TEMPO":  # get the current tempo via the record in midi.py
             tmp = gbl.tempo
-            for o,t in neomma.MMA.midi.tempoChanges:
+            for o, t in neomma.MMA.midi.tempoChanges:
                 if o > gbl.tickOffset:
                     break
                 tmp = t
             return str(tmp)
 
-        elif s == 'OFFSET':
+        elif s == "OFFSET":
             return str(gbl.tickOffset)
-        
-        elif s == 'SONGFILENAME':
+
+        elif s == "SONGFILENAME":
             return str(gbl.infile)
 
-        elif s == 'VOLUME':
+        elif s == "VOLUME":
             return str(int(neomma.MMA.volume.volume * 100))  # INT() is important
 
-        elif s == 'VOLUMERATIO':
+        elif s == "VOLUMERATIO":
             return str(neomma.MMA.volume.vTRatio * 100)
 
-        elif s == 'LASTVOLUME':
+        elif s == "LASTVOLUME":
             return str(int(neomma.MMA.volume.lastVolume * 100))
 
-        elif s == 'GROOVE':
+        elif s == "GROOVE":
             return neomma.MMA.grooves.currentGroove
 
-        elif s == 'GROOVELIST':
-            return ' '.join(sorted([x for x in neomma.MMA.grooves.glist.keys() if isinstance(x, str)]))
+        elif s == "GROOVELIST":
+            return " ".join(
+                sorted(
+                    [x for x in neomma.MMA.grooves.glist.keys() if isinstance(x, str)]
+                )
+            )
 
-        elif s == 'TRACKLIST':
-            return ' '.join(sorted(gbl.tnames.keys()))
+        elif s == "TRACKLIST":
+            return " ".join(sorted(gbl.tnames.keys()))
 
-        elif s == 'LASTGROOVE':
+        elif s == "LASTGROOVE":
             return neomma.MMA.grooves.lastGroove
 
-        elif s == 'PLUGINS':
+        elif s == "PLUGINS":
             from neomma.MMA.regplug import simplePlugs  # to avoid circular import error
-            return ' '.join(simplePlugs)
 
-        elif s == 'TRACKPLUGINS':
+            return " ".join(simplePlugs)
+
+        elif s == "TRACKPLUGINS":
             from neomma.MMA.regplug import trackPlugs  # to avoid circular import error
-            return ' '.join(trackPlugs)
-         
-        elif s == 'DATAPLUGINS':
+
+            return " ".join(trackPlugs)
+
+        elif s == "DATAPLUGINS":
             from neomma.MMA.regplug import dataPlugs  # to avoid circular import error
-            return ' '.join(dataPlugs)
-        
-        elif s == 'SEQ':
+
+            return " ".join(dataPlugs)
+
+        elif s == "SEQ":
             return str(gbl.seqCount)
 
-        elif s == 'SEQRND':
+        elif s == "SEQRND":
             if neomma.MMA.seqrnd.seqRnd[0] == 0:
                 return "Off"
             if neomma.MMA.seqrnd.seqRnd[0] == 1:
                 return "On"
-            return ' '.join(neomma.MMA.seqrnd.seqRnd[1:])
+            return " ".join(neomma.MMA.seqrnd.seqRnd[1:])
 
-        elif s == 'SEQSIZE':
+        elif s == "SEQSIZE":
             return str(gbl.seqSize)
 
-        elif s == 'SWINGMODE':
+        elif s == "SWINGMODE":
             return neomma.MMA.swing.settings()
 
-        elif s == 'TICKPOS':
+        elif s == "TICKPOS":
             return str(gbl.tickOffset)
-        
-        elif s == 'TRANSPOSE':
+
+        elif s == "TRANSPOSE":
             return str(gbl.transpose)
 
-        elif s == 'STACKVALUE':
+        elif s == "STACKVALUE":
             if not self.pushstack:
                 error("Empty push/pull variable stack")
             return self.pushstack.pop()
 
-        elif s == 'DEBUG':
+        elif s == "DEBUG":
             return neomma.MMA.debug.getFlags()
-        
-        elif s == 'LASTDEBUG':
+
+        elif s == "LASTDEBUG":
             return neomma.MMA.debug.getLFlags()
-            
-        elif s == 'VEXPAND':
+
+        elif s == "VEXPAND":
             if self.expandMode:
                 return "On"
             else:
                 return "Off"
 
         elif s == "MIDIPLAYER":
-            return "%s Background=%s Delay=%s." % \
-                (' '.join(neomma.MMA.player.midiPlayer), neomma.MMA.player.inBackGround,
-                 neomma.MMA.player.waitTime)
+            return "%s Background=%s Delay=%s." % (
+                " ".join(neomma.MMA.player.midiPlayer),
+                neomma.MMA.player.inBackGround,
+                neomma.MMA.player.waitTime,
+            )
 
         elif s == "MIDISPLIT":
-            return ' '.join([str(x) for x in neomma.MMA.midi.splitChannels])
+            return " ".join([str(x) for x in neomma.MMA.midi.splitChannels])
 
         elif s == "MIDIASSIGNS":
             x = []
             for c, n in sorted(gbl.midiAssigns.items()):
                 if n:
-                    x.append("{}={}".format(c, ','.join(n)))
-            return ' '.join(x)
+                    x.append("{}={}".format(c, ",".join(n)))
+            return " ".join(x)
 
-        elif s == 'SEQRNDWEIGHT':
-            return ' '.join([str(x) for x in neomma.MMA.seqrnd.seqRndWeight])
+        elif s == "SEQRNDWEIGHT":
+            return " ".join([str(x) for x in neomma.MMA.seqrnd.seqRndWeight])
 
-        elif s == 'AUTOLIBPATH':
-            return ' '.join(neomma.MMA.paths.libDirs)
+        elif s == "AUTOLIBPATH":
+            return " ".join(neomma.MMA.paths.libDirs)
 
-        elif s == 'LIBPATH':
-            return ' '.join(neomma.MMA.paths.libPath)
+        elif s == "LIBPATH":
+            return " ".join(neomma.MMA.paths.libPath)
 
-        elif s == 'MMAPATH':
+        elif s == "MMAPATH":
             return gbl.MMAdir
 
-        elif s == 'INCPATH':
-            return ' '.join(neomma.MMA.paths.incPath)
+        elif s == "INCPATH":
+            return " ".join(neomma.MMA.paths.incPath)
 
-        elif s == 'PLUGPATH':
-            return ' '.join(neomma.MMA.paths.plugPaths)
-    
-        elif s == 'VOICETR':
+        elif s == "PLUGPATH":
+            return " ".join(neomma.MMA.paths.plugPaths)
+
+        elif s == "VOICETR":
             return neomma.MMA.translate.vtable.retlist()
 
-        elif s == 'TONETR':
+        elif s == "TONETR":
             return neomma.MMA.translate.dtable.retlist()
 
-        elif s == 'OUTPATH':
+        elif s == "OUTPATH":
             return gbl.outPath
 
-        elif s == 'BARNUM':
+        elif s == "BARNUM":
             return str(gbl.barNum + 1)
 
-        elif s == 'LINENUM':
+        elif s == "LINENUM":
             return str(gbl.lineno)
 
-        elif s == 'LYRIC':
+        elif s == "LYRIC":
             return neomma.MMA.lyric.lyric.setting()
 
         # Some time/date macros. Useful for generating copyright strings
 
-        elif s == 'DATEYEAR':
+        elif s == "DATEYEAR":
             return str(datetime.datetime.now().year)
 
-        elif s == 'DATEDATE':
+        elif s == "DATEDATE":
             return datetime.datetime.now().strftime("%Y-%m-%d")
 
-        elif s == 'DATETIME':
+        elif s == "DATETIME":
             return datetime.datetime.now().strftime("%H:%M:%S")
 
-        
         # Some system info. Could be useful in generating path names?
 
-        elif s == 'PWD':
+        elif s == "PWD":
             return os.getcwd()
-        
+
         # Track vars ... these are in format TRACKNAME_VAR
 
-        a = s.rfind('_')
+        a = s.rfind("_")
         if a == -1:
             error("Unknown system variable $_%s" % s)
 
         tname = s[:a]
-        func = s[a+1:]
+        func = s[a + 1 :]
 
         try:
             t = gbl.tnames[tname]
         except KeyError:
             error("System variable $_%s refers to nonexistent track." % s)
 
-        if func == 'ACCENT':
+        if func == "ACCENT":
             r = []
             for s in t.accent:
                 r.append("{")
                 for b, v in s:
-                    r.append('%g' % (b/float(gbl.BperQ)+1))
+                    r.append("%g" % (b / float(gbl.BperQ) + 1))
                     r.append(str(int(v * 100)))
                 r.append("}")
-            return ' '.join(r)
+            return " ".join(r)
 
-        elif func == 'ARTICULATE':
-            return ' '.join([str(x) for x in t.artic])
+        elif func == "ARTICULATE":
+            return " ".join([str(x) for x in t.artic])
 
-        elif func == 'CHORDS':
+        elif func == "CHORDS":
             r = []
             for l in t.chord:
-                r.append('{' + ' '.join(l) + '}')
-            return ' '.join(r)
+                r.append("{" + " ".join(l) + "}")
+            return " ".join(r)
 
-        elif func == 'CHANNEL':
+        elif func == "CHANNEL":
             return str(t.channel)
 
-        elif func == 'COMPRESS':
-            return ' '.join([str(x) for x in t.compress])
+        elif func == "COMPRESS":
+            return " ".join([str(x) for x in t.compress])
 
-        elif func == 'DELAY':
-            return ' '.join([str(x) for x in t.delay])
+        elif func == "DELAY":
+            return " ".join([str(x) for x in t.delay])
 
-        elif func == 'DIRECTION':
-            if t.vtype == 'ARIA':
-                return ' '.join([str(x) for x in t.selectDir])
+        elif func == "DIRECTION":
+            if t.vtype == "ARIA":
+                return " ".join([str(x) for x in t.selectDir])
             else:
-                return ' '.join([str(x) for x in t.direction])
+                return " ".join([str(x) for x in t.direction])
 
-        elif func == 'DUPROOT':
+        elif func == "DUPROOT":
             if t.vtype != "CHORD":
                 error("Only CHORD tracks have DUPROOT")
             return t.getDupRootSetting()
 
-        elif func == 'FRETNOISE':
+        elif func == "FRETNOISE":
             return t.getFretNoiseOptions()
 
-        elif func == 'HARMONY':
-            return ' '.join([str(x) for x in t.harmony])
+        elif func == "HARMONY":
+            return " ".join([str(x) for x in t.harmony])
 
-        elif func == 'HARMONYONLY':
-            return ' '.join([str(x) for x in t.harmonyOnly])
+        elif func == "HARMONYONLY":
+            return " ".join([str(x) for x in t.harmonyOnly])
 
-        elif func == 'HARMONYVOLUME':
-            return ' '.join([str(int(i * 100)) for i in t.harmonyVolume])
+        elif func == "HARMONYVOLUME":
+            return " ".join([str(int(i * 100)) for i in t.harmonyVolume])
 
-        elif func == 'INVERT':
-            return ' '.join([str(x) for x in t.invert])
+        elif func == "INVERT":
+            return " ".join([str(x) for x in t.invert])
 
-        elif func == 'LIMIT':
+        elif func == "LIMIT":
             return "{} mode={}".format(t.chordLimit[0], t.chordLimit[1])
 
-        elif func == 'MALLET':
+        elif func == "MALLET":
             if t.vtype not in ("SOLO", "MELODY"):
                 error("Mallet only valid in SOLO and MELODY tracks")
-            return "Mallet Rate=%i Decay=%i" % (t.mallet, t.malletDecay*100)
+            return "Mallet Rate=%i Decay=%i" % (t.mallet, t.malletDecay * 100)
 
-        elif func == 'MIDINOTE':
+        elif func == "MIDINOTE":
             return neomma.MMA.midinote.mopts(t)
 
-        elif func == 'MIDIVOLUME':
+        elif func == "MIDIVOLUME":
             return "%s" % t.cVolume
 
-        elif func == 'OCTAVE':
-            return ' '.join([str(i//12) for i in t.octave])
+        elif func == "OCTAVE":
+            return " ".join([str(i // 12) for i in t.octave])
 
-        elif func == 'MOCTAVE':
-            return ' '.join([str((i//12)-1) for i in t.octave])
+        elif func == "MOCTAVE":
+            return " ".join([str((i // 12) - 1) for i in t.octave])
 
-        elif func == 'ORNAMENT':
+        elif func == "ORNAMENT":
             return neomma.MMA.ornament.getOrnOpts(t)
-        
-        elif func == 'PLUGINS':
-            from neomma.MMA.regplug import trackPlugs  # avoids circular import
-            return ' '.join(trackPlugs)
-        
-        elif func == 'RANGE':
-            return ' '.join([str(x) for x in t.chordRange])
 
-        elif func == 'RSKIP':
-            m = ''
+        elif func == "PLUGINS":
+            from neomma.MMA.regplug import trackPlugs  # avoids circular import
+
+            return " ".join(trackPlugs)
+
+        elif func == "RANGE":
+            return " ".join([str(x) for x in t.chordRange])
+
+        elif func == "RSKIP":
+            m = ""
             if t.rSkipBeats:
-                m = "Beats=%s " % ','.join(['%g' % (x/float(gbl.BperQ)+1) for x in t.rSkipBeats])
-            m += ' '.join([str(int(i * 100)) for i in t.rSkip])
+                m = "Beats=%s " % ",".join(
+                    ["%g" % (x / float(gbl.BperQ) + 1) for x in t.rSkipBeats]
+                )
+            m += " ".join([str(int(i * 100)) for i in t.rSkip])
             return m
 
-        elif func == 'RDURATION':
+        elif func == "RDURATION":
             tmp = []
             for a1, a2 in t.rDuration:
                 a1 = int(a1 * 100)
                 a2 = int(a2 * 100)
                 if a1 == a2:
-                    tmp.append('%s' % abs(a1))
+                    tmp.append("%s" % abs(a1))
                 else:
-                    tmp.append('{},{}'.format(a1, a2))
+                    tmp.append("{},{}".format(a1, a2))
 
-            return ' '. join(tmp)
+            return " ".join(tmp)
 
-        elif func == 'RTIME':
+        elif func == "RTIME":
             tmp = []
             for a1, a2 in t.rTime:
                 if a1 == a2:
-                    tmp.append('%s' % abs(a1))
+                    tmp.append("%s" % abs(a1))
                 else:
-                    tmp.append('{},{}'.format(a1, a2))
-            return ' '.join(tmp)
+                    tmp.append("{},{}".format(a1, a2))
+            return " ".join(tmp)
 
-        elif func == 'RVOLUME':
+        elif func == "RVOLUME":
             tmp = []
             for a1, a2 in t.rVolume:
                 a1 = int(a1 * 100)
                 a2 = int(a2 * 100)
                 if a1 == a2:
-                    tmp.append('%s' % abs(a1))
+                    tmp.append("%s" % abs(a1))
                 else:
-                    tmp.append('{},{}'.format(a1, a2))
-            return ' '.join(tmp)
+                    tmp.append("{},{}".format(a1, a2))
+            return " ".join(tmp)
 
-        elif func == 'RPITCH':
+        elif func == "RPITCH":
             return neomma.MMA.rpitch.getOpts(t)
-            
-                    
-        elif func == 'SEQUENCE':
+
+        elif func == "SEQUENCE":
             tmp = []
             for a in range(gbl.seqSize):
-                tmp.append('{' + t.formatPattern(t.sequence[a]) + '}')
-            return ' '.join(tmp)
+                tmp.append("{" + t.formatPattern(t.sequence[a]) + "}")
+            return " ".join(tmp)
 
-        elif func == 'SEQRND':
+        elif func == "SEQRND":
             if t.seqRnd:
-                return 'On'
+                return "On"
             else:
-                return 'Off'
+                return "Off"
 
-        elif func == 'SEQRNDWEIGHT':
-            return ' '.join([str(x) for x in t.seqRndWeight])
+        elif func == "SEQRNDWEIGHT":
+            return " ".join([str(x) for x in t.seqRndWeight])
 
-        elif func == 'SPAN':
+        elif func == "SPAN":
             return "{} {}".format(t.spanStart, t.spanEnd)
 
-        elif func == 'STICKY':
+        elif func == "STICKY":
             if t.sticky:
                 return "True"
             else:
                 return "False"
-            
 
-        elif func == 'STRUM':
+        elif func == "STRUM":
             r = []
             for v in t.strum:
                 if v is None:
@@ -480,63 +495,69 @@ class Macros:
                     else:
                         r.append("{},{}".format(a, b))
 
-            return ' '.join(r)
+            return " ".join(r)
 
-        elif func == 'STRUMADD':
-            return ' '.join([str(x) for x in t.strumAdd])
+        elif func == "STRUMADD":
+            return " ".join([str(x) for x in t.strumAdd])
 
-        elif func == 'TRIGGER':
+        elif func == "TRIGGER":
             return neomma.MMA.trigger.getTriggerOptions(t)
 
-        elif func == 'TONE':
-            if t.vtype in ('MELODY', 'SOLO'):
+        elif func == "TONE":
+            if t.vtype in ("MELODY", "SOLO"):
                 if not t.drumType:
                     error("Melody/Solo tracks must be DRUMTYPE for tone.")
                 return str(neomma.MMA.midiC.valueToDrum(t.drumTone))
 
-            elif t.vtype != 'DRUM':
+            elif t.vtype != "DRUM":
                 error("Tracktype %s doesn't have TONE" % t.vtype)
 
-            return ' '.join([neomma.MMA.midiC.valueToDrum(a) for a in t.toneList])
+            return " ".join([neomma.MMA.midiC.valueToDrum(a) for a in t.toneList])
 
-        elif func == 'UNIFY':
-            return ' '.join([str(x) for x in t.unify])
+        elif func == "UNIFY":
+            return " ".join([str(x) for x in t.unify])
 
-        elif func == 'VOICE':
-            return ' '.join([neomma.MMA.midiC.valueToInst(a) for a in t.voice])
+        elif func == "VOICE":
+            return " ".join([neomma.MMA.midiC.valueToInst(a) for a in t.voice])
 
-        elif func == 'VOICING':
-            if t.vtype != 'CHORD':
+        elif func == "VOICING":
+            if t.vtype != "CHORD":
                 error("Only CHORD tracks have VOICING")
             t = t.voicing
-            return "Mode=%s Range=%s Center=%s RMove=%s Move=%s Dir=%s" % \
-                (t.mode, t.range, t.center, t.random, t.bcount, t.dir)
+            return "Mode=%s Range=%s Center=%s RMove=%s Move=%s Dir=%s" % (
+                t.mode,
+                t.range,
+                t.center,
+                t.random,
+                t.bcount,
+                t.dir,
+            )
 
-        elif func == 'VOLUME':
-            return ' '.join([str(int(a * 100)) for a in t.volume])
+        elif func == "VOLUME":
+            return " ".join([str(int(a * 100)) for a in t.volume])
 
         else:
             error("Unknown system track variable %s" % s)
 
     def sysfun(self, func, arg):
         print("In sysfun", func, arg)
-        if func == 'NOTELEN':
+        if func == "NOTELEN":
             return "%sT" % getNoteLen(arg)
-        
-        elif func == 'ENV':
+
+        elif func == "ENV":
             return safeEnv(arg)
 
         else:
             error("Unknown system function %s" % func)
 
     def expand(self, l):
-        """ Loop though input line and make variable subsitutions.
-            MMA variables are pretty simple ... any word starting
-            with a "$xxx" is a variable.
+        """Loop though input line and make variable subsitutions.
+        MMA variables are pretty simple ... any word starting
+        with a "$xxx" is a variable.
 
-            l - list
+        l - list
 
-            RETURNS: new list with all subs done.
+        RETURNS: new list with all subs done.
         """
 
         if not self.expandMode:
@@ -545,37 +566,39 @@ class Macros:
         gotmath = 0
         sliceVar = None
 
-        while 1:          # Loop until no more subsitutions have been done
+        while 1:  # Loop until no more subsitutions have been done
             sub = 0
 
             for i, s in enumerate(l):
-                  if len(s) > 0 and s[0] == '$':
-                    
+                if len(s) > 0 and s[0] == "$":
                     s = s[1:].upper()
                     if not s:
                         error("Illegal macro name '%s'." % l[i])
 
                     frst = s[0]  # first char after the leading '$'
 
-                    if frst == '$':  # $$ - don't expand (done in IF clause)
+                    if frst == "$":  # $$ - don't expand (done in IF clause)
                         continue
 
-                    if frst == '(':   # flag math macro
+                    if frst == "(":  # flag math macro
                         gotmath = 1
                         continue
 
                     # pull slice notation off the end of the name
 
-                    if s.endswith(']'):
-                        x = s.rfind('[')
+                    if s.endswith("]"):
+                        x = s.rfind("[")
                         if not x:
-                            error("No matching for '[' for trailing ']' in variable '%s'." % s)
-                        sliceVar = s[x+1:-1]
+                            error(
+                                "No matching for '[' for trailing ']' in variable '%s'."
+                                % s
+                            )
+                        sliceVar = s[x + 1 : -1]
                         s = s[:x]
 
                         # If the slice is empty sliceVar will return the length
                         # of the list, i.e. the number of words.
-                        
+
                         """ Since we be using an 'eval' to do the actual slicing,
                             we check the slice string to make sure it's looking
                             valid. The easy way out makes as much sense as anything
@@ -585,28 +608,30 @@ class Macros:
 
                         for test in sliceVar.split(":"):
                             try:
-                                test == '' or int(test)
+                                test == "" or int(test)
                             except:
-                                error("Invalid index in slice notation '%s'." % sliceVar)
+                                error(
+                                    "Invalid index in slice notation '%s'." % sliceVar
+                                )
 
                     else:
                         sliceVar = None
 
                     # we have a var, see if system or user. Set 'ex'
 
-                    if frst == '_':   # system var
+                    if frst == "_":  # system var
                         ex = self.sysvar(s[1:])
 
                     elif s in self.vars:  # user var?
                         ex = self.vars[s]
 
                     elif sliceVar == "":
-                        l = l[:i] + ["-1"] + l[i+1:]
+                        l = l[:i] + ["-1"] + l[i + 1 :]
                         sub = 1
                         sliceVar = None
                         break
-                    
-                    else:                 # unknown var...error
+
+                    else:  # unknown var...error
                         error("User variable '%s'  has not been defined" % s)
 
                     if isinstance(ex, list):  # MSET variable
@@ -621,7 +646,7 @@ class Macros:
                             else:
                                 ex = []
 
-                    else:                       # regular SET variable
+                    else:  # regular SET variable
                         ex = ex.split()
                         if sliceVar is not None:
                             ex = sliceVariable(ex, sliceVar)
@@ -633,7 +658,7 @@ class Macros:
                         We concat this into the existing line, process some more
                     """
 
-                    l = l[:i] + ex + l[i+1:]
+                    l = l[:i] + ex + l[i + 1 :]
 
                     sub = 1
                     break
@@ -641,25 +666,24 @@ class Macros:
             if not sub:
                 break
 
-        
         # all the mma internal and system macros are expanded. Now check for math.
 
         if gotmath:
-            l = ' '.join(l)   # join back into one line
+            l = " ".join(l)  # join back into one line
 
             while 1:
                 try:
-                    s1 = l.index('$(')  # any '$(' left?
+                    s1 = l.index("$(")  # any '$(' left?
                 except:
-                    break               # nope, done
+                    break  # nope, done
                 # find trailing )
                 nest = 0
-                s2 = s1+2
+                s2 = s1 + 2
                 max = len(l)
                 while 1:
-                    if l[s2] == '(':
+                    if l[s2] == "(":
                         nest += 1
-                    if l[s2] == ')':
+                    if l[s2] == ")":
                         if not nest:
                             break
                         else:
@@ -668,14 +692,14 @@ class Macros:
                     if s2 >= max:
                         error("Unmatched delimiter in '%s'." % l)
 
-                l = l[:s1] + str( safeEval(l[s1+2:s2].strip())) + l[s2+1:]
+                l = l[:s1] + str(safeEval(l[s1 + 2 : s2].strip())) + l[s2 + 1 :]
 
             l = l.split()
 
         return l
 
     def showvars(self, ln):
-        """ Display all currently defined user variables. """
+        """Display all currently defined user variables."""
 
         if len(ln):
             for a in ln:
@@ -686,34 +710,33 @@ class Macros:
                     print("$%s - not defined" % a)
 
         else:
-
             print("User variables defined:")
             kys = self.vars.keys()
             kys.sort()
 
             mx = 0
 
-            for a in kys:                    # get longest name
+            for a in kys:  # get longest name
                 if len(a) > mx:
                     mx = len(a)
 
             mx = mx + 2
 
             for a in kys:
-                print("     %-*s  %s" % (mx, '$'+a, self.vars[a]))
+                print("     %-*s  %s" % (mx, "$" + a, self.vars[a]))
 
     def getvname(self, v):
-        """ Helper routine to validate variable name. """
+        """Helper routine to validate variable name."""
 
-        if v[0] in ('$', '_'):
+        if v[0] in ("$", "_"):
             error("Variable names cannot start with a '$' or '_'")
-        if '[' in v or ']' in v:
+        if "[" in v or "]" in v:
             error("Variable names cannot contain [ or ] characters.")
 
         return v.upper()
 
     def rndvar(self, ln):
-        """ Set a variable randomly from a list. """
+        """Set a variable randomly from a list."""
 
         if len(ln) < 2:
             error("Use: RndSet Variable_Name <list of possible values>")
@@ -726,7 +749,7 @@ class Macros:
             dPrint("Variable ${} randomly set to '{}'".format(v, self.vars[v]))
 
     def newsetvar(self, ln):
-        """ Set a new variable. Ignore if already set. """
+        """Set a new variable. Ignore if already set."""
 
         if not len(ln):
             error("Use: NSET VARIABLE_NAME [Value] [[+] [Value]]")
@@ -737,14 +760,14 @@ class Macros:
         self.setvar(ln)
 
     def setvar(self, ln):
-        """ Set a variable. Note the difference between the next 2 lines:
-                Set Bar BAR
-                Set Foo AAA BBB $bar
-                   $Foo == "AAA BBB BAR"
-                Set Foo AAA + BBB + $bar
-                   $Foo == "AAABBBBAR"
+        """Set a variable. Note the difference between the next 2 lines:
+            Set Bar BAR
+            Set Foo AAA BBB $bar
+               $Foo == "AAA BBB BAR"
+            Set Foo AAA + BBB + $bar
+               $Foo == "AAABBBBAR"
 
-            The "+"s just strip out intervening spaces.
+        The "+"s just strip out intervening spaces.
         """
 
         if len(ln) < 1:
@@ -752,15 +775,15 @@ class Macros:
 
         v = self.getvname(ln.pop(0))
 
-        t = ''
+        t = ""
         addSpace = 0
         for i, a in enumerate(ln):
-            if a == '+':
+            if a == "+":
                 addSpace = 0
                 continue
             else:
                 if addSpace:
-                    t += ' '
+                    t += " "
                 t += a
                 addSpace = 1
 
@@ -770,7 +793,7 @@ class Macros:
             dPrint("Variable ${} == '{}'".format(v, self.vars[v]))
 
     def msetvar(self, ln):
-        """ Set a variable to a number of lines. """
+        """Set a variable to a number of lines."""
 
         if len(ln) != 1:
             error("Use: MSET VARIABLE_NAME <lines> MsetEnd")
@@ -784,7 +807,7 @@ class Macros:
             if not l:
                 error("Reached EOF while looking for MSetEnd")
             cmd = l[0].upper()
-            if cmd in ("MSETEND", 'ENDMSET'):
+            if cmd in ("MSETEND", "ENDMSET"):
                 if len(l) > 1:
                     error("No arguments permitted for MSetEnd/EndMSet")
                 else:
@@ -792,18 +815,18 @@ class Macros:
             lm.append(l)
 
         self.vars[v] = lm
-        
+
     def unsetvar(self, ln):
-        """ Delete a variable reference. """
+        """Delete a variable reference."""
 
         if len(ln) != 1:
             error("Use: UNSET Variable")
         v = ln[0].upper()
-        if v[0] == '_':
+        if v[0] == "_":
             error("Internal variables cannot be deleted or modified")
 
         if v in self.vars:
-            del(macros.vars[v])
+            del macros.vars[v]
 
             if neomma.MMA.debug.debug:
                 dPrint("Variable '%s' UNSET" % v)
@@ -815,14 +838,14 @@ class Macros:
         if len(ln) == 1:
             cmd = ln[0].upper()
         else:
-            cmd = ''
+            cmd = ""
 
-        if cmd == 'ON':
+        if cmd == "ON":
             self.expandMode = 1
             if neomma.MMA.debug.debug:
                 dPrint("Variable expansion ON")
 
-        elif cmd == 'OFF':
+        elif cmd == "OFF":
             self.expandMode = 0
             if neomma.MMA.debug.debug:
                 dPrint("Variable expansion OFF")
@@ -831,7 +854,7 @@ class Macros:
             error("Use: Vexpand ON/Off")
 
     def varinc(self, ln):
-        """ Increment  a variable. """
+        """Increment  a variable."""
 
         if len(ln) == 1:
             inc = 1
@@ -844,7 +867,7 @@ class Macros:
 
         v = ln[0].upper()
 
-        if v[0] == '_':
+        if v[0] == "_":
             error("Internal variables cannot be modified")
 
         if not v in self.vars:
@@ -863,7 +886,7 @@ class Macros:
             dPrint("Variable '{}' INC to {}".format(v, self.vars[v]))
 
     def vardec(self, ln):
-        """ Decrement a varaiable. """
+        """Decrement a varaiable."""
 
         if len(ln) == 1:
             dec = 1
@@ -875,7 +898,7 @@ class Macros:
             error("Usage: DEC Variable [value]")
 
         v = ln[0].upper()
-        if v[0] == '_':
+        if v[0] == "_":
             error("Internal variables cannot be modified")
 
         if not v in self.vars:
@@ -894,14 +917,14 @@ class Macros:
             dPrint("Variable '{}' DEC to {}".format(v, self.vars[v]))
 
     def varIF(self, ln):
-        """ Conditional variable if/then. """
+        """Conditional variable if/then."""
 
         def expandV(l):
-            """ Private func. """
+            """Private func."""
 
             l = l.upper()
 
-            if l[:2] == '$$':
+            if l[:2] == "$$":
                 l = l.upper()
                 l = l[2:]
                 if not l in self.vars:
@@ -916,11 +939,11 @@ class Macros:
                 except:
                     v = None
 
-            return(l.upper(), v)
+            return (l.upper(), v)
 
         def readblk():
-            """ Private, reads a block until ENDIF, IFEND or ELSE.
-                Return (Terminator, lines[], linenumbers[] )
+            """Private, reads a block until ENDIF, IFEND or ELSE.
+            Return (Terminator, lines[], linenumbers[] )
             """
 
             q = []
@@ -933,14 +956,14 @@ class Macros:
                     error("EOF reached while looking for EndIf")
 
                 cmd = l[0].upper()
-                if cmd == 'IF':
+                if cmd == "IF":
                     nesting += 1
-                if cmd in ("IFEND", 'ENDIF', 'ELSE'):
+                if cmd in ("IFEND", "ENDIF", "ELSE"):
                     if len(l) > 1:
                         error("No arguments permitted for IfEnd/EndIf/Else")
                     if not nesting:
                         break
-                    if cmd != 'ELSE':
+                    if cmd != "ELSE":
                         nesting -= 1
 
                 q.append(l)
@@ -955,45 +978,58 @@ class Macros:
 
         # 1. do the unary options: DEF, NDEF
 
-        if action in ('DEF', 'NDEF', 'ISEMPTY', 'ISNOTEMPTY'):
+        if action in ("DEF", "NDEF", "ISEMPTY", "ISNOTEMPTY"):
             if len(ln) != 2:
                 error("Usage: IF %s VariableName" % action)
 
             v = ln[1].upper()  # everyone expects upper() except for EXISTS
 
-            if action == 'DEF':
+            if action == "DEF":
                 compare = v in self.vars
-                
-            elif action == 'NDEF':
-                compare = (v not in self.vars)
 
-            elif action in ('ISEMPTY', 'ISNOTEMPTY'):
-                if v.startswith('_'):
+            elif action == "NDEF":
+                compare = v not in self.vars
+
+            elif action in ("ISEMPTY", "ISNOTEMPTY"):
+                if v.startswith("_"):
                     v = self.sysvar(v[1:])
                 elif v not in self.vars:
                     error("Variable '%s' has not been created" % v)
                 else:
                     v = self.vars[v]  # contents of user var
-                if action == 'ISEMPTY':
-                    compare = (v == '')
+                if action == "ISEMPTY":
+                    compare = v == ""
                 else:
-                    compare = (v != '')
-             
+                    compare = v != ""
+
         # 2. FIle operations
 
-        elif action in ('EXISTS', 'ISDIR', 'ISFILE'):
-            if action == 'EXISTS':   # does file exist?
+        elif action in ("EXISTS", "ISDIR", "ISFILE"):
+            if action == "EXISTS":  # does file exist?
                 compare = path.exists(path.expanduser(ln[1]))
-                
-            if action == 'ISDIR':   # does file exist and is it a directory
+
+            if action == "ISDIR":  # does file exist and is it a directory
                 compare = path.isdir(path.expanduser(ln[1]))
-                
-            if action == 'ISFILE':   # does file exist and is it a file
+
+            if action == "ISFILE":  # does file exist and is it a file
                 compare = path.isfile(path.expanduser(ln[1]))
- 
+
         # 2. Binary ops: EQ, NE, etc.
 
-        elif action in ('LT', '<', 'LE', '<=', 'EQ', '==', 'GE', '>=', 'GT', '>', 'NE', '!='):
+        elif action in (
+            "LT",
+            "<",
+            "LE",
+            "<=",
+            "EQ",
+            "==",
+            "GE",
+            ">=",
+            "GT",
+            ">",
+            "NE",
+            "!=",
+        ):
             if len(ln) != 3:
                 error("Usage: VARS %s Value1 Value2" % action)
 
@@ -1005,18 +1041,18 @@ class Macros:
             if None in (v1, v2):
                 v1, v2 = s1, s2
 
-            if action == 'LT' or action == '<':
-                compare = (v1 < v2)
-            elif action == 'LE' or action == '<=':
-                compare = (v1 <= v2)
-            elif action == 'EQ' or action == '==':
-                compare = (v1 == v2)
-            elif action == 'GE' or action == '>=':
-                compare = (v1 >= v2)
-            elif action == 'GT' or action == '>':
-                compare = (v1 > v2)
-            elif action == 'NE' or action == '!=':
-                compare = (v1 != v2)
+            if action == "LT" or action == "<":
+                compare = v1 < v2
+            elif action == "LE" or action == "<=":
+                compare = v1 <= v2
+            elif action == "EQ" or action == "==":
+                compare = v1 == v2
+            elif action == "GE" or action == ">=":
+                compare = v1 >= v2
+            elif action == "GT" or action == ">":
+                compare = v1 > v2
+            elif action == "NE" or action == "!=":
+                compare = v1 != v2
             else:
                 error("Unreachable binary conditional")  # can't get here
 
@@ -1031,10 +1067,10 @@ class Macros:
 
         cmd, q, qnum = readblk()
 
-        if cmd == 'ELSE':
+        if cmd == "ELSE":
             cmd, q1, qnum1 = readblk()
 
-            if cmd == 'ELSE':
+            if cmd == "ELSE":
                 error("Only one ELSE is permitted in IF construct")
 
             if not compare:

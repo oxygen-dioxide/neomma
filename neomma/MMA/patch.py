@@ -31,14 +31,13 @@ import neomma.MMA.midiC
 
 
 def patch(ln):
-    """ Main routine to manage midi patch names. """
+    """Main routine to manage midi patch names."""
 
     for i, a in enumerate(ln):
-
-        if a.count('=') == 1:
-            a, b = a.split('=')
+        if a.count("=") == 1:
+            a, b = a.split("=")
         else:
-            b = ''
+            b = ""
         a = a.upper()
 
         if a == "LIST":
@@ -53,15 +52,16 @@ def patch(ln):
                 error("Expecting All, EXT or GM argument for List")
 
         elif a == "RENAME":
-            prename(ln[i + 1:])
+            prename(ln[i + 1 :])
             break
 
-        elif a == 'SET':
-            patchset(ln[i + 1:])
+        elif a == "SET":
+            patchset(ln[i + 1 :])
             break
 
         else:
             error("Unknown option for Patch: %s" % a)
+
 
 # Set a patch value=name
 
@@ -75,7 +75,7 @@ def patchset(ln):
         error("PATCH SET: All options must be VALUE=PAIR items.")
 
     for v, n in ln:
-        v = v.split('.')
+        v = v.split(".")
         if len(v) > 3 or len(v) < 1:
             error("Patch Set: Expecting a voice value Prog.MSB.LSB.")
 
@@ -83,13 +83,13 @@ def patchset(ln):
         # the parts are for MSB(ctrl32), LSB(ctrl0), and Patch
 
         voc = 0
-        if len(v) > 2:    # ctrl32
+        if len(v) > 2:  # ctrl32
             i = stoi(v[2], "Patch Set LSB expecting integer.")
             if i < 0 or i > 127:
                 error("LSB must be 0..127, not '%s'." % i)
             voc = i << 16
 
-        if len(v) > 1:    # ctrl0
+        if len(v) > 1:  # ctrl0
             i = stoi(v[1], "Patch Set MSB expecting integer.")
             if i < 0 or i > 127:
                 error("MSB must be 0..127, not '%s'." % i)
@@ -103,15 +103,25 @@ def patchset(ln):
         # Handle the name.
 
         if voc in voiceNames:
-            warning("Patch Set duplicating voice name %s=%s with %s=%s" %
-                    (voiceNames[voc], voc, n, neomma.MMA.midiC.extVocStr(voc)))
+            warning(
+                "Patch Set duplicating voice name %s=%s with %s=%s"
+                % (voiceNames[voc], voc, n, neomma.MMA.midiC.extVocStr(voc))
+            )
 
         if n in voiceInx:
-            warning("Patch Set duplicating voice value %s=%s with %s=%s" %
-                    (neomma.MMA.midiC.extVocStr(voiceInx[n]), n, neomma.MMA.midiC.extVocStr(voc), n))
+            warning(
+                "Patch Set duplicating voice value %s=%s with %s=%s"
+                % (
+                    neomma.MMA.midiC.extVocStr(voiceInx[n]),
+                    n,
+                    neomma.MMA.midiC.extVocStr(voc),
+                    n,
+                )
+            )
 
         voiceNames[voc] = n
         voiceInx[n] = voc
+
 
 # Rename
 
@@ -137,11 +147,12 @@ def prename(ln):
         del voiceInx[a]
         voiceInx[b] = v
 
+
 # list funcs
 
 
 def plistgm():
-    """ List GM voices. """
+    """List GM voices."""
 
     for v in sorted(voiceNames.keys()):
         if v <= 127:
@@ -149,7 +160,7 @@ def plistgm():
 
 
 def plistext():
-    """ List extended voices. """
+    """List extended voices."""
 
     for v in sorted(voiceNames.keys()):
         if v > 127:
@@ -157,6 +168,6 @@ def plistext():
 
 
 def plistall():
-    """ List all voices. """
+    """List all voices."""
     plistgm()
     plistext()

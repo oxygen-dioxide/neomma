@@ -73,22 +73,25 @@ from neomma.MMA.macro import macros
 from neomma.MMA.alloc import trackAlloc
 from neomma.MMA.keysig import keySig
 
-beginData = []      # Current data set by a BEGIN statement
-beginPoints = []    # since BEGINs can be nested, we need ptrs for backing out of BEGINs
+beginData = []  # Current data set by a BEGIN statement
+beginPoints = []  # since BEGINs can be nested, we need ptrs for backing out of BEGINs
 
 ########################################
 # File processing. Mostly jumps to pats
 ########################################
 
+
 def parseFile(n, depth=[0]):
-    """ Open and process a file. Errors exit. """
+    """Open and process a file. Errors exit."""
 
     depth[0] += 1
-    if depth[0]>50:
-        error("USE/INCLUDE recursion error. "
-              "Use and Include are limited to a depth of 50. "
-              "Check current file and rc files for error.")
-        
+    if depth[0] > 50:
+        error(
+            "USE/INCLUDE recursion error. "
+            "Use and Include are limited to a depth of 50. "
+            "Check current file and rc files for error."
+        )
+
     fp = gbl.inpath
 
     f = neomma.MMA.file.ReadFile(n)
@@ -100,21 +103,22 @@ def parseFile(n, depth=[0]):
         dPrint("File '%s' closed." % n)
 
     depth[0] -= 1
-                
+
+
 def parse(inpath):
-    """ Process a mma input file. """
+    """Process a mma input file."""
 
     global beginData, lastChord
-    
+
     gbl.inpath = inpath
     curline = None
 
     while 1:
         neomma.MMA.after.check()
-        
+
         curline = inpath.read()
 
-        if curline is None:   # eof, exit parser
+        if curline is None:  # eof, exit parser
             break
 
         l = macros.expand(curline)
@@ -137,33 +141,33 @@ def parse(inpath):
             begin[] stuff have to be here, in this order.
         """
 
-        action = l[0].upper()      # 1st arg in line
+        action = l[0].upper()  # 1st arg in line
 
-        if action == 'BEGIN':
+        if action == "BEGIN":
             if not l[1:]:
                 error("Use: Begin STUFF")
             beginPoints.append(len(beginData))
             beginData.extend(l[1:])
             continue
 
-        if action == 'END':
+        if action == "END":
             if len(l) > 1:
                 error("No arguments permitted for END")
             if not beginData:
                 error("No 'BEGIN' for 'END'")
-            beginData = beginData[:beginPoints.pop(-1)]
+            beginData = beginData[: beginPoints.pop(-1)]
             continue
 
         if beginData:
             l = beginData + l
             action = l[0].upper()
 
-        if neomma.MMA.debug.showExpand and action != 'REPEAT':
+        if neomma.MMA.debug.showExpand and action != "REPEAT":
             dPrint(l)
 
         if action in simpleFuncs:
             simpleFuncs[action](l[1:])
-            continue            
+            continue
 
         """ We have several possibilities ...
             1. The command is a valid assigned track name,
@@ -173,9 +177,9 @@ def parse(inpath):
         """
 
         if not action in gbl.tnames:  # no track allocated?
-            trackAlloc(action, 0)     # Try to create. Always returns.
+            trackAlloc(action, 0)  # Try to create. Always returns.
 
-        if action in gbl.tnames:     # BASS/DRUM/APEGGIO/CHORD
+        if action in gbl.tnames:  # BASS/DRUM/APEGGIO/CHORD
             name = action
             if len(l) < 2:
                 error("Expecting argument after '%s'" % name)
@@ -191,7 +195,6 @@ def parse(inpath):
             else:  # opps, not any kind of func
                 error("{} is not a {} track function.".format(action, name))
 
-
         ### Gotta be a chord data line!
 
         """ A data line can have an optional bar number at the start
@@ -200,18 +203,17 @@ def parse(inpath):
             a line number on a line by itself it okay.
         """
 
-        
-        if action.isdigit():   # isdigit() matches '1', '1234' but not '1a'!
-            gbl.barLabel = l[0].lstrip('0')
+        if action.isdigit():  # isdigit() matches '1', '1234' but not '1a'!
+            gbl.barLabel = l[0].lstrip("0")
             l = l[1:]
-            if not l:        # ignore empty lines
+            if not l:  # ignore empty lines
                 continue
         else:
-            gbl.barLabel = ''
+            gbl.barLabel = ""
 
         ##  A bar can have an optional repeat count. This must
         ##  be at the end of bar in the form '* xx'.
-        if len(l) > 1 and l[-2] == '*':
+        if len(l) > 1 and l[-2] == "*":
             rptcount = stoi(l[-1], "Expecting integer after '*'")
             l = l[:-2]
         else:
@@ -219,7 +221,7 @@ def parse(inpath):
 
         # Dataplugins all start with '@'. Code is in the plugin code.
         # A data plugin modifies the existing data line and returns it.
-        if l[0].startswith('@'):
+        if l[0].startswith("@"):
             p = l[0].upper()
             if p not in dataFuncs:
                 error("Unknown data plugin '%s' called." % p)
@@ -228,7 +230,7 @@ def parse(inpath):
         # Extract solo(s) from line ... this is anything in {}s.
         # The solo data is pushed into RIFFs and discarded from
         # the current line.
-        l = ' '.join(l)
+        l = " ".join(l)
         l = neomma.MMA.patSolo.extractSolo(l, rptcount)
 
         # set lyrics from [stuff] in the current line.
@@ -243,9 +245,11 @@ def parse(inpath):
         #   1. Make sure there is some chord data,
         #   2. Ensure the correct number of chords.
         if not l:
-            error("Expecting music (chord) data. Even lines with "
-                  "lyrics or solos still need a chord. If you "
-                  "don't want a chord use 'z'.")
+            error(
+                "Expecting music (chord) data. Even lines with "
+                "lyrics or solos still need a chord. If you "
+                "don't want a chord use 'z'."
+            )
 
         # We now have a chord line. It'll look something like:
         #
@@ -255,11 +259,11 @@ def parse(inpath):
         #    chord in the line. Each entry has the start/end (in beats), chordname, etc.
         #
 
-        ctable = parseChordLine(l)   # parse the chord line
+        ctable = parseChordLine(l)  # parse the chord line
 
         # Create MIDI data for the bar
 
-        for rpt in range(rptcount):   # for each bar in the repeat count ( Cm * 3)
+        for rpt in range(rptcount):  # for each bar in the repeat count ( Cm * 3)
             """ Handle global (de)cresc by popping a new volume off stack. """
 
             if neomma.MMA.volume.futureVol:
@@ -283,11 +287,11 @@ def parse(inpath):
             for a in gbl.tnames.values():
                 if rsq >= 0:
                     seqSave = gbl.seqCount
-                    if a.name in seqlist:   # for seqrnd with tracklist
+                    if a.name in seqlist:  # for seqrnd with tracklist
                         gbl.seqCount = rsq
-                a.bar(ctable)    # process entire bar!
+                a.bar(ctable)  # process entire bar!
 
-                if rsq >= 0:   # for track rnd
+                if rsq >= 0:  # for track rnd
                     gbl.seqCount = seqSave
 
             # Adjust counters
@@ -303,9 +307,12 @@ def parse(inpath):
             else:
                 nextOffset = gbl.barLen
 
-            # barPtrs is used by the -B/b options to strip unwanted sections. 
-            gbl.barPtrs[gbl.barNum + 1] = [gbl.barLabel, gbl.tickOffset,
-                                           gbl.tickOffset + nextOffset - 1]
+            # barPtrs is used by the -B/b options to strip unwanted sections.
+            gbl.barPtrs[gbl.barNum + 1] = [
+                gbl.barLabel,
+                gbl.tickOffset,
+                gbl.tickOffset + nextOffset - 1,
+            ]
 
             gbl.totTime += float(nextOffset / gbl.BperQ) / gbl.tempo
 
@@ -315,44 +322,46 @@ def parse(inpath):
                 if gbl.barLabel:
                     gbl.barLabels.append(gbl.barLabel)
                 else:
-                    gbl.barLabels.append('?')
+                    gbl.barLabels.append("?")
 
             gbl.barNum += 1
             gbl.seqCount = (gbl.seqCount + 1) % gbl.seqSize
 
-            neomma.MMA.grooves.nextGroove()   # using groove list? Advance.
+            neomma.MMA.grooves.nextGroove()  # using groove list? Advance.
 
             # Enabled with the -r command line option
 
             if neomma.MMA.debug.showrun:
-                if lyrics:       # we print lyric as a list 
+                if lyrics:  # we print lyric as a list
                     ly = lyrics  # with the []s
                 else:
-                    ly = ''      # no lyric
-                dPrint("%3d: %s %s" % (gbl.barNum, ' '.join(l), ly))
+                    ly = ""  # no lyric
+                dPrint("%3d: %s %s" % (gbl.barNum, " ".join(l), ly))
 
             # if repeat count is set with dupchord we push
             # the chord back and get lyric.extract to add the
             # chord to the midi file again. A real lyric is
             # just ignored ... 2 reasons: the lyric is mangled and
             # and it makes sense to only have it once!
-            if rptcount>1 and neomma.MMA.lyric.lyric.dupchords:
-                _,lyrics = neomma.MMA.lyric.lyric.extract(' '.join(l), 0)
+            if rptcount > 1 and neomma.MMA.lyric.lyric.dupchords:
+                _, lyrics = neomma.MMA.lyric.lyric.extract(" ".join(l), 0)
 
             # The barNum and other pointers have been incremented
             # and a bar of data has been processed. If we are repeating
             # due to a "*" we do a AGAIN test. Without a rpt this would
-            # be done at the start of a data line. 
-            if rptcount>1 and  neomma.MMA.after.needed():
+            # be done at the start of a data line.
+            if rptcount > 1 and neomma.MMA.after.needed():
                 neomma.MMA.after.check(recurse=True)
+
 
 ##################################################################
 
-def allTracks(ln):
-    """ Apply command to all specified tracks or track types. """
 
-    types1 = ('BASS', 'CHORD', 'ARPEGGIO', 'SCALE', 'DRUM', 'WALK', 'PLECTRUM')
-    types2 = ('MELODY', 'SOLO', 'ARIA')
+def allTracks(ln):
+    """Apply command to all specified tracks or track types."""
+
+    types1 = ("BASS", "CHORD", "ARPEGGIO", "SCALE", "DRUM", "WALK", "PLECTRUM")
+    types2 = ("MELODY", "SOLO", "ARIA")
     allTypes = types1 + types2
 
     ttypes = []
@@ -387,6 +396,7 @@ def allTracks(ln):
 #######################################
 # Do-nothing functions
 
+
 def comment(ln):
     pass
 
@@ -416,12 +426,12 @@ def ifelse(ln):
 
 
 def repeat(ln):
-    """ Repeat/RepeatEnd/RepeatEnding.
+    """Repeat/RepeatEnd/RepeatEnding.
 
-        Read input until a RepeatEnd is found. The entire
-        chunk is pushed back into the input stream the
-        correct number of times. This accounts for endings and
-        nested repeats.
+    Read input until a RepeatEnd is found. The entire
+    chunk is pushed back into the input stream the
+    correct number of times. This accounts for endings and
+    nested repeats.
     """
 
     def repeatChunk():
@@ -437,16 +447,16 @@ def repeat(ln):
 
             act = l[0].upper()
 
-            if act == 'REPEAT':
+            if act == "REPEAT":
                 nesting += 1
 
-            elif act in ('REPEATEND', 'ENDREPEAT') and nesting:
+            elif act in ("REPEATEND", "ENDREPEAT") and nesting:
                 nesting -= 1
 
-            elif act == 'REPEATENDING' and nesting:
+            elif act == "REPEATENDING" and nesting:
                 pass
 
-            elif act in ('REPEATEND', 'ENDREPEAT', 'REPEATENDING'):
+            elif act in ("REPEATEND", "ENDREPEAT", "REPEATENDING"):
                 return (q, qnum, act, l[1:])
 
             q.append(l)
@@ -464,13 +474,13 @@ def repeat(ln):
     main, mainnum, act, l = repeatChunk()
 
     while 1:
-        if act in ('REPEATEND', 'ENDREPEAT'):
+        if act in ("REPEATEND", "ENDREPEAT"):
             if l:
                 l = macros.expand(l)
                 if len(l) == 2:
                     l = [x.upper() for x in l]
-                    if 'NOWARN' in l:
-                        l.remove('NOWARN')
+                    if "NOWARN" in l:
+                        l.remove("NOWARN")
                         warn = 0
                 else:
                     warn = 1
@@ -481,7 +491,10 @@ def repeat(ln):
                 count = stoi(l[0], "%s takes an integer arg" % act)
 
                 if count == 2 and warn:
-                    warning("%s count of 2 duplicates default. Did you mean 3 or more?" % act)
+                    warning(
+                        "%s count of 2 duplicates default. Did you mean 3 or more?"
+                        % act
+                    )
 
                 elif count == 1 and warn:
                     warning("%s count of 1 means NO REPEAT" % act)
@@ -506,15 +519,15 @@ def repeat(ln):
             gbl.inpath.push(stack, stacknum)
             break
 
-        elif act == 'REPEATENDING':
+        elif act == "REPEATENDING":
             ending = 1
 
             if l:
                 l = macros.expand(l)
                 if len(l) == 2:
                     l = [x.upper() for x in l]
-                    if 'NOWARN' in l:
-                        l.remove('NOWARN')
+                    if "NOWARN" in l:
+                        l.remove("NOWARN")
                         warn = 0
                 else:
                     warn = 1
@@ -557,23 +570,25 @@ def goto(ln):
 
 
 def eof(ln):
-    """ Stop reading CURRENT file """
+    """Stop reading CURRENT file"""
 
     gbl.inpath.toEof()
 
-def forceError(ln):
-    """ Force an error. """
 
-    if len(ln)<1:
-        ln=["Unspecified cause."]
-    error('User error: ' + ' '.join(ln))
-    
+def forceError(ln):
+    """Force an error."""
+
+    if len(ln) < 1:
+        ln = ["Unspecified cause."]
+    error("User error: " + " ".join(ln))
+
+
 #######################################
 # File and I/O
 
 
 def include(ln):
-    """ Include a file. """
+    """Include a file."""
 
     global beginData
 
@@ -590,8 +605,9 @@ def include(ln):
 
     parseFile(fn)
 
+
 def usefile(ln):
-    """ Include a library file. """
+    """Include a library file."""
 
     global beginData
 
@@ -619,11 +635,12 @@ def usefile(ln):
 #######################################
 # Misc
 
+
 def rndseed(ln):
-    """ Reseed the random number generator. """
+    """Reseed the random number generator."""
 
     if not ln:
-        random.seed()   # just resets, not predicable.
+        random.seed()  # just resets, not predicable.
 
     elif len(ln) > 1:
         error("RNDSEED: requires 0 or 1 arguments")
@@ -632,15 +649,19 @@ def rndseed(ln):
 
 
 def lnPrint(ln):
-    """ Print stuff in a "print" command. """
+    """Print stuff in a "print" command."""
 
     print(" ".join(ln))
 
 
 def printActive(ln):
-    """ Print a list of the active tracks. """
+    """Print a list of the active tracks."""
 
-    print("Active tracks, groove: {} {}".format(neomma.MMA.grooves.currentGroove, ' '.join(ln)))
+    print(
+        "Active tracks, groove: {} {}".format(
+            neomma.MMA.grooves.currentGroove, " ".join(ln)
+        )
+    )
     print("%15s  %2s   %s" % ("Track", "Ch", "Events"))
     for a in sorted(gbl.tnames.keys()):
         f = gbl.tnames[a]
@@ -649,10 +670,10 @@ def printActive(ln):
                 ch = f.channel
                 ecount = 0
                 for ev in gbl.mtrks[ch].miditrk:
-                    ecount +=  len(gbl.mtrks[ch].miditrk[ev])
+                    ecount += len(gbl.mtrks[ch].miditrk[ev])
             else:
-                ch = '-'
-                ecount = ''
+                ch = "-"
+                ecount = ""
             print("%15s  %2s   %s" % (a, ch, ecount))
     print("\n")
 
@@ -665,9 +686,9 @@ def printActive(ln):
 #######################################
 # Pattern/Groove
 
-    
+
 def trackDefPattern(name, ln):
-    """ Define a pattern for a track.
+    """Define a pattern for a track.
 
     Use the type-name for all defines.... check the track
     names and if it has a '-' in it, we use only the
@@ -676,7 +697,7 @@ def trackDefPattern(name, ln):
 
     ln = ln[:]
 
-    name = name.split('-')[0]
+    name = name.split("-")[0]
 
     trackAlloc(name, 1)
 
@@ -685,27 +706,27 @@ def trackDefPattern(name, ln):
     else:
         error("Define is expecting a pattern name")
 
-    if pattern in ('z', 'Z', '-'):
+    if pattern in ("z", "Z", "-"):
         error("Pattern name '%s' is reserved" % pattern)
 
-    if pattern.startswith('_'):
+    if pattern.startswith("_"):
         error("Names with a leading underscore are reserved")
 
     if not ln:
         error("No pattern list given for '{} {}'".format(name, pattern))
 
-    ln = ' '.join(ln)
+    ln = " ".join(ln)
     gbl.tnames[name].definePattern(pattern, ln)
 
 
 def trackRiff(name, ln):
-    """ Set a riff for a track. """
+    """Set a riff for a track."""
 
-    gbl.tnames[name].setRiff(' '.join(ln))
+    gbl.tnames[name].setRiff(" ".join(ln))
 
 
 def trackDupRiff(name, ln):
-    """ Set a riff for a track. """
+    """Set a riff for a track."""
 
     if not ln:
         error("%s DupRiff: need at least one track to copy to.")
@@ -714,7 +735,7 @@ def trackDupRiff(name, ln):
 
 
 def deleteTrks(ln):
-    """ Delete a track and free the MIDI track. """
+    """Delete a track and free the MIDI track."""
 
     if not len(ln):
         error("Use Delete Track [...]")
@@ -744,12 +765,13 @@ def deleteTrks(ln):
         if neomma.MMA.debug.debug:
             dPrint("Track '%s' deleted" % name)
 
+
 #######################################
 # Volume
 
 
 def trackRvolume(name, ln):
-    """ Set random volume for specific track. """
+    """Set random volume for specific track."""
 
     if not ln:
         error("Use: %s RVolume N [...]" % name)
@@ -769,7 +791,7 @@ def trackDeCresc(name, ln):
 
 
 def trackVolume(name, ln):
-    """ Set volume for specific track. """
+    """Set volume for specific track."""
 
     if not ln:
         error("Use: %s Volume DYN [...]" % name)
@@ -778,13 +800,13 @@ def trackVolume(name, ln):
 
 
 def trackChords(name, ln):
-    """ Set a chord line for a specific track. """
+    """Set a chord line for a specific track."""
 
     gbl.tnames[name].setChords(ln)
 
 
 def trackAccent(name, ln):
-    """ Set emphasis beats for track."""
+    """Set emphasis beats for track."""
 
     gbl.tnames[name].setAccent(ln)
 
@@ -792,8 +814,9 @@ def trackAccent(name, ln):
 #######################################
 # Timing
 
+
 def trackMallet(name, ln):
-    """ Set repeating-mallet options for solo/melody track. """
+    """Set repeating-mallet options for solo/melody track."""
 
     if not ln:
         error("Use: %s Mallet <Option=Value> [...]" % name)
@@ -802,7 +825,7 @@ def trackMallet(name, ln):
 
 
 def trackRduration(name, ln):
-    """ Set random duration effect for specific track."""
+    """Set random duration effect for specific track."""
 
     if not ln:
         error("Use: %s Rduration N [...]" % name)
@@ -811,7 +834,7 @@ def trackRduration(name, ln):
 
 
 def trackRtime(name, ln):
-    """ Set random timing for specific track. """
+    """Set random timing for specific track."""
 
     if not ln:
         error("Use: %s RTime N [...]" % name)
@@ -820,13 +843,13 @@ def trackRtime(name, ln):
 
 
 def trackRskip(name, ln):
-    """ Set random skip for specific track. """
+    """Set random skip for specific track."""
 
     gbl.tnames[name].setRSkip(ln)
 
 
 def trackArtic(name, ln):
-    """ Set articulation. """
+    """Set articulation."""
 
     if not ln:
         error("Use: %s Articulation N [...]" % name)
@@ -839,7 +862,7 @@ def trackArtic(name, ln):
 
 
 def trackCompress(name, ln):
-    """ Set (unset) compress for track. """
+    """Set (unset) compress for track."""
 
     if not ln:
         error("Use: %s Compress <value[s]>" % name)
@@ -848,7 +871,7 @@ def trackCompress(name, ln):
 
 
 def trackVoicing(name, ln):
-    """ Set Voicing options. Only valid for chord tracks at this time."""
+    """Set Voicing options. Only valid for chord tracks at this time."""
 
     if not ln:
         error("Use: %s Voicing <MODE=VALUE> [...]" % name)
@@ -857,7 +880,7 @@ def trackVoicing(name, ln):
 
 
 def trackDupRoot(name, ln):
-    """ Set (unset) the root note duplication. Only applies to chord tracks. """
+    """Set (unset) the root note duplication. Only applies to chord tracks."""
 
     if not ln:
         error("Use: %s DupRoot <value> ..." % name)
@@ -866,13 +889,13 @@ def trackDupRoot(name, ln):
 
 
 def trackChordLimit(name, ln):
-    """ Set (unset) ChordLimit for track. """
+    """Set (unset) ChordLimit for track."""
 
     gbl.tnames[name].setChordLimit(ln)
 
 
 def trackRange(name, ln):
-    """ Set (unset) Range for track. Only effects arp and scale. """
+    """Set (unset) Range for track. Only effects arp and scale."""
 
     if not ln:
         error("Use: %s Range <value> ... " % name)
@@ -881,7 +904,7 @@ def trackRange(name, ln):
 
 
 def trackInvert(name, ln):
-    """ Set invert for track."""
+    """Set invert for track."""
 
     if not ln:
         error("Use: %s Invert N [...]" % name)
@@ -890,7 +913,7 @@ def trackInvert(name, ln):
 
 
 def trackSpan(name, ln):
-    """ Set midi note span for track. """
+    """Set midi note span for track."""
 
     if len(ln) != 2:
         error("Use: %s Start End" % name)
@@ -913,7 +936,7 @@ def trackSpan(name, ln):
 
 
 def trackOctave(name, ln):
-    """ Set octave for specific track. """
+    """Set octave for specific track."""
 
     if not ln:
         error("Use: %s Octave N [...], (n=0..10)" % name)
@@ -922,7 +945,7 @@ def trackOctave(name, ln):
 
 
 def trackMOctave(name, ln):
-    """ Set midi-based octave for specific track. """
+    """Set midi-based octave for specific track."""
 
     if not ln:
         error("Use: %s MOctave N [...], (n=01..9)" % name)
@@ -931,72 +954,83 @@ def trackMOctave(name, ln):
 
 
 def trackRpitch(name, ln):
-    """ Set random pitch adjustment for specific track. """
+    """Set random pitch adjustment for specific track."""
 
     if not ln:
         error("Use: %s RPitch N [...]" % name)
     gbl.tnames[name].setRPitch(ln)
 
+
 def trackStrum(name, ln):
-    """ Set all specified track strum. """
+    """Set all specified track strum."""
 
     if not ln:
         error("Use: %s Strum N [...]" % name)
 
     gbl.tnames[name].setStrum(ln)
 
+
 def trackStrumAdd(name, ln):
-    """ Set all specified track strumAdd. """
+    """Set all specified track strumAdd."""
 
     if not ln:
         error("Use: %s StrumAdd N [...]" % name)
 
     gbl.tnames[name].setStrumAdd(ln)
 
+
 def trackSticky(name, ln):
-    """ Sets a track as sticky. Ignored by groove commands. """
+    """Sets a track as sticky. Ignored by groove commands."""
 
     if not ln:
         error("Use: %s Sticky On/Off" % name)
 
     gbl.tnames[name].setSticky(ln)
 
+
 def trackHarmony(name, ln):
-    """ Set harmony value. """
+    """Set harmony value."""
 
     if not ln:
         error("Use: %s Harmony N [...]" % name)
 
     neomma.MMA.harmony.setHarmony(gbl.tnames[name], ln)
+
+
 #    gbl.tnames[name].setHarmony(ln)
 
 
 def trackHarmonyOnly(name, ln):
-    """ Set harmony only for track. """
+    """Set harmony only for track."""
 
     if not ln:
         error("Use: %s HarmonyOnly N [...]" % name)
 
     neomma.MMA.harmony.setHarmonyOnly(gbl.tnames[name], ln)
+
+
 #      gbl.tnames[name].setHarmonyOnly(ln)
 
 
 def trackHarmonyVolume(name, ln):
-    """ Set harmony volume for track."""
+    """Set harmony volume for track."""
 
     if not ln:
         error("Use: %s HarmonyVolume N [...]" % name)
 
     neomma.MMA.harmony.setHarmonyVolume(gbl.tnames[name], ln)
+
+
 #      gbl.tnames[name].setHarmonyVolume(ln)
 
 
 #######################################
 # Plectrum only stuff
 
+
 def trackPlectrumTuning(name, ln):
-    """ Define the number of strings and tuning for
-        for an instrument that can be played with a plectrum.
+    """Define the number of strings and tuning for
+    for an instrument that can be played with a plectrum.
     """
 
     if not ln:
@@ -1007,14 +1041,16 @@ def trackPlectrumTuning(name, ln):
     try:
         g.setPlectrumTuning(ln)
     except AttributeError:
-        warning("TUNING: not permitted in %s tracks. Arg '%s' ignored." %
-                (g.vtype, ' '.join(ln)))
+        warning(
+            "TUNING: not permitted in %s tracks. Arg '%s' ignored."
+            % (g.vtype, " ".join(ln))
+        )
 
 
 def trackPlectrumCapo(name, ln):
-    """ Define the position of the capo
-        (unlike a real guitar negative numbers are allowed)
-        for an instrument that can be played with a plectrum.
+    """Define the position of the capo
+    (unlike a real guitar negative numbers are allowed)
+    for an instrument that can be played with a plectrum.
     """
 
     if not ln or len(ln) != 1:
@@ -1024,32 +1060,38 @@ def trackPlectrumCapo(name, ln):
     try:
         g.setPlectrumCapo(ln[0])
     except AttributeError:
-        warning("CAPO: not permitted in %s tracks. Arg '%s' ignored." %
-                (g.vtype, ' '.join(ln)))
+        warning(
+            "CAPO: not permitted in %s tracks. Arg '%s' ignored."
+            % (g.vtype, " ".join(ln))
+        )
 
 
 def trackPlectrumFretNoise(name, ln):
-    """ Define fret noise options.
-    """
+    """Define fret noise options."""
 
     g = gbl.tnames[name]
 
     try:
         g.setPlectrumFretNoise(ln)
     except AttributeError:
-        warning("FRETNOISE: not permitted in %s tracks. Arg '%s' ignored." %
-                (g.vtype, ' '.join(ln)))
+        warning(
+            "FRETNOISE: not permitted in %s tracks. Arg '%s' ignored."
+            % (g.vtype, " ".join(ln))
+        )
+
 
 def trackPlectrumShape(name, ln):
-    """ Define chord shape for stringed instrument. """
+    """Define chord shape for stringed instrument."""
 
     g = gbl.tnames[name]
-    
+
     try:
         g.setPlectrumShape(ln)
     except AttributeError:
-        warning("SHAPE: not permitted in %s tracks. Arg '%s' ignored." %
-                (g.vtype, ' '.join(ln)))
+        warning(
+            "SHAPE: not permitted in %s tracks. Arg '%s' ignored."
+            % (g.vtype, " ".join(ln))
+        )
 
 
 #######################################
@@ -1057,7 +1099,7 @@ def trackPlectrumShape(name, ln):
 
 
 def trackChannel(name, ln):
-    """ Set the midi channel for a track."""
+    """Set the midi channel for a track."""
 
     if not ln:
         error("Use: %s Channel" % name)
@@ -1066,7 +1108,7 @@ def trackChannel(name, ln):
 
 
 def trackChShare(name, ln):
-    """ Set MIDI channel sharing."""
+    """Set MIDI channel sharing."""
 
     if len(ln) != 1:
         error("Use: %s ChShare TrackName" % name)
@@ -1075,7 +1117,7 @@ def trackChShare(name, ln):
 
 
 def trackVoice(name, ln):
-    """ Set voice for specific track. """
+    """Set voice for specific track."""
 
     if not ln:
         error("Use: %s Voice NN [...]" % name)
@@ -1084,7 +1126,7 @@ def trackVoice(name, ln):
 
 
 def trackOff(name, ln):
-    """ Turn a track off """
+    """Turn a track off"""
 
     if ln:
         error("Use: %s OFF with no paramater" % name)
@@ -1093,7 +1135,7 @@ def trackOff(name, ln):
 
 
 def trackOn(name, ln):
-    """ Turn a track on """
+    """Turn a track on"""
 
     if ln:
         error("Use: %s ON with no paramater" % name)
@@ -1102,19 +1144,19 @@ def trackOn(name, ln):
 
 
 def trackOrnament(name, ln):
-    """ Set the ornamentation. Currently only for SCALE. """
+    """Set the ornamentation. Currently only for SCALE."""
 
     neomma.MMA.ornament.setOrnament(gbl.tnames[name], ln)
 
 
 def trackTone(name, ln):
-    """ Set the tone (note). Only valid in drum tracks."""
+    """Set the tone (note). Only valid in drum tracks."""
 
     gbl.tnames[name].setTone(ln)
 
 
 def trackForceOut(name, ln):
-    """ Force output of voice settings. """
+    """Force output of voice settings."""
 
     if len(ln):
         error("Use %s ForceOut (no options)" % name)
@@ -1125,8 +1167,9 @@ def trackForceOut(name, ln):
 #######################################
 # Misc
 
+
 def trackArpeggiate(name, ln):
-    """ Set up the solo/melody arpeggiator. """
+    """Set up the solo/melody arpeggiator."""
 
     if not ln:
         error("Use: %s Arpeggiate N" % name)
@@ -1135,12 +1178,14 @@ def trackArpeggiate(name, ln):
     try:
         g.setArp(ln)
     except AttributeError:
-        warning("Arpeggiate: not permitted in %s tracks. Arg '%s' ignored." %
-                (g.vtype, ' '.join(ln)))
+        warning(
+            "Arpeggiate: not permitted in %s tracks. Arg '%s' ignored."
+            % (g.vtype, " ".join(ln))
+        )
 
 
 def trackStretch(name, ln):
-    """ Set the stretch value for solo/melody. """
+    """Set the stretch value for solo/melody."""
 
     if not ln:
         error("Use: %s Stretch N" % name)
@@ -1149,12 +1194,14 @@ def trackStretch(name, ln):
     try:
         g.setStretch(ln)
     except AttributeError:
-        warning("Stretch: not permitted in %s tracks. Arg '%s' ignored." %
-                (g.vtype, ' '.join(ln)))
+        warning(
+            "Stretch: not permitted in %s tracks. Arg '%s' ignored."
+            % (g.vtype, " ".join(ln))
+        )
 
 
 def trackDelay(name, ln):
-    """ Set up the solo/melody delay (echo). """
+    """Set up the solo/melody delay (echo)."""
 
     if not ln:
         error("Use: %s Delay N" % name)
@@ -1163,10 +1210,10 @@ def trackDelay(name, ln):
 
 
 def trackDrumType(name, ln):
-    """ Set a melody or solo track to be a drum solo track."""
+    """Set a melody or solo track to be a drum solo track."""
 
     tr = gbl.tnames[name]
-    if tr.vtype not in ('SOLO', 'MELODY'):
+    if tr.vtype not in ("SOLO", "MELODY"):
         error("Only Solo and Melody tracks can be to DrumType, not '%s'" % name)
     if ln:
         error("No parmeters permitted for DrumType command")
@@ -1175,7 +1222,7 @@ def trackDrumType(name, ln):
 
 
 def trackDirection(name, ln):
-    """ Set scale/arp direction. """
+    """Set scale/arp direction."""
 
     if not ln:
         error("Use: %s Direction OPT" % name)
@@ -1184,7 +1231,7 @@ def trackDirection(name, ln):
 
 
 def trackScaletype(name, ln):
-    """ Set the scale type. """
+    """Set the scale type."""
 
     if not ln:
         error("Use: %s ScaleType OPT" % name)
@@ -1193,7 +1240,7 @@ def trackScaletype(name, ln):
 
 
 def trackUnify(name, ln):
-    """ Set UNIFY for track."""
+    """Set UNIFY for track."""
 
     if not len(ln):
         error("Use %s UNIFY 1 [...]" % name)
@@ -1215,182 +1262,185 @@ def trackUnify(name, ln):
 
 """
 
-simpleFuncs = {'ADJUSTVOLUME': neomma.MMA.volume.adjvolume,
-               'AFTER': neomma.MMA.after.create,
-               'ALLGROOVES': neomma.MMA.grooves.allgrooves,
-               'ALLTRACKS': allTracks,
-               'AUTHOR': neomma.MMA.docs.docAuthor,
-               'AUTOSOLOTRACKS': neomma.MMA.patSolo.setAutoSolo,
-               'BEATADJUST': neomma.MMA.tempo.beatAdjust,
-               'CALL': neomma.MMA.func.callFunction,
-               'CHANNELPREF': neomma.MMA.midifuncs.setChPref,
-               'CHORDADJUST': neomma.MMA.chords.chordAdjust,
-               'COMMENT': comment,
-               'CRESC': neomma.MMA.volume.setCresc,
-               'CUT': neomma.MMA.tempo.cut,
-               'DEBUG': neomma.MMA.debug.setDebug,
-               'DEC': macros.vardec,
-               'DECRESC': neomma.MMA.volume.setDecresc,
-               'DEFALIAS': neomma.MMA.grooves.grooveAlias,
-               'DEFCHORD': neomma.MMA.chords.defChord,
-               'DEFCALL': neomma.MMA.func.defCall,
-               'DEFGROOVE': neomma.MMA.grooves.grooveDefine,
-               'DELETE': deleteTrks,
-               'DOC': neomma.MMA.docs.docNote,
-               'DOCVAR': neomma.MMA.docs.docVars,
-               'DRUMVOLTR': neomma.MMA.translate.drumVolTable.set,
-               'ELSE': ifelse,
-               'ENDIF': ifend,
-               'ENDMSET': endmset,
-               'ENDREPEAT': repeatend,
-               'EOF': eof,
-               'ERROR': forceError,
-               'FERMATA': neomma.MMA.tempo.fermata,
-               'GOTO': goto,
-               'GROOVE': neomma.MMA.grooves.groove,
-               'GROOVECLEAR': neomma.MMA.grooves.grooveClear,
-               'IF': macros.varIF,
-               'IFEND': ifend,
-               'INC': macros.varinc,
-               'INCLUDE': include,
-               'KEYSIG': keySig.create,
-               'LABEL': comment,
-               'LYRIC': neomma.MMA.lyric.lyric.option,
-               'MIDIDEF': neomma.MMA.mdefine.mdefine,
-               'MIDI': neomma.MMA.midifuncs.rawMidi,
-               'MIDICOPYRIGHT': neomma.MMA.midifuncs.setMidiCopyright,
-               'MIDICUE': neomma.MMA.midifuncs.setMidiCue,
-               'MIDIFILE': neomma.MMA.midifuncs.setMidiFileType,
-               'MIDIINC': neomma.MMA.midiIn.midiinc,
-               'MIDIVOLUME': neomma.MMA.midifuncs.setMidiVolume,
-               'MIDICRESC': neomma.MMA.midifuncs.setMidiCresc,
-               'MIDIDECRESC': neomma.MMA.midifuncs.setMidiDecresc,
-               'CHANNELINIT': neomma.MMA.midifuncs.setChannelInit,
-               'MIDIMARK': neomma.MMA.midifuncs.midiMarker,
-               'MIDISPLIT': neomma.MMA.midi.setSplitChannels,
-               'MIDITEXT': neomma.MMA.midifuncs.setMidiText,
-               'MIDITNAME': neomma.MMA.midifuncs.setMidiName,
-               'MMAEND': neomma.MMA.paths.mmaend,
-               'MMASTART': neomma.MMA.paths.mmastart,
-               'MSET': macros.msetvar,
-               'MSETEND': endmset,
-               'NEWSET': macros.newsetvar,
-               'PATCH': neomma.MMA.patch.patch,
-               'PLUGIN': neomma.MMA.regplug.plugin,
-               'PRINT': lnPrint,
-               'PRINTACTIVE': printActive,
-               'PRINTCHORD': neomma.MMA.chords.printChord,
-               'REPEAT': repeat,
-               'REPEATEND': repeatend,
-               'REPEATENDING': repeatending,
-               'RESTART': neomma.MMA.sequence.restart,
-               'RNDSEED': rndseed,
-               'RNDSET': macros.rndvar,
-               'SEQ': neomma.MMA.sequence.seq,
-               'SEQCLEAR': neomma.MMA.sequence.seqClear,
-               'SEQRND': neomma.MMA.seqrnd.setSeqRnd,
-               'SEQRNDWEIGHT': neomma.MMA.seqrnd.setSeqRndWeight,
-               'SEQSIZE': neomma.MMA.sequence.seqsize,
-               'SET': macros.setvar,
-               'SETINCPATH': neomma.MMA.paths.setIncPath,
-               'SETLIBPATH': neomma.MMA.paths.setLibPath,
-               'SETMIDIPLAYER': neomma.MMA.player.setMidiPlayer,
-               'SETOUTPATH': neomma.MMA.paths.setOutPath,
-               'SETPLUGPATH': neomma.MMA.paths.setPlugPath,
-               'SETSYNCTONE': neomma.MMA.sync.setSyncTone,
-               'SHOWVARS': macros.showvars,
-               'STACKVALUE': macros.stackValue,
-               'SWELL': neomma.MMA.volume.setSwell,
-               'SWINGMODE': neomma.MMA.swing.swingMode,
-               'SYNCHRONIZE': neomma.MMA.sync.synchronize,
-               'TEMPO': neomma.MMA.tempo.tempo,
-               'TIME': neomma.MMA.tempo.setTime,
-               'TIMESIG': timeSig.setSig,
-               'TONETR': neomma.MMA.translate.dtable.set,
-               'TRUNCATE': neomma.MMA.truncate.setTruncate,
-               'TWEAKS': neomma.MMA.tweaks.setTweak,
-               'UNSET': macros.unsetvar,
-               'USE': usefile,
-               'VARCLEAR': macros.clear,
-               'VEXPAND': macros.vexpand,
-               'VOICEVOLTR': neomma.MMA.translate.voiceVolTable.set,
-               'VOICETR': neomma.MMA.translate.vtable.create,
-               'VOLUME': neomma.MMA.volume.setVolume,
-               'TRANSPOSE': neomma.MMA.keysig.transpose}
+simpleFuncs = {
+    "ADJUSTVOLUME": neomma.MMA.volume.adjvolume,
+    "AFTER": neomma.MMA.after.create,
+    "ALLGROOVES": neomma.MMA.grooves.allgrooves,
+    "ALLTRACKS": allTracks,
+    "AUTHOR": neomma.MMA.docs.docAuthor,
+    "AUTOSOLOTRACKS": neomma.MMA.patSolo.setAutoSolo,
+    "BEATADJUST": neomma.MMA.tempo.beatAdjust,
+    "CALL": neomma.MMA.func.callFunction,
+    "CHANNELPREF": neomma.MMA.midifuncs.setChPref,
+    "CHORDADJUST": neomma.MMA.chords.chordAdjust,
+    "COMMENT": comment,
+    "CRESC": neomma.MMA.volume.setCresc,
+    "CUT": neomma.MMA.tempo.cut,
+    "DEBUG": neomma.MMA.debug.setDebug,
+    "DEC": macros.vardec,
+    "DECRESC": neomma.MMA.volume.setDecresc,
+    "DEFALIAS": neomma.MMA.grooves.grooveAlias,
+    "DEFCHORD": neomma.MMA.chords.defChord,
+    "DEFCALL": neomma.MMA.func.defCall,
+    "DEFGROOVE": neomma.MMA.grooves.grooveDefine,
+    "DELETE": deleteTrks,
+    "DOC": neomma.MMA.docs.docNote,
+    "DOCVAR": neomma.MMA.docs.docVars,
+    "DRUMVOLTR": neomma.MMA.translate.drumVolTable.set,
+    "ELSE": ifelse,
+    "ENDIF": ifend,
+    "ENDMSET": endmset,
+    "ENDREPEAT": repeatend,
+    "EOF": eof,
+    "ERROR": forceError,
+    "FERMATA": neomma.MMA.tempo.fermata,
+    "GOTO": goto,
+    "GROOVE": neomma.MMA.grooves.groove,
+    "GROOVECLEAR": neomma.MMA.grooves.grooveClear,
+    "IF": macros.varIF,
+    "IFEND": ifend,
+    "INC": macros.varinc,
+    "INCLUDE": include,
+    "KEYSIG": keySig.create,
+    "LABEL": comment,
+    "LYRIC": neomma.MMA.lyric.lyric.option,
+    "MIDIDEF": neomma.MMA.mdefine.mdefine,
+    "MIDI": neomma.MMA.midifuncs.rawMidi,
+    "MIDICOPYRIGHT": neomma.MMA.midifuncs.setMidiCopyright,
+    "MIDICUE": neomma.MMA.midifuncs.setMidiCue,
+    "MIDIFILE": neomma.MMA.midifuncs.setMidiFileType,
+    "MIDIINC": neomma.MMA.midiIn.midiinc,
+    "MIDIVOLUME": neomma.MMA.midifuncs.setMidiVolume,
+    "MIDICRESC": neomma.MMA.midifuncs.setMidiCresc,
+    "MIDIDECRESC": neomma.MMA.midifuncs.setMidiDecresc,
+    "CHANNELINIT": neomma.MMA.midifuncs.setChannelInit,
+    "MIDIMARK": neomma.MMA.midifuncs.midiMarker,
+    "MIDISPLIT": neomma.MMA.midi.setSplitChannels,
+    "MIDITEXT": neomma.MMA.midifuncs.setMidiText,
+    "MIDITNAME": neomma.MMA.midifuncs.setMidiName,
+    "MMAEND": neomma.MMA.paths.mmaend,
+    "MMASTART": neomma.MMA.paths.mmastart,
+    "MSET": macros.msetvar,
+    "MSETEND": endmset,
+    "NEWSET": macros.newsetvar,
+    "PATCH": neomma.MMA.patch.patch,
+    "PLUGIN": neomma.MMA.regplug.plugin,
+    "PRINT": lnPrint,
+    "PRINTACTIVE": printActive,
+    "PRINTCHORD": neomma.MMA.chords.printChord,
+    "REPEAT": repeat,
+    "REPEATEND": repeatend,
+    "REPEATENDING": repeatending,
+    "RESTART": neomma.MMA.sequence.restart,
+    "RNDSEED": rndseed,
+    "RNDSET": macros.rndvar,
+    "SEQ": neomma.MMA.sequence.seq,
+    "SEQCLEAR": neomma.MMA.sequence.seqClear,
+    "SEQRND": neomma.MMA.seqrnd.setSeqRnd,
+    "SEQRNDWEIGHT": neomma.MMA.seqrnd.setSeqRndWeight,
+    "SEQSIZE": neomma.MMA.sequence.seqsize,
+    "SET": macros.setvar,
+    "SETINCPATH": neomma.MMA.paths.setIncPath,
+    "SETLIBPATH": neomma.MMA.paths.setLibPath,
+    "SETMIDIPLAYER": neomma.MMA.player.setMidiPlayer,
+    "SETOUTPATH": neomma.MMA.paths.setOutPath,
+    "SETPLUGPATH": neomma.MMA.paths.setPlugPath,
+    "SETSYNCTONE": neomma.MMA.sync.setSyncTone,
+    "SHOWVARS": macros.showvars,
+    "STACKVALUE": macros.stackValue,
+    "SWELL": neomma.MMA.volume.setSwell,
+    "SWINGMODE": neomma.MMA.swing.swingMode,
+    "SYNCHRONIZE": neomma.MMA.sync.synchronize,
+    "TEMPO": neomma.MMA.tempo.tempo,
+    "TIME": neomma.MMA.tempo.setTime,
+    "TIMESIG": timeSig.setSig,
+    "TONETR": neomma.MMA.translate.dtable.set,
+    "TRUNCATE": neomma.MMA.truncate.setTruncate,
+    "TWEAKS": neomma.MMA.tweaks.setTweak,
+    "UNSET": macros.unsetvar,
+    "USE": usefile,
+    "VARCLEAR": macros.clear,
+    "VEXPAND": macros.vexpand,
+    "VOICEVOLTR": neomma.MMA.translate.voiceVolTable.set,
+    "VOICETR": neomma.MMA.translate.vtable.create,
+    "VOLUME": neomma.MMA.volume.setVolume,
+    "TRANSPOSE": neomma.MMA.keysig.transpose,
+}
 
 trackFuncs = {
-    'ACCENT': trackAccent,
-    'ARPEGGIATE': trackArpeggiate,
-    'ARTICULATE': trackArtic,
-    'CHANNEL': trackChannel,
-    'CHORDS': trackChords,
-    'DUPRIFF': trackDupRiff,
-    'MIDIVOLUME': neomma.MMA.midifuncs.trackMidiVolume,
-    'MIDICRESC': neomma.MMA.midifuncs.trackMidiCresc,
-    'MIDIDECRESC': neomma.MMA.midifuncs.trackMidiDecresc,
-    'CHSHARE': trackChShare,
-    'COMPRESS': trackCompress,
-    'COPY': neomma.MMA.grooves.trackCopy,
-    'CRESC': trackCresc,
-    'CUT': neomma.MMA.tempo.trackCut,
-    'DECRESC': trackDeCresc,
-    'DELAY': trackDelay,
-    'DIRECTION': trackDirection,
-    'DRUMTYPE': trackDrumType,
-    'DUPROOT': trackDupRoot,
-    'FORCEOUT': trackForceOut,
-    'FRETNOISE': trackPlectrumFretNoise,
-    'GROOVE': neomma.MMA.grooves.trackGroove,
-    'HARMONY': trackHarmony,
-    'HARMONYONLY': trackHarmonyOnly,
-    'HARMONYVOLUME': trackHarmonyVolume,
-    'INVERT': trackInvert,
-    'LIMIT': trackChordLimit,
-    'MALLET': trackMallet,
-    'MIDICLEAR': neomma.MMA.midifuncs.trackMidiClear,
-    'MIDICUE': neomma.MMA.midifuncs.trackMidiCue,
-    'MIDIDEF': neomma.MMA.mdefine.trackMdefine,
-    'MIDIGLIS': neomma.MMA.midifuncs.trackGlis,
-    'MIDIPAN': neomma.MMA.midifuncs.trackPan,
-    'MIDISEQ': neomma.MMA.midifuncs.trackMidiSeq,
-    'MIDITEXT': neomma.MMA.midifuncs.trackMidiText,
-    'MIDITNAME': neomma.MMA.midifuncs.trackMidiName,
-    'MIDIVOICE': neomma.MMA.midifuncs.trackMidiVoice,
-    'MIDIWHEEL': neomma.MMA.midifuncs.trackWheel,
-    'MOCTAVE': trackMOctave,
-    'OCTAVE': trackOctave,
-    'OFF': trackOff,
-    'ON': trackOn,
+    "ACCENT": trackAccent,
+    "ARPEGGIATE": trackArpeggiate,
+    "ARTICULATE": trackArtic,
+    "CHANNEL": trackChannel,
+    "CHORDS": trackChords,
+    "DUPRIFF": trackDupRiff,
+    "MIDIVOLUME": neomma.MMA.midifuncs.trackMidiVolume,
+    "MIDICRESC": neomma.MMA.midifuncs.trackMidiCresc,
+    "MIDIDECRESC": neomma.MMA.midifuncs.trackMidiDecresc,
+    "CHSHARE": trackChShare,
+    "COMPRESS": trackCompress,
+    "COPY": neomma.MMA.grooves.trackCopy,
+    "CRESC": trackCresc,
+    "CUT": neomma.MMA.tempo.trackCut,
+    "DECRESC": trackDeCresc,
+    "DELAY": trackDelay,
+    "DIRECTION": trackDirection,
+    "DRUMTYPE": trackDrumType,
+    "DUPROOT": trackDupRoot,
+    "FORCEOUT": trackForceOut,
+    "FRETNOISE": trackPlectrumFretNoise,
+    "GROOVE": neomma.MMA.grooves.trackGroove,
+    "HARMONY": trackHarmony,
+    "HARMONYONLY": trackHarmonyOnly,
+    "HARMONYVOLUME": trackHarmonyVolume,
+    "INVERT": trackInvert,
+    "LIMIT": trackChordLimit,
+    "MALLET": trackMallet,
+    "MIDICLEAR": neomma.MMA.midifuncs.trackMidiClear,
+    "MIDICUE": neomma.MMA.midifuncs.trackMidiCue,
+    "MIDIDEF": neomma.MMA.mdefine.trackMdefine,
+    "MIDIGLIS": neomma.MMA.midifuncs.trackGlis,
+    "MIDIPAN": neomma.MMA.midifuncs.trackPan,
+    "MIDISEQ": neomma.MMA.midifuncs.trackMidiSeq,
+    "MIDITEXT": neomma.MMA.midifuncs.trackMidiText,
+    "MIDITNAME": neomma.MMA.midifuncs.trackMidiName,
+    "MIDIVOICE": neomma.MMA.midifuncs.trackMidiVoice,
+    "MIDIWHEEL": neomma.MMA.midifuncs.trackWheel,
+    "MOCTAVE": trackMOctave,
+    "OCTAVE": trackOctave,
+    "OFF": trackOff,
+    "ON": trackOn,
     "ORNAMENT": trackOrnament,
-    'TUNING': trackPlectrumTuning,
-    'CAPO': trackPlectrumCapo,
-    'SHAPE': trackPlectrumShape,
-    'RANGE': trackRange,
-    'RDURATION': trackRduration,
-    'RESTART': neomma.MMA.sequence.trackRestart,
-    'RIFF': trackRiff,
-    'RSKIP': trackRskip,
-    'RTIME': trackRtime,
-    'RVOLUME': trackRvolume,
-    'RPITCH':  neomma.MMA.rpitch.setRPitch,
-    'SCALETYPE': trackScaletype,
-    'SEQCLEAR': neomma.MMA.sequence.trackSeqClear,
-    'SEQRND': neomma.MMA.sequence.trackSeqRnd,
-    'SEQUENCE': neomma.MMA.sequence.trackSequence,
-    'SEQRNDWEIGHT': neomma.MMA.sequence.trackSeqRndWeight,
-    'STRETCH': trackStretch,
-    'STICKY': trackSticky,
-    'SWELL': trackSwell,
-    'TRIGGER': neomma.MMA.trigger.setTrigger,
-    'MIDINOTE': neomma.MMA.midinote.parse,
-    'NOTESPAN': trackSpan,
-    'STRUM': trackStrum,
-    'STRUMADD': trackStrumAdd,
-    'TONE': trackTone,
-    'UNIFY': trackUnify,
-    'VOICE': trackVoice,
-    'VOICING': trackVoicing,
-    'VOLUME': trackVolume,
-    'DEFINE': trackDefPattern}
+    "TUNING": trackPlectrumTuning,
+    "CAPO": trackPlectrumCapo,
+    "SHAPE": trackPlectrumShape,
+    "RANGE": trackRange,
+    "RDURATION": trackRduration,
+    "RESTART": neomma.MMA.sequence.trackRestart,
+    "RIFF": trackRiff,
+    "RSKIP": trackRskip,
+    "RTIME": trackRtime,
+    "RVOLUME": trackRvolume,
+    "RPITCH": neomma.MMA.rpitch.setRPitch,
+    "SCALETYPE": trackScaletype,
+    "SEQCLEAR": neomma.MMA.sequence.trackSeqClear,
+    "SEQRND": neomma.MMA.sequence.trackSeqRnd,
+    "SEQUENCE": neomma.MMA.sequence.trackSequence,
+    "SEQRNDWEIGHT": neomma.MMA.sequence.trackSeqRndWeight,
+    "STRETCH": trackStretch,
+    "STICKY": trackSticky,
+    "SWELL": trackSwell,
+    "TRIGGER": neomma.MMA.trigger.setTrigger,
+    "MIDINOTE": neomma.MMA.midinote.parse,
+    "NOTESPAN": trackSpan,
+    "STRUM": trackStrum,
+    "STRUMADD": trackStrumAdd,
+    "TONE": trackTone,
+    "UNIFY": trackUnify,
+    "VOICE": trackVoice,
+    "VOICING": trackVoicing,
+    "VOLUME": trackVolume,
+    "DEFINE": trackDefPattern,
+}
 
 dataFuncs = {}

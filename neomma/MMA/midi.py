@@ -21,16 +21,23 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 Bob van der Poel <bob@mellowood.ca>
 """
 
-from   neomma.MMA.midiM import intToWord, intTo3Byte, intToLong, intToVarNumber, intTo14, packBytes
+from neomma.MMA.midiM import (
+    intToWord,
+    intTo3Byte,
+    intToLong,
+    intToVarNumber,
+    intTo14,
+    packBytes,
+)
 import neomma.MMA.midiC
 import neomma.MMA.debug
 import neomma.MMA.sync
 from . import gbl
-from   neomma.MMA.common import *
-from   neomma.MMA.miditables import NONETONE
+from neomma.MMA.common import *
+from neomma.MMA.miditables import NONETONE
 
 splitChannels = []
-tempoChanges = []    # A list of tempo changes, use to check from tempo.py
+tempoChanges = []  # A list of tempo changes, use to check from tempo.py
 
 # some constants we use to catorgize event types
 MIDI_NOTE = 1
@@ -38,13 +45,13 @@ MIDI_PRG = 2
 
 
 def setSplitChannels(ln):
-    """ Parser routine, sets up list of track to split. Overwrites existing. """
+    """Parser routine, sets up list of track to split. Overwrites existing."""
 
     global splitChannels
     splitChannels = []
 
     for a in ln:
-        try:   # is this a legit channel number
+        try:  # is this a legit channel number
             ch = int(a, 0)
         except ValueError:  # assume track name then
             ch = None
@@ -52,7 +59,7 @@ def setSplitChannels(ln):
         if ch is None:
             if not a in gbl.tnames:
                 a = a.upper()
-                neomma.MMA.alloc.trackAlloc(a, 0)    # ensure that track is allocated
+                neomma.MMA.alloc.trackAlloc(a, 0)  # ensure that track is allocated
             if not a in gbl.tnames:
                 error("MidiSplit: Track '%s' is not valid." % a)
             if not gbl.tnames[a].channel:
@@ -68,15 +75,16 @@ def setSplitChannels(ln):
         msg = ["SplitChannels: "]
         for a in splitChannels:
             msg.append(str(a))
-        dPrint(' '.join(msg))
+        dPrint(" ".join(msg))
 
 
 ####################
 
-def writeTracks(out):
-    """ Write the accumulated MIDI tracks to file. """
 
-    keys = list(gbl.mtrks.keys())   # a list of channels. Should rename?
+def writeTracks(out):
+    """Write the accumulated MIDI tracks to file."""
+
+    keys = list(gbl.mtrks.keys())  # a list of channels. Should rename?
     keys.sort()
 
     """ For type 0 MIDI files all data is contained in 1 track.
@@ -101,7 +109,7 @@ def writeTracks(out):
 
     out.write(mkHeader(tcount, gbl.BperQ, gbl.midiFileType))
 
-    if gbl.barRange:   # compensate for -B/-b options
+    if gbl.barRange:  # compensate for -B/-b options
         stripRange()
 
     # Write data chunks for each track
@@ -109,7 +117,7 @@ def writeTracks(out):
     for n in keys:
         # Call special function to split a track (set by MidiSplit)
         if n in splitChannels and gbl.midiFileType:
-            tcount += writeSplitTrack(n, out)   
+            tcount += writeSplitTrack(n, out)
         else:
             # use normal function
             gbl.mtrks[n].writeMidiTrack(out)
@@ -127,12 +135,12 @@ def writeTracks(out):
 
 
 def writeSplitTrack(channel, out):
-    """ Split a track. In drum tracks this puts different instruments
-        into individual tracks (useful!); for instrument tracks it puts
-       each pitch into a track (probably not useful).
+    """Split a track. In drum tracks this puts different instruments
+     into individual tracks (useful!); for instrument tracks it puts
+    each pitch into a track (probably not useful).
     """
 
-    tr = gbl.mtrks[channel].miditrk   # track to split
+    tr = gbl.mtrks[channel].miditrk  # track to split
 
     # A dict to store the split midi tracks. We'll end up with
     # a track for each pitch which appears in the track and
@@ -140,17 +148,17 @@ def writeSplitTrack(channel, out):
 
     notes = {}
 
-    onEvent = 0x90 + (channel-1)
-    offEvent = 0x80 + (channel-1)
+    onEvent = 0x90 + (channel - 1)
+    offEvent = 0x80 + (channel - 1)
     for offset in tr.keys():
-        for x in range(len(tr[offset])-1, -1, -1):
+        for x in range(len(tr[offset]) - 1, -1, -1):
             ev = tr[offset][x]
             if len(ev) == 3 and (ev[0] in (onEvent, offEvent)):
                 n = ev[1]
             else:
-                n = -1      # special value for non-note on events
+                n = -1  # special value for non-note on events
 
-            if not n in notes:   # create a new mtrk if needed
+            if not n in notes:  # create a new mtrk if needed
                 notes[n] = Mtrk(10)
 
             if offset in notes[n].miditrk:  # copy event to new track
@@ -181,28 +189,30 @@ def writeSplitTrack(channel, out):
         len(notes)-1 IS CORRECT ... we've already figured on writing 1 track.
     """
 
-    return len(notes)-1
+    return len(notes) - 1
 
 
 def mkHeader(count, tempo, Mtype):
 
-    return packBytes("MThd", intToLong(6), intToWord(Mtype), intToWord(count), intToWord(tempo))
+    return packBytes(
+        "MThd", intToLong(6), intToWord(Mtype), intToWord(count), intToWord(tempo)
+    )
 
 
 # Midi track class. All the midi creation is done here.
 #  We create a class instance for each track. mtrks{}.
 
-class Mtrk:
 
+class Mtrk:
     def __init__(self, channel):
         self.miditrk = {}
-        self.channel = channel-1
-        self.trackname = ''
+        self.channel = channel - 1
+        self.trackname = ""
         self.lastOffEvent = [None] * 129  # cell for each note, saved delta
         self.lastPrg = 0
 
     def delDup(self, offset, cmd):
-        """ Delete a duplicate event. Used by timesig, etc.    """
+        """Delete a duplicate event. Used by timesig, etc."""
 
         tr = self.miditrk
         lg = len(cmd)
@@ -211,42 +221,42 @@ class Mtrk:
             for ev in tr[offset]:
                 if ev[0:lg] != cmd:  # not target, copy it
                     tmp.append(ev)
-            tr[offset] = tmp           # new set of events (may be empty)
+            tr[offset] = tmp  # new set of events (may be empty)
 
-    def addTimeSig(self, offset,  nn, dd, cc, bb):
-        """ Create a midi time signature.
+    def addTimeSig(self, offset, nn, dd, cc, bb):
+        """Create a midi time signature.
 
-            delta - midi delta offset
-            nn = sig numerator, beats per measure
-            dd - sig denominator, 2=quarter note, 3=eighth,
-            cc - midi clocks/tick
-            bb - # of 32nd notes in quarter (normally 8)
+        delta - midi delta offset
+        nn = sig numerator, beats per measure
+        dd - sig denominator, 2=quarter note, 3=eighth,
+        cc - midi clocks/tick
+        bb - # of 32nd notes in quarter (normally 8)
 
-            This is only called by timeSig.create(). Don't
-            call this directly since the timeSig.create() checks for
-            duplicate settings.
+        This is only called by timeSig.create(). Don't
+        call this directly since the timeSig.create() checks for
+        duplicate settings.
         """
 
-        cmd = packBytes(0xff, 0x58)
+        cmd = packBytes(0xFF, 0x58)
         # we might have several different timesigs on the same offset,
-        # so take time to delete any. 
+        # so take time to delete any.
         self.delDup(offset, cmd)
         self.addToTrack(offset, packBytes(cmd, (0x04, nn, dd, cc, bb)))
 
     def addKeySig(self, offset, n, mi):
-        """ Set the midi key signature. """
+        """Set the midi key signature."""
 
-        cmd = packBytes(0xff, 0x59)
+        cmd = packBytes(0xFF, 0x59)
         self.delDup(offset, cmd)
         self.addToTrack(offset, packBytes(cmd, (0x02, n, mi)))
 
     def addMarker(self, offset, msg):
-        """ Create a midi MARKER event."""
+        """Create a midi MARKER event."""
 
-        self.addToTrack(offset, packBytes((0xff, 0x06), intToVarNumber(len(msg)), msg))
+        self.addToTrack(offset, packBytes((0xFF, 0x06), intToVarNumber(len(msg)), msg))
 
     def addCopyright(self, offset, msg):
-        """ Insert copyright. """
+        """Insert copyright."""
 
         # should never happen since the caller sets offset=0
         if offset != 0:
@@ -255,9 +265,9 @@ class Mtrk:
         # We need to bypass addToTrack to force copyright to the start of the track.
 
         # Create the copyright event
-        ev = packBytes((0xff, 0x02), intToVarNumber(len(msg)), msg)
+        ev = packBytes((0xFF, 0x02), intToVarNumber(len(msg)), msg)
 
-        tr = self.miditrk   # this is the meta track
+        tr = self.miditrk  # this is the meta track
 
         # We keep a pointer (ipoint) which points to the position of
         # the last copyright string. If there isn't one, we create
@@ -274,36 +284,36 @@ class Mtrk:
             tr[offset] = [ev]
 
     def addText(self, offset, msg):
-        """ Create a midi TextEvent."""
+        """Create a midi TextEvent."""
 
-        self.addToTrack(offset, packBytes((0xff, 0x01), intToVarNumber(len(msg)), msg))
+        self.addToTrack(offset, packBytes((0xFF, 0x01), intToVarNumber(len(msg)), msg))
 
     def addLyric(self, offset, msg):
-        """ Create a midi lyric event. """
+        """Create a midi lyric event."""
 
-        self.addToTrack(offset, packBytes((0xff, 0x05), intToVarNumber(len(msg)), msg))
+        self.addToTrack(offset, packBytes((0xFF, 0x05), intToVarNumber(len(msg)), msg))
 
     def addCuePoint(self, offset, msg):
-        """ Create a MIDI cue pointr event. """
+        """Create a MIDI cue pointr event."""
 
-        self.addToTrack(offset, packBytes((0xff, 0x07), intToVarNumber(len(msg)), msg ))
+        self.addToTrack(offset, packBytes((0xFF, 0x07), intToVarNumber(len(msg)), msg))
 
     def addTrkName(self, offset, msg):
-        """ Creates a midi track name event. """
+        """Creates a midi track name event."""
 
         offset = 0  # ignore user offset, always put this at 0
 
         self.trackname = msg
 
-        cmd = packBytes((0xff, 0x03))
+        cmd = packBytes((0xFF, 0x03))
         self.delDup(offset, cmd)
         self.addToTrack(offset, packBytes(cmd, intToVarNumber(len(msg)), msg))
 
     def addProgChange(self, offset, program, oldprg):
-        """ Create a midi program change (handles extended voicing).
+        """Create a midi program change (handles extended voicing).
 
-            program - The MIDI program (voice) value
-            oldprg  - existing MIDI program
+        program - The MIDI program (voice) value
+        oldprg  - existing MIDI program
         """
 
         # We truck around a special pseudo voice 'NONE' or 127.127.127 which
@@ -317,102 +327,106 @@ class Mtrk:
         v1, lsb1, msb1 = neomma.MMA.midiC.voice2tup(oldprg)
         v2, lsb2, msb2 = neomma.MMA.midiC.voice2tup(program)
 
-        if msb1 != msb2:   # only if CTRL32 has changed
-            self.addToTrack(offset, packBytes((0xb0 | self.channel, 0x20, msb2)))
+        if msb1 != msb2:  # only if CTRL32 has changed
+            self.addToTrack(offset, packBytes((0xB0 | self.channel, 0x20, msb2)))
 
-        if lsb1 != lsb2:   # only if CTRL0 has changed
-            self.addToTrack(offset, packBytes((0xb0 | self.channel, 0x00, lsb2)))
+        if lsb1 != lsb2:  # only if CTRL0 has changed
+            self.addToTrack(offset, packBytes((0xB0 | self.channel, 0x00, lsb2)))
 
         # Always do voice change. Maybe not necessary, but let's be safe.
 
-        self.addToTrack(offset, packBytes((0xc0 | self.channel, v2)), MIDI_PRG)
+        self.addToTrack(offset, packBytes((0xC0 | self.channel, v2)), MIDI_PRG)
 
     def addGlis(self, offset, v):
-        """ Set the portamento. LowLevel MIDI.
+        """Set the portamento. LowLevel MIDI.
 
-            This does 2 things:
-                1. turns portamento on/off,
-                2. sets the LSN rate.
+        This does 2 things:
+            1. turns portamento on/off,
+            2. sets the LSN rate.
         """
 
         if v == 0:
-            self.addToTrack(offset, packBytes((0xb0 | self.channel, 0x41, 0x00)))
+            self.addToTrack(offset, packBytes((0xB0 | self.channel, 0x41, 0x00)))
 
         else:
-            self.addToTrack(offset, packBytes((0xb0 | self.channel, 0x41, 0x7f)))
-            self.addToTrack(offset, packBytes((0xb0 | self.channel, 0x05, v)))
+            self.addToTrack(offset, packBytes((0xB0 | self.channel, 0x41, 0x7F)))
+            self.addToTrack(offset, packBytes((0xB0 | self.channel, 0x05, v)))
 
     def addWheel(self, offset, v):
-        """ Set lsb/msb for the modulation wheel. """
+        """Set lsb/msb for the modulation wheel."""
 
-        self.addToTrack(offset, packBytes((0xe0 | self.channel), intTo14(v)))
+        self.addToTrack(offset, packBytes((0xE0 | self.channel), intTo14(v)))
 
     def addPan(self, offset, v):
-        """ Set the lsb of the pan setting."""
+        """Set the lsb of the pan setting."""
 
-        self.addToTrack(offset, packBytes((0xb0 | self.channel, 0x0a, v)))
+        self.addToTrack(offset, packBytes((0xB0 | self.channel, 0x0A, v)))
 
     def addCtl(self, offset, l):
-        """ Add arbitary control sequence to track."""
+        """Add arbitary control sequence to track."""
 
-        self.addToTrack(offset, packBytes(0xb0 | self.channel, l))
+        self.addToTrack(offset, packBytes(0xB0 | self.channel, l))
 
     def addNoteOff(self, offset):
-        """ Insert a "All Note Off" into the midi stream.
+        """Insert a "All Note Off" into the midi stream.
 
-            Called from the cutTrack() function.
+        Called from the cutTrack() function.
         """
 
-        self.addToTrack(offset, packBytes((0xb0 | self.channel, 0x7b, 0)), MIDI_NOTE )
+        self.addToTrack(offset, packBytes((0xB0 | self.channel, 0x7B, 0)), MIDI_NOTE)
 
     def addMasterVolume(self, offset, v):
-        """ System Exclusive master volume message. Meta track. """
+        """System Exclusive master volume message. Meta track."""
 
         # We send to packBytes as a long list, no tuples. Just a bit
         # easier to maintain a long list like this.
-        self.addToTrack(offset, packBytes(
-                0xf0,       # Start sysex
-                0x07,       # message size (needed for SMF)
-                0x7f,       # realtime
-                0x7f,       # disregard channel
-                0x04,       # device control
-                0x01,       # master volume
-                intTo14(v), # params (14 bit)
-                0xf7 ))     # EOX
+        self.addToTrack(
+            offset,
+            packBytes(
+                0xF0,  # Start sysex
+                0x07,  # message size (needed for SMF)
+                0x7F,  # realtime
+                0x7F,  # disregard channel
+                0x04,  # device control
+                0x01,  # master volume
+                intTo14(v),  # params (14 bit)
+                0xF7,
+            ),
+        )  # EOX
 
     def addChannelVol(self, offset, v):
-        """ Set the midi channel volume."""
+        """Set the midi channel volume."""
 
         tr = self.miditrk
-        cvol = packBytes(0xb0 | self.channel, 0x07)  # 2 byte channel vol
+        cvol = packBytes(0xB0 | self.channel, 0x07)  # 2 byte channel vol
 
         # Before adding a new channel volume event we check to see if there
         # are any future channel volume events and delete them.
-        
+
         for off in tr:
             if off >= offset:
                 tr[off] = [e for e in tr[off] if e[0:2] != cvol]
-        
+
         self.addToTrack(offset, packBytes(cvol, v))
 
     def addTempo(self, offset, bpm):
-        """ Create a midi tempo meta event.
+        """Create a midi tempo meta event.
 
-             bpm - beats per minute
+        bpm - beats per minute
 
-             Return - packed midi string
+        Return - packed midi string
         """
 
-        cmd = packBytes((0xff, 0x51, 0x03))
+        cmd = packBytes((0xFF, 0x51, 0x03))
         self.delDup(offset, cmd)
 
         self.addToTrack(offset, packBytes(cmd, intTo3Byte(60000000 // bpm)))
         tempoChanges.append([offset, bpm])
-        
-    def writeMidiTrack(self, out):
-        """ Create/write the MIDI track.
 
-            We convert timing offsets to midi-deltas.
+    def writeMidiTrack(self, out):
+        """Create/write the MIDI track.
+
+        We convert timing offsets to midi-deltas.
         """
 
         tr = self.miditrk
@@ -429,7 +443,7 @@ class Mtrk:
             for offset in list(tr.keys()):
                 if offset > eof:
                     del tr[offset]
-            self.addToTrack(eof, packBytes((0xb0 | self.channel, 0x7b, 0)))
+            self.addToTrack(eof, packBytes((0xB0 | self.channel, 0x7B, 0)))
 
         """ To every MIDI track we generate we add (if the -0 flag
             was set) an on/off beep at offset 0. This makes for
@@ -453,19 +467,21 @@ class Mtrk:
                 nm = "META"
             else:
                 nm = self.trackname
-            dPrint( "<%s> Unique ts: %s; Ttl events %s; Average ev/ts %.2f" %
-                (nm, len(tr), ttl, float(ttl)/len(tr)))
+            dPrint(
+                "<%s> Unique ts: %s; Ttl events %s; Average ev/ts %.2f"
+                % (nm, len(tr), ttl, float(ttl) / len(tr))
+            )
 
         last = 0
 
         # Convert all events to MIDI deltas and store in
         # the track array/list
 
-        tdata = []        # empty track container
-        lastSts = None    # Running status tracker
+        tdata = []  # empty track container
+        lastSts = None  # Running status tracker
 
         for a in sorted(tr.keys()):
-            delta = a-last
+            delta = a - last
 
             if not tr[a]:
                 continue  # this skips the delta offset update!
@@ -484,7 +500,7 @@ class Mtrk:
                         d = d[1:]
                     else:
                         lastSts = d[0]
-                        if lastSts < 0x80 or lastSts > 0xef or not gbl.runningStatus:
+                        if lastSts < 0x80 or lastSts > 0xEF or not gbl.runningStatus:
                             lastSts = None
 
                 tdata.extend([intToVarNumber(delta), d])
@@ -494,9 +510,9 @@ class Mtrk:
         # Add an EOF to the track (included in total track size)
 
         tdata.append(intToVarNumber(0))
-        tdata.append(packBytes((0xff, 0x2f, 0x00)))
+        tdata.append(packBytes((0xFF, 0x2F, 0x00)))
 
-        tdata = bytearray(b'').join(tdata)
+        tdata = bytearray(b"").join(tdata)
         totsize = len(tdata)
 
         out.write(b"MTrk")
@@ -504,49 +520,49 @@ class Mtrk:
         out.write(tdata)
 
     def getLastOffset(self):
-        """ Go though the data and find the last offset. 
-            Used in re-allocating tracks. A completely
-            empty track will return 0, but that's okay
-            and shouldn't happen in any event.
+        """Go though the data and find the last offset.
+        Used in re-allocating tracks. A completely
+        empty track will return 0, but that's okay
+        and shouldn't happen in any event.
         """
 
-        offset = 0  
+        offset = 0
         for a in self.miditrk:
             if a > offset:
                 offset = a
         return offset
-    
-    def addPairToTrack(self, boffset, startRnd, endRnd, duration, note, v, unify ):
-        """ Add a note on/off pair to a track.
 
-            boffset      - offset into current bar
-            startRnd, endRnd  - rand val start adjustment
-            duration  - note len
-            note      - midi value of note
-            v      - midi velocity
-            unify      - if set attempt to unify/compress on/offs
+    def addPairToTrack(self, boffset, startRnd, endRnd, duration, note, v, unify):
+        """Add a note on/off pair to a track.
 
-            This function tries its best to handle overlapping events.
-            Easy to show effect with a table of note ON/OFF pairs. Both
-            events are for the same note pitch.
+        boffset      - offset into current bar
+        startRnd, endRnd  - rand val start adjustment
+        duration  - note len
+        note      - midi value of note
+        v      - midi velocity
+        unify      - if set attempt to unify/compress on/offs
 
-            Offsets     |     200  |      300  |  320  |  420
-            ---------|--------|--------|-------|--------
-            Pair1     |     on      |       |  off  |
-            Pair2     |      |      on   |       |  off
+        This function tries its best to handle overlapping events.
+        Easy to show effect with a table of note ON/OFF pairs. Both
+        events are for the same note pitch.
 
-            The logic here will delete the OFF event at 320 and
-            insert a new OFF at 300. Result is that when playing
-            Pair1 will turn off at 300 followed by the same note
-            in Pair2 beginning sounded right after. Why the on/off?
-            Remember: Velocities may be different!
+        Offsets     |     200  |      300  |  320  |  420
+        ---------|--------|--------|-------|--------
+        Pair1     |     on      |       |  off  |
+        Pair2     |      |      on   |       |  off
 
-            However, if the unify flag is set we should end up with:
+        The logic here will delete the OFF event at 320 and
+        insert a new OFF at 300. Result is that when playing
+        Pair1 will turn off at 300 followed by the same note
+        in Pair2 beginning sounded right after. Why the on/off?
+        Remember: Velocities may be different!
 
-            Offsets     |     200  |      300  |  320  |  420
-            ---------|--------|--------|-------|--------
-            Pair1     |     on      |       |       |
-            Pair2     |      |       |       |  off
+        However, if the unify flag is set we should end up with:
+
+        Offsets     |     200  |      300  |  320  |  420
+        ---------|--------|--------|-------|--------
+        Pair1     |     on      |       |       |
+        Pair2     |      |       |       |  off
 
         """
 
@@ -573,7 +589,7 @@ class Mtrk:
 
         noOnFlag = False
 
-        f = self.lastOffEvent[note] 
+        f = self.lastOffEvent[note]
 
         if f is not None and f >= onOffset and f <= offOffset:
             # evlist is a delta-offset list. It should have a note off event
@@ -595,14 +611,14 @@ class Mtrk:
         self.lastOffEvent[note] = offOffset
 
     def addNoteOnToTrack(self, boffset, note, v, startRnd=None, endRnd=None):
-        """ Add a single note on or note off when v=0 to a track.
-            boffset      - offset into current bar
-            duration  - note len
-            note      - midi value of note
-            v      - midi velocity, set to 0 for note off
-            startRnd/endRnd  - rand val start adjustment
+        """Add a single note on or note off when v=0 to a track.
+        boffset      - offset into current bar
+        duration  - note len
+        note      - midi value of note
+        v      - midi velocity, set to 0 for note off
+        startRnd/endRnd  - rand val start adjustment
 
-            Added by louisjb for plectrum.
+        Added by louisjb for plectrum.
         """
 
         # Start offsets
@@ -623,28 +639,27 @@ class Mtrk:
 
         # ON/OFF events (off is on with v = 0)
 
-
         self.addToTrack(onOffset, onEvent, MIDI_NOTE)
-        if v==0:
+        if v == 0:
             self.lastOffEvent[note] = onOffset
         return onOffset
 
     def addToTrack(self, offset, event, evType=None):
-        """ Add an event to a track.
+        """Add an event to a track.
 
-            MIDI data is saved as created in track structures.
-            Each track has a miditrk dictionary entry which used
-            the time offsets and keys and has the various events
-            as data. Each event is a packed string of bytes and
-            the events are stored as a list in the order they are
-            created. Our storage looks like:
+        MIDI data is saved as created in track structures.
+        Each track has a miditrk dictionary entry which used
+        the time offsets and keys and has the various events
+        as data. Each event is a packed string of bytes and
+        the events are stored as a list in the order they are
+        created. Our storage looks like:
 
-                 miditrk[OFFSET_VALUE] = [event1, event2, ...]
+             miditrk[OFFSET_VALUE] = [event1, event2, ...]
 
-            evType is an optional arg. Two values are used:
-                 MIDI_PR - a program (voice) change. Save the timestamp.
-                 MIDI_NOTE - note on/off ... check to see it doesn't happen
-                             before the last program change.
+        evType is an optional arg. Two values are used:
+             MIDI_PR - a program (voice) change. Save the timestamp.
+             MIDI_NOTE - note on/off ... check to see it doesn't happen
+                         before the last program change.
 
         """
 
@@ -668,33 +683,36 @@ class Mtrk:
         else:
             tr[offset] = [event]
 
+
 def stripRange():
-    """ Strip out range limited data. Only of -B/b option. """
+    """Strip out range limited data. Only of -B/b option."""
 
-    bp = gbl.barPtrs   # list generated at compile time
+    bp = gbl.barPtrs  # list generated at compile time
 
-    if gbl.barRange[-1] == 'ABS':
+    if gbl.barRange[-1] == "ABS":
         gbl.barRange.pop()  # delete abs marker (set by -B)
-        for a in bp:        # convert comment numbers to abs numbers
+        for a in bp:  # convert comment numbers to abs numbers
             bp[a][0] = str(a)
     validRange = []
 
-    for a in gbl.barRange:   # list of bars we want to produce
+    for a in gbl.barRange:  # list of bars we want to produce
         for b in bp:
             if a == bp[b][0]:
                 validRange.append([bp[b][1], bp[b][2]])
 
     if not validRange:
-        dPrint("   Range directive -b/B would result in empty file.\n"
-              "   Entire file is being created. Check the range.")
+        dPrint(
+            "   Range directive -b/B would result in empty file.\n"
+            "   Entire file is being created. Check the range."
+        )
         return
 
     # Collaspe/merge the valid range pointers
-    validRange.sort()   # barptrs was dict, so this list is not in order
+    validRange.sort()  # barptrs was dict, so this list is not in order
     tmp = []
     a, b = validRange[0]
     for i in range(1, len(validRange)):
-        if b+1 == validRange[i][0]:
+        if b + 1 == validRange[i][0]:
             b = validRange[i][1]
         else:
             tmp.append([a, b])
@@ -709,7 +727,7 @@ def stripRange():
     disList = []
     lowestEv = bp[1][1]
     for a in validRange:
-        disList.append([lowestEv, a[0]-1])
+        disList.append([lowestEv, a[0] - 1])
         lowestEv = a[1]
 
     """ Determine the last event time in the buffer. This is not nesc. the
@@ -723,7 +741,7 @@ def stripRange():
         if z[-1] > lastev:
             lastev = z[-1]
 
-    disList.append([validRange[-1][1]+1, lastev])
+    disList.append([validRange[-1][1] + 1, lastev])
 
     """ 1st pass. For each track take all the cut parts and adjust their
         offsets to the end offset of the previous keep section. Strip out
@@ -734,15 +752,15 @@ def stripRange():
         for n in gbl.mtrks:
             tr = gbl.mtrks[n].miditrk
             newEvents = []
-            for ev in sorted(tr.keys()):   # sort is important!
+            for ev in sorted(tr.keys()):  # sort is important!
                 if ev >= start and ev <= end:
                     for e in tr[ev]:
-                        e0 = e[0] & 0xf0
+                        e0 = e[0] & 0xF0
                         # skip note on events
                         if e0 == 0x90 and e[2]:
                             continue
                         # skip lyric and text events
-                        if e[0] == 0xff:
+                        if e[0] == 0xFF:
                             if e[1] == 0x05 or e[1] == 0x01:
                                 continue
                         # skip if event is note off and it already is present
@@ -755,7 +773,7 @@ def stripRange():
                                     break
                         if e:
                             newEvents.append(e)
-                    del (tr[ev])
+                    del tr[ev]
 
             """ We now have a new list of events for the 'start' offset (it might
                 just be an empty list) AND we have deleted the events for 'start'
@@ -768,15 +786,15 @@ def stripRange():
     """ 2nd pass. Adjust offsets of stuff to keep. """
 
     offset = 0
-    for vals in range(len(validRange)):   # each valid range
+    for vals in range(len(validRange)):  # each valid range
         start = validRange[vals][0]
-        end = validRange[vals][1]+1
-        offset += (start - disList[vals][0])
-        for a in gbl.mtrks:               # each track
+        end = validRange[vals][1] + 1
+        offset += start - disList[vals][0]
+        for a in gbl.mtrks:  # each track
             tr = gbl.mtrks[a].miditrk
             for ev in sorted(tr.keys()):  # each event list
                 if ev >= start and ev <= end:
-                    newoffset = ev-offset
+                    newoffset = ev - offset
                     if ev != newoffset:  # don't append/copy creating duplicates
                         if newoffset in tr:
                             tr[newoffset].extend(tr[ev])

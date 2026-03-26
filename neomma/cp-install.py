@@ -7,8 +7,8 @@ import shutil, os, sys
 # This should be fixed to be more versatile. Volunteers?
 
 
-pyMaj=2
-pyMin=6
+pyMaj = 2
+pyMin = 6
 
 PY3 = sys.version_info[0] >= 3  # set if running python3
 
@@ -16,22 +16,28 @@ PY3 = sys.version_info[0] >= 3  # set if running python3
 if PY3:
     raw_input = input
 
+
 def okay(msg):
     print(msg)
-    a=raw_input("   Press <ENTER> to continue (anything else will terminate): ")
+    a = raw_input("   Press <ENTER> to continue (anything else will terminate): ")
 
     if a:
         sys.exit(1)
 
     return
 
+
 # Before we do anything, make sure we have an up-to-date python.
 
 if not PY3:
     if sys.version_info[0] < pyMaj or sys.version_info[1] < pyMin:
-        print("\nYou need a more current version of Python to run MMA and this install script.")
-        print("We're looking for something equal or greater than version %s.%s or any 3.x" % \
-                  (pyMaj,pyMin))
+        print(
+            "\nYou need a more current version of Python to run MMA and this install script."
+        )
+        print(
+            "We're looking for something equal or greater than version %s.%s or any 3.x"
+            % (pyMaj, pyMin)
+        )
         print("Current Python version is %s.\n" % sys.version)
         sys.exit(0)
 
@@ -41,9 +47,9 @@ if not PY3:
 print("This script will install mma, the standard library and the python modules.")
 
 try:
-    u=os.getuid()
+    u = os.getuid()
 except:
-    u=1
+    u = 1
 
 if u:
     okay("""\nYou do not appear to be running this script as 'root' user.
@@ -57,7 +63,8 @@ rootexe = "/usr/local/bin"
 dest = rootdir + "/mma"
 exe = rootexe + "/mma"
 
-print("""
+print(
+    """
 We recommend that you install the package with this script
 in the default locations. This script will create a
 directory 'mma' in /usr/local/share. If this isn't
@@ -71,7 +78,9 @@ The main executable script will be installed in %s.
 If you ever decide to get rid of MMA, just delete the executable
 in /usr/local/mma and the directory tree in /usr/local/share/mma.
 
-""" % rootexe)
+"""
+    % rootexe
+)
 
 okay("")
 
@@ -84,13 +93,13 @@ if not os.path.exists(rootdir):
     if os.system("mkdir -p %s" % rootdir):
         print("Opps, create failed. Were you root?")
         sys.exit(1)
-    
+
 if not os.path.exists(rootexe):
     okay("""The directory %s does not exist. Create okay?""" % rootexe)
     if os.system("mkdir -p %s" % rootexe):
         print("Opps, create failed. Were you root?")
         sys.exit(1)
-    
+
 
 ###########################################
 ######## Copy the executable.
@@ -102,52 +111,54 @@ if os.path.exists(exe):
 
 print("Copying mma to %s" % exe)
 
-shutil.copy( 'mma.py', exe)
+shutil.copy("mma.py", exe)
 
 ###########################################
 ######## Copy the library
 
 
 if os.path.exists(dest):
-    bu=dest.rsplit('/', 1)[0] + '/mma-old'
+    bu = dest.rsplit("/", 1)[0] + "/mma-old"
     if os.path.exists(bu):
         print("This script was going to move the existing MMA tree to")
         print("a backup directory called '%s'. But that already exists." % bu)
         print("So, please delete the backup (and current) directories by hand.")
-        print("Yes, the script could do this, but it's probably safer for you to do it!")
+        print(
+            "Yes, the script could do this, but it's probably safer for you to do it!"
+        )
         sys.exit(1)
 
     okay("Existing mma tree '%s' is being moved to '%s'." % (dest, bu))
-    os.rename( dest, bu )
+    os.rename(dest, bu)
 
-print( "Copying library to %s" % dest)
+print("Copying library to %s" % dest)
 os.makedirs(dest)
-shutil.copytree( "lib", dest+"/lib")
+shutil.copytree("lib", dest + "/lib")
 
 
 ###########################################
 ######## Copy the includes
 
 print("Copying includes to %s" % dest)
-shutil.copytree( "includes", dest+"/includes")
+shutil.copytree("includes", dest + "/includes")
 
 ###########################################
 ######## Copy the plugins
 
 print("Copying plugins to %s" % dest)
-shutil.copytree( "plugins", dest+"/plugins")
+shutil.copytree("plugins", dest + "/plugins")
 
 ###########################################
 ######## Copy the modules
 
 print("Copying python modules to %s" % dest)
-shutil.copytree( "MMA", dest+"/MMA")
+shutil.copytree("MMA", dest + "/MMA")
 
 ###########################################
 ######## Copy the html docs
 
 print("Copying HTML documentation to %s" % dest)
-shutil.copytree( "docs", dest+"/docs")
+shutil.copytree("docs", dest + "/docs")
 
 ###########################################
 ######## Set permissions/udate database
@@ -161,7 +172,7 @@ okay("")
 os.system("%s -G" % exe)
 
 print("Setting permissions on MMADIR database file for user update.")
-os.system("chmod a+w " + dest+"/lib/stdlib/.mmaDB")
+os.system("chmod a+w " + dest + "/lib/stdlib/.mmaDB")
 
 ## man pages
 

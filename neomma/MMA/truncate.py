@@ -36,17 +36,17 @@ side = None
 
 
 def setTruncate(ln):
-    """ Set the truncate variable for the next bar. """
+    """Set the truncate variable for the next bar."""
 
     global length, count, side
 
     if length:
         warning("Truncate: option set with value pending, previous setting discarded.")
 
-    side = 0    # assume 'right' or start of bar
-    count = 1    # assume 1 bar only
+    side = 0  # assume 'right' or start of bar
+    count = 1  # assume 1 bar only
 
-    ln, opts = opt2pair(ln)   # separate out the option strings
+    ln, opts = opt2pair(ln)  # separate out the option strings
 
     # Grab the truncate length first, need this to figure the
     # value for the side option, later.
@@ -57,7 +57,9 @@ def setTruncate(ln):
     beats = stof(ln[0], "Truncate: Bar length must be value.")
 
     if beats <= 0 or beats >= gbl.QperBar:
-        error("Truncate: Range must be >0 and <={}, not '{}'.".format(gbl.QperBar, beats))
+        error(
+            "Truncate: Range must be >0 and <={}, not '{}'.".format(gbl.QperBar, beats)
+        )
 
     length = int(beats * gbl.BperQ)
 
@@ -66,7 +68,7 @@ def setTruncate(ln):
     for cmd, opt in opts:
         cmd = cmd.upper()
 
-        if cmd == 'COUNT':
+        if cmd == "COUNT":
             b = stoi(opt, "Truncate: Bar COUNT must be integer.")
             if b < 1:
                 error("Truncate: Bar COUNT must be 1 or greater.")
@@ -76,7 +78,7 @@ def setTruncate(ln):
             opt = opt.upper()
             max = gbl.barLen
 
-            if opt == "LEFT":   # side to use, default==left
+            if opt == "LEFT":  # side to use, default==left
                 side = 0
 
             elif opt == "RIGHT":  # use the right side of pattern
@@ -92,13 +94,20 @@ def setTruncate(ln):
             error("Truncate: '%s' is an unknown option." % cmd)
 
     if neomma.MMA.debug.debug:
-        dPrint("Truncate: Next %s bar(s) are %g beats, "
-              "using pattern from beats %g to %g."
-            % (count, beats, float(side) / gbl.BperQ, (float(side) + length) / gbl.BperQ))
+        dPrint(
+            "Truncate: Next %s bar(s) are %g beats, "
+            "using pattern from beats %g to %g."
+            % (
+                count,
+                beats,
+                float(side) / gbl.BperQ,
+                (float(side) + length) / gbl.BperQ,
+            )
+        )
 
 
 def countDown():
-    """ Decrement the bar count. Called from parse.  """
+    """Decrement the bar count. Called from parse."""
 
     global length, count, side
 

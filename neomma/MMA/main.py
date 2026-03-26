@@ -36,10 +36,10 @@ import neomma.MMA.debug
 import neomma.MMA.paths
 import neomma.MMA.writeMid
 
-from  neomma.MMA.safe_eval import safeEnv
+from neomma.MMA.safe_eval import safeEnv
 
 from . import gbl
-from   neomma.MMA.common import *
+from neomma.MMA.common import *
 
 
 cmdSMF = None
@@ -52,15 +52,15 @@ cmdSMF = None
 
 # for some reason, someone might want a different encoding
 # real easy to set it from env at startup
-m = safeEnv( 'MMA_ENCODING' )
-if m:    # don't set to empty ... will crash
+m = safeEnv("MMA_ENCODING")
+if m:  # don't set to empty ... will crash
     gbl.encoding = m
 
 # MMA prints errors/warning/debug to stdout
 # this will redirect to a file
-gbl.logFile = safeEnv('MMA_LOGFILE')
+gbl.logFile = safeEnv("MMA_LOGFILE")
 
-neomma.MMA.paths.init()   # initialize the lib/include paths
+neomma.MMA.paths.init()  # initialize the lib/include paths
 
 # Parse command line with click
 
@@ -86,9 +86,9 @@ if gbl.infile:
             m.addText(0, "Created by neomma.")
 
 
-m.addTempo(0, gbl.tempo)      # most user files will override this
-neomma.MMA.tempo.setTime(['4/4'])    # and this. IMPORTANT! Sets default chordTabs[]
-   
+m.addTempo(0, gbl.tempo)  # most user files will override this
+neomma.MMA.tempo.setTime(["4/4"])  # and this. IMPORTANT! Sets default chordTabs[]
+
 # Read RC files
 neomma.MMA.paths.readRC()
 
@@ -100,7 +100,7 @@ neomma.MMA.paths.readRC()
 if gbl.makeGrvDefs:
     if gbl.infile:
         error("No filename is permitted with the -g option")
-    neomma.MMA.auto.libUpdate()                # update and EXIT
+    neomma.MMA.auto.libUpdate()  # update and EXIT
 
 
 ################################
@@ -132,7 +132,7 @@ if gbl.createDocs:
 
 if neomma.MMA.options.cmdSMF is not None:
     gbl.lineno = -1
-    neomma.MMA.midifuncs.setMidiFileType(['SMF=%s' % neomma.MMA.options.cmdSMF])
+    neomma.MMA.midifuncs.setMidiFileType(["SMF=%s" % neomma.MMA.options.cmdSMF])
 
 ######################################
 # Create the output filename
@@ -161,7 +161,7 @@ else:
 neomma.MMA.parse.parseFile(f)
 
 # Finally, the mmaend files
-neomma.MMA.paths.dommaEnd() 
+neomma.MMA.paths.dommaEnd()
 
 #################################################
 # Just display the channel assignments (-c) and exit...
@@ -171,17 +171,17 @@ if neomma.MMA.debug.chshow:
     msg.append("\nTracks allocated:\n")
     k = list(gbl.tnames.keys())
     k.sort()
-    cmax:int = max(len(a) for a in (k+gbl.deletedTracks)) + 1
-    cwrap:int = 0
+    cmax: int = max(len(a) for a in (k + gbl.deletedTracks)) + 1
+    cwrap: int = 0
     for a in k:
         cwrap += cmax
         if cwrap > 60:
             cwrap = cmax
-            msg.append('\n')
+            msg.append("\n")
         msg.append(" %-*s" % (cmax, a))
-    msg.append('\n')
-    print(' '.join(msg))
-    
+    msg.append("\n")
+    print(" ".join(msg))
+
     if gbl.deletedTracks:
         msg = ["Deleted Tracks:\n"]
         cwrap = 0
@@ -189,12 +189,14 @@ if neomma.MMA.debug.chshow:
             cwrap += cmax
             if cwrap > 60:
                 cwrap = cmax
-                msg.append('\n')
-            msg.append(" %-*s" % (cmax, a),)
-        msg.append('\n')
-        print(' '.join(msg))
-        
-    msg=["Channel assignments:\n"]
+                msg.append("\n")
+            msg.append(
+                " %-*s" % (cmax, a),
+            )
+        msg.append("\n")
+        print(" ".join(msg))
+
+    msg = ["Channel assignments:\n"]
     for c, n in sorted(gbl.midiAssigns.items()):
         if n:
             cwrap = 3
@@ -202,17 +204,17 @@ if neomma.MMA.debug.chshow:
             for nn in n:
                 cwrap += cmax
                 if cwrap > 63:
-                    msg.append('\n    ')
-                    cwrap = cmax+3
+                    msg.append("\n    ")
+                    cwrap = cmax + 3
                 msg.append(" %-*s" % (cmax, nn))
-            msg.append('\n')
-    print(' '.join(msg))
+            msg.append("\n")
+    print(" ".join(msg))
 
     sys.exit(0)
 
 neomma.MMA.writeMid.maker()
 
 if neomma.MMA.debug.debug:
-    dPrint("Completed processing '%s' to '%s'." %
-           (gbl.infile, neomma.MMA.paths.outfile))
-    
+    dPrint(
+        "Completed processing '%s' to '%s'." % (gbl.infile, neomma.MMA.paths.outfile)
+    )

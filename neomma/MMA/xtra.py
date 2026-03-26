@@ -29,17 +29,17 @@ import sys
 
 from neomma.MMA.common import *
 from . import gbl
-import neomma.MMA.paths 
+import neomma.MMA.paths
 import neomma.MMA.auto
 import neomma.MMA.writeMid
 
 
 def checkChords(clist):
-    """ Take a list of chords passed on the command line and check them
-        for validity.
+    """Take a list of chords passed on the command line and check them
+    for validity.
     """
 
-    gbl.ignoreBadChords=True
+    gbl.ignoreBadChords = True
     okaylist = []
     for b in clist:
         try:
@@ -47,11 +47,12 @@ def checkChords(clist):
             okaylist.append(b)
         except:
             continue
-    print ("VALID: %s" % ', '.join(okaylist))
+    print("VALID: %s" % ", ".join(okaylist))
     gbl.ignoreBadChords = False
 
+
 def checkFile(l):
-    """ Check a MMA input file an verify chords are valid. """
+    """Check a MMA input file an verify chords are valid."""
 
     # one could read a RC file. Insert neomma.MMA.paths.readRC()
     # here, but it's probably a silly thing to do since we
@@ -65,7 +66,7 @@ def checkFile(l):
 
     while 1:
         curline = inpath.read()
-        
+
         if curline is None:
             break
 
@@ -74,31 +75,31 @@ def checkFile(l):
 
         # check the chords in the line. All lines must start with a line #
         # if not a line # we just skip to next line.
-        if curline[0].isdigit():   # curline is a list 
+        if curline[0].isdigit():  # curline is a list
             l = curline[1:]
             ##  A bar can have an optional repeat count. This must
             ##  be at the end of bar in the form '* xx'. Just strip it
-            if len(l) > 1 and l[-2] == '*':
+            if len(l) > 1 and l[-2] == "*":
                 l = l[:-2]
 
             # join into a string
-            l = ' '.join(l)
-            
+            l = " ".join(l)
+
             # extract/discard RIFFs. Note: Malformed riffs are NOT extracted
             # in real mma code the riff/lyric can appear anywhere ... this
             # so-called parsing code is much more simplistic. Here we cut the
             # line off at the first { or [.
-            l  = l.partition('{')[0].partition('[')[0]
-                
-            l = l.split()  
-            
+            l = l.partition("{")[0].partition("[")[0]
+
+            l = l.split()
+
             for c in l:
-                if c in (None, '', 'z', '/', '/!'):
+                if c in (None, "", "z", "/", "/!"):
                     continue
 
                 if c in validChords:
                     continue
-                
+
                 else:
                     try:
                         gbl.ignoreBadChords = True
@@ -109,28 +110,29 @@ def checkFile(l):
                         continue
 
     # summarize
-    print("Valid chords: %s" % ', '.join(sorted(validChords)))
+    print("Valid chords: %s" % ", ".join(sorted(validChords)))
     sys.exit(0)
 
+
 def listGrooves(arg):
-    """ List the grooves found in the files in args. 
-        Directories are parsed for all files.
+    """List the grooves found in the files in args.
+    Directories are parsed for all files.
     """
 
     if len(arg) > 1:
         error("-xGrooves: too many args (use 1 or none)")
-    
+
     matching = []
     if arg:
         arg = arg[0].upper()
     else:
-        arg = ''
-    
+        arg = ""
+
     # the libpath can't be changed via a CLI, so we only
     # need (and use) the default
     libp = neomma.MMA.paths.libPath
-    
-    neomma.MMA.auto.findGroove('')  # initalize the database
+
+    neomma.MMA.auto.findGroove("")  # initalize the database
 
     for dir, g in neomma.MMA.auto.grooveDB:
         for filename, namelist in g.items():
@@ -138,53 +140,57 @@ def listGrooves(arg):
                 if arg in x:
                     for a in neomma.MMA.paths.libPath:
                         if filename.startswith(a):
-                            filename = filename[len(a)+1:]
+                            filename = filename[len(a) + 1 :]
                             break
                     if filename.endswith(gbl.EXT):
-                        filename = filename[:-len(gbl.EXT)]
-                    matching.append("{}:{}".format(filename,x))
-                
+                        filename = filename[: -len(gbl.EXT)]
+                    matching.append("{}:{}".format(filename, x))
+
     for a in sorted(matching):
         print(a)
-        
+
     sys.exit(0)
+
 
 def printVars():
     from neomma.MMA.macro import macros
 
     print(args)
     for a in args:
-        if a[0]=='$':  # strip off option leading $
-            a=a[1:]
-        a=a.upper()
-        if a[0] == '_':   # system var
+        if a[0] == "$":  # strip off option leading $
+            a = a[1:]
+        a = a.upper()
+        if a[0] == "_":  # system var
             ex = macros.sysvar(a[1:])
         else:
             error("Only system variables (with a leading _) are defined, not %s." % a)
 
         print("${} = {}".format(a, ex))
     sys.exit(0)
-    
+
+
 def xoption(opt, args):
-    """ Xtra, seldom used, options """
+    """Xtra, seldom used, options"""
 
     opt = opt.upper()
 
-    if opt == 'NOCREDIT':
+    if opt == "NOCREDIT":
         gbl.noCredit = True
         return
-        
-    elif opt == 'CHORDS':
+
+    elif opt == "CHORDS":
         # check a list of chords on the cmd line for validity
         if not args:
             neomma.MMA.options.usage()
         checkChords(args)
-        sys.exit(0)   # don't return ... all we can do is the chords
+        sys.exit(0)  # don't return ... all we can do is the chords
 
-    elif opt == 'CHECKFILE':
+    elif opt == "CHECKFILE":
         # check a input file for valid chords
         if len(args) != 1:
-            error("-xCheckFile: Exactly one filename required. Use '-xCheckFile <FILENAME>'.")
+            error(
+                "-xCheckFile: Exactly one filename required. Use '-xCheckFile <FILENAME>'."
+            )
         checkFile(args[0])
 
     elif opt == "GROOVES":
@@ -194,14 +200,16 @@ def xoption(opt, args):
         from neomma.MMA.macro import macros
 
         for a in args:
-            if a[0]=='$':  # strip off option leading $
-                a=a[1:]
-            a=a.upper()
+            if a[0] == "$":  # strip off option leading $
+                a = a[1:]
+            a = a.upper()
 
-            if a[0] == '_':   # system var
+            if a[0] == "_":  # system var
                 ex = macros.sysvar(a[1:])
             else:
-                error("Only system variables (with a leading _) are defined, not %s." % a)
+                error(
+                    "Only system variables (with a leading _) are defined, not %s." % a
+                )
 
             print("${} = {}".format(a, ex))
         sys.exit(0)
@@ -209,13 +217,12 @@ def xoption(opt, args):
     elif opt == "TSPLIT":
         if neomma.MMA.writeMid.splitOutput:
             warning("-xTSPLIT overwriting prior setting.")
-        neomma.MMA.writeMid.splitOutput = 'TRACKS'
+        neomma.MMA.writeMid.splitOutput = "TRACKS"
 
-    elif opt == 'CSPLIT':
+    elif opt == "CSPLIT":
         if neomma.MMA.writeMid.splitOutput:
             warning("-xCSPLIT overwriting prior setting.")
-        neomma.MMA.writeMid.splitOutput = 'CHANNELS'
-        
+        neomma.MMA.writeMid.splitOutput = "CHANNELS"
+
     else:
         error("'%s' is an unknown -x option" % opt)
-             

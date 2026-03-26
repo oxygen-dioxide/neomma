@@ -4,18 +4,21 @@
 from neomma.MMA import pluginUtils as pu
 import neomma.MMA.gbl as gbl
 
+
 def dataRun(ln):
-    """ The actual plugin code. Note that it is called 
-        via a standard mma data line with the plugin name
-        inserted into that. The plugin converts that part
-        of the line to something else ... in this case "Gm".
-        However, there is nothing to stop your code from examining
-        the line and changing anything in it.
+    """The actual plugin code. Note that it is called
+    via a standard mma data line with the plugin name
+    inserted into that. The plugin converts that part
+    of the line to something else ... in this case "Gm".
+    However, there is nothing to stop your code from examining
+    the line and changing anything in it.
     """
-    
-    return ['Gm'] + ln
+
+    return ["Gm"] + ln
+
 
 # Entry for usage (mma -Iaddgm)
 
-def printUsage():    
+
+def printUsage():
     print("Usage for the mma addgm plugin. ")

@@ -32,10 +32,10 @@ files = []
 
 
 def cleanup():
-    """ This cleanup routine will delete registered files. Currently this
-        includes:
+    """This cleanup routine will delete registered files. Currently this
+    includes:
 
-          files ... created by groove preview and autoplay funcs
+      files ... created by groove preview and autoplay funcs
     """
 
     for f in files:
@@ -45,5 +45,6 @@ def cleanup():
             pass
 
     neomma.MMA.common.cleanPrintBuffer()
+
 
 atexit.register(cleanup)

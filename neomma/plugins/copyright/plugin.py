@@ -16,8 +16,11 @@ pu.setAuthor("Written by {}".format(author))
 # We add the arguments for the command, each with name, default value and a
 # small description. A default value of None requires specifying the argument.
 pu.addArgument("Author", author, "The name of the copyright holder")
-pu.addArgument("Year", '{}'.format(datetime.date.today().year),
-               "The (first) year the copyright is valid")
+pu.addArgument(
+    "Year",
+    "{}".format(datetime.date.today().year),
+    "The (first) year the copyright is valid",
+)
 
 # We add a small doc. %NAME% is replaced by plugin name.
 pu.setPluginDoc("""
@@ -35,9 +38,11 @@ Version 1.0.
 # # Entry points                    #
 # ###################################
 
+
 # This prints help when MMA is called with -I switch.
 def printUsage():
     pu.printUsage()
+
 
 # This is not a track plugin, so we define run(line).
 def run(line):
@@ -50,7 +55,7 @@ def run(line):
 
     # This is how we access arguments.
     author = args["Author"]
-    year   = args["Year"]
+    year = args["Year"]
 
     # MIDI specs say we should use (C).
     pu.addCommand("MidiCopyright (C) {} {}".format(year, author))

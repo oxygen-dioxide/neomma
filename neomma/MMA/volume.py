@@ -34,23 +34,33 @@ import re
     are (most likely) sounded with a maximum velocity.
 """
 
-vols: dict[str, float] = {'OFF': 0.00, 'PPPP': 0.05, 'PPP': 0.10,
-        'PP': 0.25, 'P': 0.40, 'MP': 0.70,
-        'M': 1.00, 'MF': 1.10, 'F': 1.30,
-        'FF': 1.60, 'FFF': 1.80, 'FFFF': 2.00}
+vols: dict[str, float] = {
+    "OFF": 0.00,
+    "PPPP": 0.05,
+    "PPP": 0.10,
+    "PP": 0.25,
+    "P": 0.40,
+    "MP": 0.70,
+    "M": 1.00,
+    "MF": 1.10,
+    "F": 1.30,
+    "FF": 1.60,
+    "FFF": 1.80,
+    "FFFF": 2.00,
+}
 
-volume = vols['M']        # default global volume
-nextVolume = None         # main parser sets this to the next volume
-                          # when future volumes are stacked. It's used
-                          # by the volume adjust to smooth out (de)crescendos.
+volume = vols["M"]  # default global volume
+nextVolume = None  # main parser sets this to the next volume
+# when future volumes are stacked. It's used
+# by the volume adjust to smooth out (de)crescendos.
 lastVolume = volume
 futureVol: list[float] = []
-vTRatio = .6
+vTRatio = 0.6
 vMRatio = 1 - vTRatio
 
 
 def adjvolume(ln: list[str]):
-    """ Adjust the ratio used in the volume table and track/global ratio. """
+    """Adjust the ratio used in the volume table and track/global ratio."""
 
     global vols, vTRatio, vMRatio
 
@@ -63,7 +73,7 @@ def adjvolume(ln: list[str]):
         error("ADJUSTVOLUME: Expecting DYNAMIC=RATIO pairs")
 
     for v, opt_str in opts:
-        if v == 'RATIO':
+        if v == "RATIO":
             r = stof(opt_str)
 
             if r < 0 or r > 100:
@@ -79,27 +89,34 @@ def adjvolume(ln: list[str]):
             error("ADJUSTVOLUME DYNAMIC: '%s' for AdjustVolume is unknown" % v)
 
     if neomma.MMA.debug.debug:
-        dPrint("Volume Ratio: {}% Track / {}% Master".format(vTRatio * 100, vMRatio * 100))
-        dPrint("Volume table: %s" % 
-              ' '.join([ "{}={}".format(a, int(vols[a] * 100)) for a in sorted(vols)]))
+        dPrint(
+            "Volume Ratio: {}% Track / {}% Master".format(vTRatio * 100, vMRatio * 100)
+        )
+        dPrint(
+            "Volume table: %s"
+            % " ".join(["{}={}".format(a, int(vols[a] * 100)) for a in sorted(vols)])
+        )
 
 
 calcVolumeRePat = re.compile(
     # This is a regular expression to parse the input for the calcVolume
     # function. The details are embedded in the comments below.
     # Thanks to Johan Vromans!
-
     # Note, there are 2 parts to this. It's either numeric
     # or mnemonic. We use a | to join the 2 halves.
     # opt. +/- (assigned to 'pre'), numeric value ('val'), and optional % to 'post'
     # Note the '$' terminator which forces NUMERIC[%] to be end.
-    r'(?P<pre>[-+])?(?P<val>[\d.]+)(?P<post>%)?$'
-    + '|' +
+    r"(?P<pre>[-+])?(?P<val>[\d.]+)(?P<post>%)?$"
+    + "|"
+    +
     # mnemonic is assigned to 'mn'.
-    r'(?P<mn>[OFPM]+)$',re.IGNORECASE )
+    r"(?P<mn>[OFPM]+)$",
+    re.IGNORECASE,
+)
+
 
 def calcVolume(new, old):
-    """ Calculate a new volume "new" possibly adjusting from "old". """
+    """Calculate a new volume "new" possibly adjusting from "old"."""
 
     m = calcVolumeRePat.match(new)
     if m is None:
@@ -107,7 +124,7 @@ def calcVolume(new, old):
 
     # Do we have a mnemonic?
 
-    mn = m.group('mn')
+    mn = m.group("mn")
     if mn:
         mn = mn.upper()
         if not mn in vols:
@@ -115,27 +132,30 @@ def calcVolume(new, old):
         return vols[mn]
 
     # So it must be a value.
-    val  = m.group('val')
-    pre  = m.group('pre')
-    post = m.group('post')
+    val = m.group("val")
+    pre = m.group("pre")
+    post = m.group("post")
 
     if pre and not post:
-        warning("Please use '%s%s%%' if you want to %screase the volume"
-                % (pre, val, "in" if pre == '+' else "de"))
+        warning(
+            "Please use '%s%s%%' if you want to %screase the volume"
+            % (pre, val, "in" if pre == "+" else "de")
+        )
 
-    v = stof(val, "Volume expecting value, not '%s'" % val) / 100.
+    v = stof(val, "Volume expecting value, not '%s'" % val) / 100.0
 
-    if pre == '+':
-        v = old * ( 1 + v )
-    elif pre == '-':
-        v = old * ( 1 - v )
-    elif post == '%':
-        v = old * ( v )
+    if pre == "+":
+        v = old * (1 + v)
+    elif pre == "-":
+        v = old * (1 - v)
+    elif post == "%":
+        v = old * (v)
 
     return v
 
+
 def setVolume(ln: list[str]):
-    """ Set master volume. """
+    """Set master volume."""
 
     global volume, lastVolume, futureVol
 
@@ -151,25 +171,26 @@ def setVolume(ln: list[str]):
 
 # The next 3 are called from the parser.
 
+
 def setCresc(ln):
-    """ Master Crescendo. """
+    """Master Crescendo."""
 
     setCrescendo(1, ln)
 
 
 def setDecresc(ln):
-    """ Master Decrescendo (Diminuendo). """
+    """Master Decrescendo (Diminuendo)."""
     setCrescendo(-1, ln)
 
 
 def setSwell(ln):
-    """ Set a swell (cresc<>decresc). """
+    """Set a swell (cresc<>decresc)."""
 
     global futureVol, volume, lastVolume
 
     lastVolume = volume
 
-    if len(ln) == 3:            # 3 args, 1st is intial setting
+    if len(ln) == 3:  # 3 args, 1st is intial setting
         setVolume([ln[0]])
         ln = ln[1:]
 
@@ -190,15 +211,14 @@ def setSwell(ln):
     c = str(c)
 
     futureVol = fvolume(0, volume, [ln[0], c])
-    futureVol.extend(fvolume(0, futureVol[-1],
-                             [str(int(volume * 100)), c])[offset:])
+    futureVol.extend(fvolume(0, futureVol[-1], [str(int(volume * 100)), c])[offset:])
 
     if neomma.MMA.debug.debug:
-        dPrint("Set Swell to: %s" % ' '.join([str(int(a * 100)) for a in futureVol]))
+        dPrint("Set Swell to: %s" % " ".join([str(int(a * 100)) for a in futureVol]))
 
 
 def setCrescendo(dir, ln):
-    """ Combined (de)cresc() """
+    """Combined (de)cresc()"""
 
     global futureVol, volume, lastVolume
 
@@ -214,13 +234,16 @@ def setCrescendo(dir, ln):
     futureVol = fvolume(dir, volume, ln)
 
     if neomma.MMA.debug.debug:
-        dPrint("Set (De)Cresc to: %s" % ' '.join([str(int(a * 100)) for a in futureVol]))
+        dPrint(
+            "Set (De)Cresc to: %s" % " ".join([str(int(a * 100)) for a in futureVol])
+        )
+
 
 # Used by both the 2 funcs above and from TRACK.setCresc()
 
 
 def fvolume(dir: int, startvol: float, ln: list[str]) -> list[float]:
-    """ Create a list of future vols. Called by (De)Cresc. """
+    """Create a list of future vols. Called by (De)Cresc."""
 
     # Get destination volume
 
@@ -257,19 +280,19 @@ def fvolume(dir: int, startvol: float, ln: list[str]) -> list[float]:
     return volList
 
 
-def calcMidiVolume14(s:str) -> int:
-    """ Convert a mnemonic volume to value for MIDI channel.
-        This function uses a 14 bit (0..0x3fff). See below for
-        the 7 bit version.
+def calcMidiVolume14(s: str) -> int:
+    """Convert a mnemonic volume to value for MIDI channel.
+    This function uses a 14 bit (0..0x3fff). See below for
+    the 7 bit version.
     """
 
     s = s.upper()
     if s in vols:
-        v = int(0x1fff * vols[s])
+        v = int(0x1FFF * vols[s])
         if v < 0:
             v = 0
-        if v > 0x3fff:
-            v = 0x3fff
+        if v > 0x3FFF:
+            v = 0x3FFF
 
     else:
         v = stoi(s, "Expecting integer arg or volume mnemonic, not %s" % s)
@@ -277,8 +300,8 @@ def calcMidiVolume14(s:str) -> int:
     return v
 
 
-def calcMidiVolume(s:str) -> int:
-    """ Convert a mnemonic volume to value for MIDI channel. """
+def calcMidiVolume(s: str) -> int:
+    """Convert a mnemonic volume to value for MIDI channel."""
 
     s = s.upper()
     if s in vols:

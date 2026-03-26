@@ -33,23 +33,23 @@ import neomma.MMA.debug
       2 - set for specific tracks, track list starts at position [1]
 """
 
-seqRnd = [0]       # set if SEQRND has been set
+seqRnd = [0]  # set if SEQRND has been set
 seqRndWeight = [1]
 
 
 def setseq():
-    """ Set up the seqrnd values, called from parse loop.
+    """Set up the seqrnd values, called from parse loop.
 
-        returns:
-           0...  a random sequence number,
-           -1    signals that rndseq is not enabled.
+    returns:
+       0...  a random sequence number,
+       -1    signals that rndseq is not enabled.
 
-        There are three methods of rndseq. They depend on the first value
-        in the list seqRnd[]:
+    There are three methods of rndseq. They depend on the first value
+    in the list seqRnd[]:
 
-           [0]  not enabled.
-           [1]  random selection, keeps all tracks in sync.
-           [2]  randomize selected tracks.
+       [0]  not enabled.
+       [1]  random selection, keeps all tracks in sync.
+       [2]  randomize selected tracks.
 
     """
 
@@ -65,24 +65,24 @@ def setseq():
 
 
 def getrndseq(weights):
-    """ Get a random sequence number. 
+    """Get a random sequence number.
 
-        The list seqRndWeight has the same number of entries in it
-        as there are in the sequence size. By default each will have
-        the same value of 1. A list of the valid sequence points is
-        generated (ie, if seqsize==4 tmp will be [0,1,2,3]). In addition
-        the weights of each entry in tmp[] is adjusted by the weights in
-        the seqrndweight[] list.
+    The list seqRndWeight has the same number of entries in it
+    as there are in the sequence size. By default each will have
+    the same value of 1. A list of the valid sequence points is
+    generated (ie, if seqsize==4 tmp will be [0,1,2,3]). In addition
+    the weights of each entry in tmp[] is adjusted by the weights in
+    the seqrndweight[] list.
 
-        FIXME?:in the future we might want to change the weighted
-               random choice we're doing by using random.choices()
-               from python 3.6+ which might be more efficient than
-               creating a list of weights.
+    FIXME?:in the future we might want to change the weighted
+           random choice we're doing by using random.choices()
+           from python 3.6+ which might be more efficient than
+           creating a list of weights.
 
-        Returns: a (weighted) random choice.
+    Returns: a (weighted) random choice.
 
     """
-    
+
     tmp = []
     for x, i in enumerate(weights):
         tmp.extend([x] * i)
@@ -91,14 +91,16 @@ def getrndseq(weights):
         return random.choice(tmp)
     except IndexError:
         error("SeqRndWeight has generated an empty list.")
-        
+
+
 ## Main parser routines
 
+
 def setSeqRnd(ln):
-    """ Set random order for all tracks. """
+    """Set random order for all tracks."""
 
     global seqRnd
-    
+
     emsg = "use [ON, OFF or TrackList ]"
     if not ln:
         error("SeqRnd:" + emsg)
@@ -130,14 +132,14 @@ def setSeqRnd(ln):
             msg.append("On")
         else:
             msg.append("Off")
-        dPrint(' '.join(msg))
+        dPrint(" ".join(msg))
 
 
 def getweights(ln, msg):
-    """ Parse a rndweight line. Called from setRndWeight() and
-        trackSeqRndWeight() in sequence.py.
+    """Parse a rndweight line. Called from setRndWeight() and
+    trackSeqRndWeight() in sequence.py.
     """
-    
+
     ln = lnExpand(ln, msg)
 
     ln, opt = opt2pair(ln, toupper=True)
@@ -145,22 +147,23 @@ def getweights(ln, msg):
     if opt:
         if ln:
             error("%s use only an option=values or individual values." % msg)
-            
+
         for v, a in opt:
             if v == "FROM":
                 tmp = [0] * gbl.seqSize
-                a = a.split(',')
+                a = a.split(",")
                 for s in a:
                     s = stoi(s, "{} FROM expecting integer, not '{}'.".format(msg, s))
-                    if s<1 or s> gbl.seqSize:
-                        error("%s FROM must only have values "
-                              "in the sequence size (%s), not '%s'."
-                              % (msg, gbl.seqSize, s))
-                    tmp[s-1] +=1
+                    if s < 1 or s > gbl.seqSize:
+                        error(
+                            "%s FROM must only have values "
+                            "in the sequence size (%s), not '%s'."
+                            % (msg, gbl.seqSize, s)
+                        )
+                    tmp[s - 1] += 1
 
             else:
                 error("{} {} is not a valid option.".format(msg, v))
-
 
     else:
         if not ln:
@@ -178,15 +181,15 @@ def getweights(ln, msg):
     # at least one bar in the sequence has to be active.
     if not any(tmp):
         error("%s Using all '0's is not permitted." % msg)
-    
+
     if neomma.MMA.debug.debug:
-        dPrint("Set {}: {}".format(msg, ' '.join([str(x) for x in tmp])))
+        dPrint("Set {}: {}".format(msg, " ".join([str(x) for x in tmp])))
 
     return tmp
 
 
 def setSeqRndWeight(ln):
-    """ Set global rnd weight. """
+    """Set global rnd weight."""
 
     global seqRndWeight
 

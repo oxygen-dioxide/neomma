@@ -4,7 +4,7 @@
 
 import os, sys, time, platform, subprocess
 
-if len(sys.argv)>1:
+if len(sys.argv) > 1:
     print("""mma-libdoc is a MMA maintenance program to parse library
  files and create/maintain the html library documentation.
  This program should be run as 'root' and it takes no
@@ -12,21 +12,23 @@ if len(sys.argv)>1:
  "README.mma-libdoc" which is distributed with MMA.""")
     sys.exit(0)
 
-installdir = ( "c:\\mma\\", "/usr/local/share/mma", "/usr/share/mma", ".")
+installdir = ("c:\\mma\\", "/usr/local/share/mma", "/usr/share/mma", ".")
 
-libpath = ''
-docpath = ''
+libpath = ""
+docpath = ""
 
 for p in installdir:
-    a = os.path.join(p, 'lib', '')
+    a = os.path.join(p, "lib", "")
     if os.path.isdir(a):
-        libpath=a
-        docpath = os.path.join(p, 'docs', 'html', 'lib')
+        libpath = a
+        docpath = os.path.join(p, "docs", "html", "lib")
         break
 
 if not libpath:
     print("Can't find the MMA library!")
-    print("Please check your installation and/or change the search path in this program.")
+    print(
+        "Please check your installation and/or change the search path in this program."
+    )
     sys.exit(1)
 
 try:
@@ -37,7 +39,7 @@ except:
 index = []
 links = []
 
-MMA = "mma"   # set different path to mma if you need to
+MMA = "mma"  # set different path to mma if you need to
 
 if platform == "Windows":
     sh_value = True
@@ -47,8 +49,9 @@ else:
 
 print("Processing library files")
 
-def  dodir(dir):
-    """ Process files in directory.  """
+
+def dodir(dir):
+    """Process files in directory."""
 
     global index, links
     newdirs = []
@@ -64,26 +67,27 @@ def  dodir(dir):
     links.append("<li> <A Href=#%s> <h2> %s </h2> </a> </li>" % (dir, dir.title()))
 
     if dir.lower() == "stdlib":
-        index.append("<P><h3>These grooves can be used from a program just by using their name.</h3>")
+        index.append(
+            "<P><h3>These grooves can be used from a program just by using their name.</h3>"
+        )
 
     index.append("<A Name =%s></a>" % dir)
-    index.append("<h2> %s </h2>" % dir.title() )
+    index.append("<h2> %s </h2>" % dir.title())
 
     index.append("<ul>")
-
 
     for f in sorted(os.listdir(libpath + dir)):
         this = os.path.join(libpath, dir, f)
 
-        if f.startswith('#') or f.startswith('.'):   # ignore backup and hidden
-                continue
+        if f.startswith("#") or f.startswith("."):  # ignore backup and hidden
+            continue
 
         if os.path.isdir(this):
             newdirs.append(os.path.join(dir, f))
             continue
 
-        if this.endswith('.mma'):
-            htmlfname = os.path.join(dir, f.replace('.mma' , '.html'))
+        if this.endswith(".mma"):
+            htmlfname = os.path.join(dir, f.replace(".mma", ".html"))
             htmldate = 0
             htmlout = os.path.join(docpath, htmlfname)
             try:
@@ -96,7 +100,7 @@ def  dodir(dir):
                 libdate = os.path.getmtime(this)
             except:
                 print("NO, NO, NO --- let Bob know about this!")
-                pass   # shouldn't ever happen!
+                pass  # shouldn't ever happen!
 
             if libdate < htmldate:
                 print("Skipping: %s" % this)
@@ -107,8 +111,11 @@ def  dodir(dir):
                 else:
                     print("Updating: %s" % htmlfname)
                 try:
-                    pid = subprocess.Popen( [MMA, "-Dxh", "-w", "-n", this],
-                          shell=sh_value, stdout=subprocess.PIPE)
+                    pid = subprocess.Popen(
+                        [MMA, "-Dxh", "-w", "-n", this],
+                        shell=sh_value,
+                        stdout=subprocess.PIPE,
+                    )
                     output = pid.communicate()[0]
 
                 except:
@@ -123,21 +130,22 @@ def  dodir(dir):
                 except:
                     print("ERROR Creating %s" % htmlout)
                     continue
-                    
 
                 # Now make html files for each groove in the lib file.
 
                 for a in open(htmlout):
                     if a.startswith("<!-- GROOVE"):
-                        a=a.split()
-                        gname = a[1].split('=', 1)[1]
-                        gout = os.path.join(docpath, dir, a[2].split('=', 1)[1])
-                        srcfile = a[3].split('=', 1)[1]
+                        a = a.split()
+                        gname = a[1].split("=", 1)[1]
+                        gout = os.path.join(docpath, dir, a[2].split("=", 1)[1])
+                        srcfile = a[3].split("=", 1)[1]
 
                         try:
-                            pid = subprocess.Popen( [MMA, "-Dgh", "-w", "-n",
-                               "%s/%s" % (srcfile, gname)],
-                               shell=sh_value, stdout=subprocess.PIPE)
+                            pid = subprocess.Popen(
+                                [MMA, "-Dgh", "-w", "-n", "%s/%s" % (srcfile, gname)],
+                                shell=sh_value,
+                                stdout=subprocess.PIPE,
+                            )
                             output = pid.communicate()[0]
                         except:
                             print("Error forking %s. Is MMA variable correctly set?")
@@ -152,19 +160,22 @@ def  dodir(dir):
                             print("ERROR Creating %s" % gout)
                         continue
 
-
-            index.append("<li> <A Href = %s> %s </a> </li>" % \
-                     (htmlfname, os.path.join(dir, f)))
+            index.append(
+                "<li> <A Href = %s> %s </a> </li>" % (htmlfname, os.path.join(dir, f))
+            )
 
     index.append("</ul>")
 
     # Insert this at the END of the stdlib listing.
     if dir.lower() == "stdlib":
-        index.append('<P><h3>These grooves should be callable just by using their names. If you have problems with duplicate groove names you can always force their use with a "use" directive.</h3>')
+        index.append(
+            '<P><h3>These grooves should be callable just by using their names. If you have problems with duplicate groove names you can always force their use with a "use" directive.</h3>'
+        )
 
     # recurse though any other directories in the lib dir (ie. contri/more/files)
     for d in newdirs:
         dodir(d)
+
 
 ##############################
 
@@ -185,7 +196,7 @@ if dirs.count("stdlib"):
 for dir in dirs:
     dodir(dir)
 
-out = open(os.path.join(docpath, 'index.html'), "w")
+out = open(os.path.join(docpath, "index.html"), "w")
 
 out.write("""<HTML>
 
@@ -288,9 +299,10 @@ if links:
     out.write("\n".join(links))
     out.write("</ul>")
     out.write("<HR Size=3pt>")
-out.write( "\n".join(index))
+out.write("\n".join(index))
 
-out.write("""
+out.write(
+    """
 <BR>
 <HR  Size=3pt>
 <P> This document and the files linked were created by <em>mma-libdoc</em>.
@@ -298,10 +310,11 @@ out.write("""
 <P>It is a part of the MMA distribution
 and is protected by the same copyrights as MMA (the GNU General Public License).
 
-<P> Created: %s""" % time.ctime() )
+<P> Created: %s"""
+    % time.ctime()
+)
 
 out.write("<HTML>")
 
 
 out.close()
-

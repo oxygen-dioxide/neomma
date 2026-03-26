@@ -32,15 +32,15 @@ import neomma.MMA.file
 import neomma.MMA.debug
 
 # Initialize the default midi player.
-if gbl.platform == 'Windows':
-    midiPlayer = ['']   # must be a list!
-elif gbl.platform == 'Darwin':
-    midiPlayer = ['open']   # must be a list!
+if gbl.platform == "Windows":
+    midiPlayer = [""]  # must be a list!
+elif gbl.platform == "Darwin":
+    midiPlayer = ["open"]  # must be a list!
 else:
-    midiPlayer = ["aplaymidi"] # Must be a list!
+    midiPlayer = ["aplaymidi"]  # Must be a list!
 
 # We run in background in windows, foreground in linux
-if gbl.platform == 'Windows':
+if gbl.platform == "Windows":
     inBackGround = 1  # by default we run in foreground
 else:
     inBackGround = 0
@@ -49,29 +49,30 @@ waitTime = 5  # default time to wait after forking in background
 
 
 def setMidiPlayer(ln):
-    """ Set the MIDI file player (used with -P and -V). """
+    """Set the MIDI file player (used with -P and -V)."""
 
     global midiPlayer, waitTime, inBackGround
 
     if not ln:
-        ln = ['']
+        ln = [""]
 
     n = []
-    for l in ln:   # parse out optional args
-        if '=' in l and l[0].isalpha():
-            a, b = l.upper().split('=', 1)
-            if a == 'DELAY':
+    for l in ln:  # parse out optional args
+        if "=" in l and l[0].isalpha():
+            a, b = l.upper().split("=", 1)
+            if a == "DELAY":
                 b = stof(b, "SetMidiPlayer: Delay must be value, not '%s'." % b)
                 waitTime = b
 
             elif a == "BACKGROUND":
-                if b in ('1', 'YES'):
+                if b in ("1", "YES"):
                     inBackGround = 1
-                elif b in ('0', 'NO'):
+                elif b in ("0", "NO"):
                     inBackGround = 0
                 else:
-                    error("SetMidiPlayer: Background must be 'yes'"
-                          "or 'no', not '%s'." % b)
+                    error(
+                        "SetMidiPlayer: Background must be 'yes'or 'no', not '%s'." % b
+                    )
 
             else:
                 error("SetMidiPlayer: unknown option '%s'." % a)
@@ -80,16 +81,18 @@ def setMidiPlayer(ln):
             n.append(neomma.MMA.file.fixfname(l))
 
     if not n:
-        n = ['']
+        n = [""]
     midiPlayer = n
 
     if neomma.MMA.debug.debug:
-        dPrint("MidiPlayer set to '%s' Background=%s Delay=%s." %
-            (' '.join(midiPlayer), inBackGround, waitTime))
+        dPrint(
+            "MidiPlayer set to '%s' Background=%s Delay=%s."
+            % (" ".join(midiPlayer), inBackGround, waitTime)
+        )
 
 
 def playMidi(file):
-    """ Play a midi file. """
+    """Play a midi file."""
 
     pl = midiPlayer[0]
     opts = midiPlayer[1:]
@@ -121,15 +124,17 @@ def playMidi(file):
     except OSError as e:
         dPrint(e)
         msg = "MidiPlayer fork error."
-        if re.search("[\'\"]", ''.join(cmd)):
+        if re.search("['\"]", "".join(cmd)):
             msg += " Using quotes in the MidiPlayer name/opts might be your problem."
         error(msg)
 
-    if inBackGround:    # if the background option set, do a sleep
+    if inBackGround:  # if the background option set, do a sleep
         print("Play in progress ... file will be deleted.")
         time.sleep(waitTime)
 
-    else:   # foreground player ... wait for process to finish
+    else:  # foreground player ... wait for process to finish
         pid.wait()
-        print("Play complete (%.2f min), MIDI file has been deleted." 
-            % ((time.time() - t) / 60))
+        print(
+            "Play complete (%.2f min), MIDI file has been deleted."
+            % ((time.time() - t) / 60)
+        )

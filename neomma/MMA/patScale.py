@@ -27,7 +27,7 @@ import random
 import neomma.MMA.harmony
 import neomma.MMA.notelen
 import neomma.MMA.ornament
-from neomma.MMA.pat  import PC, Pgroup
+from neomma.MMA.pat import PC, Pgroup
 
 from . import gbl
 from neomma.MMA.common import *
@@ -37,9 +37,9 @@ import copy
 
 
 class Scale(PC):
-    """ Pattern class for a Scale track. """
+    """Pattern class for a Scale track."""
 
-    vtype = 'SCALE'
+    vtype = "SCALE"
 
     lastNote = -1
     lastChord = None
@@ -51,28 +51,30 @@ class Scale(PC):
     dirfact = 1
 
     def __init__(self, ln):
-        
+
         PC.__init__(self, ln)
-        
+
     def saveGroove(self, gname):
-        """ Save special/local variables for groove. """
+        """Save special/local variables for groove."""
 
         PC.saveGroove(self, gname)  # create storage. Do this 1st.
 
     def restoreGroove(self, gname):
-        """ Restore special/local/variables for groove. """
+        """Restore special/local/variables for groove."""
 
         PC.restoreGroove(self, gname)
 
     def getPgroup(self, ev):
-        """ Get group for scale patterns.
+        """Get group for scale patterns.
 
-            Fields - start, length, volume
+        Fields - start, length, volume
         """
 
         if len(ev) != 3:
-            error("There must be at exactly 3 items in each group "
-                  "in a Scale definition, not <%s>." % ' '.join(ev))
+            error(
+                "There must be at exactly 3 items in each group "
+                "in a Scale definition, not <%s>." % " ".join(ev)
+            )
 
         a = Pgroup()
 
@@ -83,25 +85,26 @@ class Scale(PC):
         return a
 
     def setScaletype(self, ln):
-        """ Set scale type. """
+        """Set scale type."""
 
         ln = lnExpand(ln, "%s ScaleType" % self.name)
         tmp = []
 
         for n in ln:
             n = n.upper()
-            if not n in ( 'CHROMATIC', 'SCALE', 'AUTO', 'CHORD'):
-                error("%s Scaletype: Only Chromatic, Scale, Auto and "
-                      "Chord are valid, not '%s'" % (self.name, n))
+            if not n in ("CHROMATIC", "SCALE", "AUTO", "CHORD"):
+                error(
+                    "%s Scaletype: Only Chromatic, Scale, Auto and "
+                    "Chord are valid, not '%s'" % (self.name, n)
+                )
 
             tmp.append(n)
 
         self.scaleType = seqBump(tmp)
 
         if neomma.MMA.debug.debug:
-            dPrint("Set %s ScaleType to: %s" %
-                  (self.name, ' '.join(self.scaleType)))
-        
+            dPrint("Set %s ScaleType to: %s" % (self.name, " ".join(self.scaleType)))
+
     def restart(self):
         self.ssvoice = -1
         self.lastNote = -1
@@ -113,16 +116,15 @@ class Scale(PC):
         self.notes = None
         self.dirfact = 1
 
-        
     def trackBar(self, pattern, ctable):
-        """ Do a scale bar.
+        """Do a scale bar.
 
-            Called from self.bar()
+        Called from self.bar()
         """
 
         sc = self.seq
         direct = self.direction[sc]
-        
+
         # If the range or direction has changed, we just start
         # with a new scale.
 
@@ -136,7 +138,6 @@ class Scale(PC):
             self.lastChord = None
 
         for p in pattern:
-
             tb = self.getChordInPos(p.offset, ctable)
 
             if tb.scaleZ:
@@ -149,42 +150,42 @@ class Scale(PC):
                 self.lastChord = thisChord
                 self.lastStype = stype
 
-                if stype == 'CHROMATIC':
-                    notelist = [ tb.chord.rootNote + x for x in range(0,12)]
-                
-                elif stype == 'CHORD':
+                if stype == "CHROMATIC":
+                    notelist = [tb.chord.rootNote + x for x in range(0, 12)]
+
+                elif stype == "CHORD":
                     notelist = tb.chord.noteList[:]
 
                 else:
                     notelist = list(tb.chord.scaleList)
-                
+
                 """ Get the current scale and append enuf copies
                 together for RANGE setting. If Range happens
                 to be 0 or 1 we end up with a single copy.
                 """
 
-                ln=self.chordRange[sc]    # RANGE 1...x (def. == 1)
+                ln = self.chordRange[sc]  # RANGE 1...x (def. == 1)
 
-                o=0
+                o = 0
                 self.notes = []
 
                 while ln >= 1:
                     for a in notelist:
-                        self.notes.append(a+o)
-                    o+=12
-                    ln-=1
+                        self.notes.append(a + o)
+                    o += 12
+                    ln -= 1
 
-                if ln>0 and ln<1:  # for fractional scale lengths
+                if ln > 0 and ln < 1:  # for fractional scale lengths
                     ln = int(len(notelist) * ln)
-                    if ln < 2:   # important, must be at least 2 notes in a scale
-                        ln=2
+                    if ln < 2:  # important, must be at least 2 notes in a scale
+                        ln = 2
                     for a in notelist[:ln]:
-                        self.notes.append(a+o)
+                        self.notes.append(a + o)
 
-                if direct == 'DOWN':
+                if direct == "DOWN":
                     self.dirfact = -1
                     if self.lastNote == -1:
-                        self.sOffset = len(self.notes)-1
+                        self.sOffset = len(self.notes) - 1
                 else:
                     self.sOffset = 0
                     self.dirfact = 1
@@ -194,34 +195,33 @@ class Scale(PC):
                         self.sOffset = self.notes.index(self.lastNote)
 
                     else:
-                        self.sOffset=len(self.notes)-1
-                        for     i, a in enumerate(self.notes):
-                            if a>self.lastNote:
+                        self.sOffset = len(self.notes) - 1
+                        for i, a in enumerate(self.notes):
+                            if a > self.lastNote:
                                 self.sOffset = i
                                 break
-
 
             # Keep offset into note list in range
 
             # only > end of list if BOTH or UP
 
             if self.sOffset >= len(self.notes):
-                if direct == 'BOTH':
+                if direct == "BOTH":
                     self.dirfact = -1
-                    self.sOffset = len(self.notes)-2
-                else:        ## UP
+                    self.sOffset = len(self.notes) - 2
+                else:  ## UP
                     self.sOffset = 0
 
             # only < start of list if DOWN or BOTH
 
             elif self.sOffset < 0:
-                if direct == 'BOTH':
+                if direct == "BOTH":
                     self.dirfact = 1
                     self.sOffset = 1
-                else:        ## DOWN
-                    self.sOffset = len(self.notes)-1
+                else:  ## DOWN
+                    self.sOffset = len(self.notes) - 1
 
-            if direct == 'RANDOM':
+            if direct == "RANDOM":
                 note = random.choice(self.notes)
             else:
                 note = self.notes[self.sOffset]
@@ -241,15 +241,15 @@ class Scale(PC):
             if self.harmony[sc]:
                 ch = self.getChordInPos(p.offset, ctable).chord.noteList
                 h = neomma.MMA.harmony.harmonize(self.harmony[sc], note, ch)
-                harmlist =  list(zip(h, [p.vol * self.harmonyVolume[sc]] * len(h)))
+                harmlist = list(zip(h, [p.vol * self.harmonyVolume[sc]] * len(h)))
             else:
                 harmlist = []
 
             offset = p.offset
-            if self.ornaments['type']:
-                offset = neomma.MMA.ornament.doOrnament(self, nlist,
-                                        self.getChordInPos(offset, ctable).chord.scaleList, p)
+            if self.ornaments["type"]:
+                offset = neomma.MMA.ornament.doOrnament(
+                    self, nlist, self.getChordInPos(offset, ctable).chord.scaleList, p
+                )
                 nlist = []
 
-            self.sendChord(nlist+harmlist, p.duration, offset)
-
+            self.sendChord(nlist + harmlist, p.duration, offset)

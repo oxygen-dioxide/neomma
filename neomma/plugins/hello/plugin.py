@@ -1,7 +1,7 @@
 # Hello world MMA plugin
 
 # This import will access the global variables in MMA.
-# You can BUT SHOULD NOT change things. 
+# You can BUT SHOULD NOT change things.
 
 import neomma.MMA.gbl as gbl
 
@@ -13,6 +13,7 @@ import neomma.MMA.gbl as gbl
 # Here is the entry point function. It must be called run().
 # It will receive a list of paramaters as a list of items.
 
+
 def run(l):
     print("Hello. This is the run() function in the MMA plugin.")
     print("We are at line %s in the MMA file %s." % (gbl.lineno, gbl.infile))
@@ -22,7 +23,9 @@ def run(l):
         for i in l:
             print(i)
 
+
 # Alternative entry point for track functions.
+
 
 def trackRun(name, l):
     print("This is the track variant.")
@@ -30,19 +33,24 @@ def trackRun(name, l):
 
     self = gbl.tnames[name]
 
-    print("This is the plugin '%s' located at '%s'." % (plugInName['name'], plugInName['dir']))
+    print(
+        "This is the plugin '%s' located at '%s'."
+        % (plugInName["name"], plugInName["dir"])
+    )
     print("One can access methods and variables belonging to the track.")
     print("For example, this is the state for octave list: %s" % self.octave)
-    print("Which means our current octave for the track %s is %s" % \
-          (self.name, self.octave[0]/12))
-    
+    print(
+        "Which means our current octave for the track %s is %s"
+        % (self.name, self.octave[0] / 12)
+    )
+
     print("\nFor our last trick, we will return some setting strings to input.")
 
     ret = []
-    ret.append( "print If you have used the -e command line option")
-    ret.append( "print you will see that we have changed the octave")
-    ret.append( "print and voicing of the track.")
-    
+    ret.append("print If you have used the -e command line option")
+    ret.append("print you will see that we have changed the octave")
+    ret.append("print and voicing of the track.")
+
     ret.append("%s Octave 6" % name)
     ret.append("%s Voice JazzGuitar" % name)
 
@@ -55,11 +63,14 @@ def trackRun(name, l):
 
     gbl.inpath.push(ret, [gbl.lineno] * len(ret))
 
+
 def dataRun(ln):
-    return ['Gm'] + ln
-        
+    return ["Gm"] + ln
+
+
 # Entry for usage (mma -Ihello)
 
-def printUsage():    
+
+def printUsage():
     print("Usage for the mma hello plugin. ")
     print("Not much to say ... I'm just an example.")

@@ -36,28 +36,56 @@ from os import environ
 from neomma.MMA.common import *
 import sys
 
-safeCmds = ['ceil', 'fabs', 'floor', 'exp', 'log', 'log10', 'pow',
-            'sqrt', 'acos', 'asin', 'atan', 'atan2', 'cos', 'hypot',
-            'sin', 'tan', 'degrees', 'radians', 'cosh', 'sinh',
-            'int', 'in', '.join', 'str', '.split', 'for', 'randint' ]
+safeCmds = [
+    "ceil",
+    "fabs",
+    "floor",
+    "exp",
+    "log",
+    "log10",
+    "pow",
+    "sqrt",
+    "acos",
+    "asin",
+    "atan",
+    "atan2",
+    "cos",
+    "hypot",
+    "sin",
+    "tan",
+    "degrees",
+    "radians",
+    "cosh",
+    "sinh",
+    "int",
+    "in",
+    ".join",
+    "str",
+    ".split",
+    "for",
+    "randint",
+]
 
 
 def pathjoin(*a):
     from os import path
+
     return path.join(*[x.strip() for x in a])
 
-def safeEnv(var:str) -> str:
-    """ Return the value of an env variable. 
-        On my system non-existant env vars register as None and
-        vars set to '' return as '' ... so we convert them all to
-        ''. MMA doesn't have a NoneType.
+
+def safeEnv(var: str) -> str:
+    """Return the value of an env variable.
+    On my system non-existant env vars register as None and
+    vars set to '' return as '' ... so we convert them all to
+    ''. MMA doesn't have a NoneType.
     """
 
     ret = environ.get(var)
-    return '' if ret == None else ret
+    return "" if ret == None else ret
+
 
 def safeEval(expr):
-    toks = re.split(r'([a-zA-Z_\.]+|.)', expr)
+    toks = re.split(r"([a-zA-Z_\.]+|.)", expr)
 
     # We have split out the args passed to a string to evaluate.
     # This is not ideal, but we are erring on the side of dumbness,
@@ -68,7 +96,7 @@ def safeEval(expr):
     # something in MMA like "Print $( ceil( 1e+4))" will work ... but
     # "Print $( ceil ( 1ee+4 )) will generate a Unknown Operator due
     # to the 2 'e's, besides the fact that 1ee+4 is wrong anyway.
-    
+
     for t in toks:
         if len(t) > 1 and t not in safeCmds:
             error("Illegal/Unknown operator '%s' in $()." % t)
@@ -77,4 +105,3 @@ def safeEval(expr):
         return eval(expr)
     except:
         error("Illegal operation in '%s'." % expr)
-

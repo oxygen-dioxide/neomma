@@ -27,74 +27,114 @@ Some silly functions used by the debug code.
 
 # the Lxxx values are the previous settings, used for LASTDEBUG macro
 
-debug          =     Ldebug         = 0
-pshow          =     Lpshow         = 0
-seqshow        =     Lseqshow       = 0
-showrun        =     Lshowrun       = 0
-noWarn         =     LnoWarn        = 0
-noOutput       =     LnoOutput      = 0
-showExpand     =     LshowExpand    = 0
-showFilenames  =     LshowFilenames = 0
-chshow         =     Lchshow        = 0
+debug = Ldebug = 0
+pshow = Lpshow = 0
+seqshow = Lseqshow = 0
+showrun = Lshowrun = 0
+noWarn = LnoWarn = 0
+noOutput = LnoOutput = 0
+showExpand = LshowExpand = 0
+showFilenames = LshowFilenames = 0
+chshow = Lchshow = 0
 
-plecShow       =     LplecShow  = 0  # not a command line setting
-rmShow         =     LrmShow    = 0  # not command
-gvShow         =     LgvShow    = 0
+plecShow = LplecShow = 0  # not a command line setting
+rmShow = LrmShow = 0  # not command
+gvShow = LgvShow = 0
 
-def cmdLineDebug(o:str) -> None:
-    """ Set a command line debug option. Called from options.py """
 
-    global debug, Ldebug, showFilenames, LshowFilenames, \
-        pshow, Lpshow, seqshow, Lseqshow, showrun, Lshowrun, \
-        noWarn, LnoWarn, noOutput, LnoOutput, showExpand, \
-        LshowExpand, chshow, Lchshow 
-    
-    if o == 'd':
+def cmdLineDebug(o: str) -> None:
+    """Set a command line debug option. Called from options.py"""
+
+    global \
+        debug, \
+        Ldebug, \
+        showFilenames, \
+        LshowFilenames, \
+        pshow, \
+        Lpshow, \
+        seqshow, \
+        Lseqshow, \
+        showrun, \
+        Lshowrun, \
+        noWarn, \
+        LnoWarn, \
+        noOutput, \
+        LnoOutput, \
+        showExpand, \
+        LshowExpand, \
+        chshow, \
+        Lchshow
+
+    if o == "d":
         debug = Ldebug = 1
 
-    elif o == 'o':
+    elif o == "o":
         showFilenames = LshowFilenames = 1
 
-    elif o == 'p':
+    elif o == "p":
         pshow = Lpshow = 1
 
-    elif o == 's':
+    elif o == "s":
         seqshow = Lseqshow = 1
 
-    elif o == 'r':
+    elif o == "r":
         showrun = Lshowrun = 1
 
-    elif o == 'w':
+    elif o == "w":
         noWarn = LnoWarn = 1
 
-    elif o == 'n':
+    elif o == "n":
         noOutput = LnoOutput = 1
 
-    elif o == 'e':
+    elif o == "e":
         showExpand = LshowExpand = 1
 
-    elif o == 'c':
+    elif o == "c":
         chshow = Lchshow = 1
-    
-def setDebug(ln:list[str]):
-    """ Set debugging options dynamically. """
+
+
+def setDebug(ln: list[str]):
+    """Set debugging options dynamically."""
 
     # This needs to be here to avoid circular import problem
     from neomma.MMA.common import opt2pair
     from neomma.MMA.common import dPrint
-    
-    global Ldebug, debug, LshowFilenames, showFilenames, \
-        Lpshow, pshow, Lseqshow, seqshow, Lshowrun, showrun, \
-        LnoWarn, noWarn, LnoOutput, noOutput, LshowExpand, showExpand, \
-        Lchshow, chshow, LplecShow, plecShow, LrmShow, rmShow, \
-        LgvShow, gvShow
-    
-    msg = ("Debug: Use MODE=On/Off where MODE is one or more of "
-           "DEBUG, FILENAMES, PATTERNS, SEQUENCE, GROOVE, "
-           "RUNTIME, WARNINGS, EXPAND, ROMAN or PLECTRUM.")
+
+    global \
+        Ldebug, \
+        debug, \
+        LshowFilenames, \
+        showFilenames, \
+        Lpshow, \
+        pshow, \
+        Lseqshow, \
+        seqshow, \
+        Lshowrun, \
+        showrun, \
+        LnoWarn, \
+        noWarn, \
+        LnoOutput, \
+        noOutput, \
+        LshowExpand, \
+        showExpand, \
+        Lchshow, \
+        chshow, \
+        LplecShow, \
+        plecShow, \
+        LrmShow, \
+        rmShow, \
+        LgvShow, \
+        gvShow
+
+    msg = (
+        "Debug: Use MODE=On/Off where MODE is one or more of "
+        "DEBUG, FILENAMES, PATTERNS, SEQUENCE, GROOVE, "
+        "RUNTIME, WARNINGS, EXPAND, ROMAN or PLECTRUM."
+    )
 
     if not len(ln):
         from neomma.MMA.common import error
+
         error(msg)
 
     # save current flags
@@ -117,59 +157,59 @@ def setDebug(ln:list[str]):
         error("Each debug option must be a opt=value pair.")
 
     for cmd, val_str in opts:
-        if val_str == 'ON' or val_str == '1':
+        if val_str == "ON" or val_str == "1":
             val = 1
-        elif val_str == 'OFF' or val_str == '0':
+        elif val_str == "OFF" or val_str == "0":
             val = 0
         else:
             error("Debug: %s needs ON, 1, OFF, or 0 arg." % cmd)
 
-        if cmd == 'DEBUG':
+        if cmd == "DEBUG":
             debug = val
             if debug:
                 dPrint("Debug=%s." % val)
 
-        elif cmd == 'FILENAMES':
+        elif cmd == "FILENAMES":
             showFilenames = val
             if debug:
                 dPrint("ShowFilenames=%s." % val)
 
-        elif cmd == 'PATTERNS':
+        elif cmd == "PATTERNS":
             pshow = val
             if debug:
                 dPrint("Pattern display=%s." % val)
 
-        elif cmd == 'SEQUENCE':
+        elif cmd == "SEQUENCE":
             seqshow = val
             if debug:
                 dPrint("Sequence display=%s." % val)
 
-        elif cmd == 'RUNTIME':
+        elif cmd == "RUNTIME":
             showrun = val
             if debug:
                 dPrint("Runtime display=%s." % val)
 
-        elif cmd == 'WARNINGS':
-            noWarn = not(val)
+        elif cmd == "WARNINGS":
+            noWarn = not (val)
             if debug:
                 dPrint("Warning display=%s" % val)
 
-        elif cmd == 'EXPAND':
+        elif cmd == "EXPAND":
             showExpand = val
             if debug:
                 dPrint("Expand display=%s." % val)
 
-        elif cmd == 'ROMAN':
+        elif cmd == "ROMAN":
             rmShow = val
             if debug:
                 dPrint("Roman numeral chords/slash display=%s" % val)
 
-        elif cmd == 'GROOVE':
+        elif cmd == "GROOVE":
             gvShow = val
             if debug:
                 dPrint("Groove re-define display=%s" % val)
 
-        elif cmd == 'PLECTRUM':
+        elif cmd == "PLECTRUM":
             plecShow = val
             if debug:
                 dPrint("Plectrum display=%s" % val)
@@ -177,45 +217,71 @@ def setDebug(ln:list[str]):
         else:
             error(msg)
 
-            
+
 def getFlags():
-    """ Returns current values of debug flags in a string.
-        Used by macro.py to expand $_Debug. 
-    """    
-    
-    return "Debug=%s  Filenames=%s Patterns=%s " \
-        "Sequence=%s Runtime=%s Warnings=%s Expand=%s " \
-        "Roman=%s Plectrum=%s Groove=%s" % \
-           (debug, showFilenames, pshow, seqshow, showrun,
-            int(not noWarn), showExpand, rmShow, plecShow, gvShow)
+    """Returns current values of debug flags in a string.
+    Used by macro.py to expand $_Debug.
+    """
+
+    return (
+        "Debug=%s  Filenames=%s Patterns=%s "
+        "Sequence=%s Runtime=%s Warnings=%s Expand=%s "
+        "Roman=%s Plectrum=%s Groove=%s"
+        % (
+            debug,
+            showFilenames,
+            pshow,
+            seqshow,
+            showrun,
+            int(not noWarn),
+            showExpand,
+            rmShow,
+            plecShow,
+            gvShow,
+        )
+    )
+
 
 def getLFlags():
-    """ Returns last set values of debug flags in a string.
-        Used by macro.py to expand %_LastDebug. 
+    """Returns last set values of debug flags in a string.
+    Used by macro.py to expand %_LastDebug.
     """
-    
-    return "Debug=%s  Filenames=%s Patterns=%s " \
-                "Sequence=%s Runtime=%s Warnings=%s Expand=%s " \
-                "Roman=%s Plectrum=%s Groove=%s" % \
-                (Ldebug, LshowFilenames, Lpshow, Lseqshow, Lshowrun,
-                 int(not LnoWarn), LshowExpand, LrmShow, LplecShow, LgvShow)
+
+    return (
+        "Debug=%s  Filenames=%s Patterns=%s "
+        "Sequence=%s Runtime=%s Warnings=%s Expand=%s "
+        "Roman=%s Plectrum=%s Groove=%s"
+        % (
+            Ldebug,
+            LshowFilenames,
+            Lpshow,
+            Lseqshow,
+            Lshowrun,
+            int(not LnoWarn),
+            LshowExpand,
+            LrmShow,
+            LplecShow,
+            LgvShow,
+        )
+    )
+
 
 def trackSet(track, func):
-    """ Print a debug message for functions which set a track setting. 
+    """Print a debug message for functions which set a track setting.
 
-        track - name of the track (Chord-Sus ... )
-        name - the name of the function (Strum, Compress ...)
+    track - name of the track (Chord-Sus ... )
+    name - the name of the function (Strum, Compress ...)
 
-        By using the macro formatting functions we get consistent output 
-         between debug and macro expansion.
+    By using the macro formatting functions we get consistent output
+     between debug and macro expansion.
     """
 
     # Need to do this way to avoid circular import problem
     from neomma.MMA.macro import macros
     from neomma.MMA.common import dPrint
-    
-    dPrint("Set {} {}: {}".format(track, func,
-            macros.sysvar("{}_{}".format(track, func.upper()))))
 
-
-
+    dPrint(
+        "Set {} {}: {}".format(
+            track, func, macros.sysvar("{}_{}".format(track, func.upper()))
+        )
+    )

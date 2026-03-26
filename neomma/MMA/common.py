@@ -29,6 +29,7 @@ parts of neomma.MMA. It is safe to load the whole works with:
 without side effects (yeah, right).
 
 """
+
 from random import randrange
 import sys
 import time
@@ -43,56 +44,64 @@ outBuffer: list[str] = []
 
 # having the term width is nice for pretty print error/warning
 from neomma.MMA.termsize import getTerminalSize
-termwidth = getTerminalSize()[0]-1
 
-def bufferPrint(a:str):
+termwidth = getTerminalSize()[0] - 1
+
+
+def bufferPrint(a: str):
     if gbl.logFile:
         outBuffer.append(a)
     else:
         print(a)
 
+
 def cleanPrintBuffer():
-    """ Write an existing stored buffer (debug/error/warning). """
-    
+    """Write an existing stored buffer (debug/error/warning)."""
+
     if outBuffer and gbl.logFile:
-        outBuffer.insert(0, "\n**** Run log: '{}' {}".format( gbl.infile, time.asctime()))
-        
-        opath = open(gbl.logFile, 'a')    # Open output for append
+        outBuffer.insert(
+            0, "\n**** Run log: '{}' {}".format(gbl.infile, time.asctime())
+        )
+
+        opath = open(gbl.logFile, "a")  # Open output for append
         try:
             import fcntl
-            fcntl.flock(opath, fcntl.LOCK_EX)   # make sure we print in one batch
+
+            fcntl.flock(opath, fcntl.LOCK_EX)  # make sure we print in one batch
         except:
             pass
-        opath.write('\n'.join(outBuffer))   # dump entire buffer
-        opath.close()                       # this will release lock as well
+        opath.write("\n".join(outBuffer))  # dump entire buffer
+        opath.close()  # this will release lock as well
 
-def prettyPrint(msg:str|list[str]):
-    """ Simple formatter for error/warning messages."""
+
+def prettyPrint(msg: str | list[str]):
+    """Simple formatter for error/warning messages."""
 
     if isinstance(msg, list):
-        msg = ' '.join(msg)
+        msg = " ".join(msg)
     try:
-        for a in wrap(msg, termwidth, initial_indent='', subsequent_indent='    '):
+        for a in wrap(msg, termwidth, initial_indent="", subsequent_indent="    "):
             bufferPrint(a)
     except:
         bufferPrint(msg)
 
-def error(msg:str):
-    """ Print an error message and exit.
 
-        If the global line number is >=0 then print the line number
-        as well.
+def error(msg: str):
+    """Print an error message and exit.
+
+    If the global line number is >=0 then print the line number
+    as well.
     """
 
     if gbl.lineno >= 0:
         linno = "<Line %d>" % gbl.lineno
     else:
-        linno = ''
+        linno = ""
 
     if gbl.inpath:
         file = "<File:%s>" % gbl.inpath.fname
     else:
-        file = ''
+        file = ""
 
     prettyPrint("Error: {} {} {}".format(linno, file, msg))
 
@@ -107,55 +116,57 @@ def error(msg:str):
 
     if gbl.ignoreBadChords:  # set with -xCHORD and -xPERMISSIVE options
         return
-    
+
     sys.exit(1)
 
-def warning(msg:str):
-    """ Print warning message and return. """
+
+def warning(msg: str):
+    """Print warning message and return."""
 
     if not neomma.MMA.debug.noWarn:
         if gbl.lineno >= 0:
             linno = "<Line %d>" % gbl.lineno
         else:
-            linno = ''
+            linno = ""
 
         if gbl.inpath:
             file = "<File:%s>" % gbl.inpath.fname
         else:
-            file = ''
+            file = ""
 
         prettyPrint("Warning: {} {} {}".format(linno, file, msg))
 
 
 def dPrint(msg):
-    """ Print/buffer a debugging message. Keep separate since we might
-        want to install line numbering, etc. later???
+    """Print/buffer a debugging message. Keep separate since we might
+    want to install line numbering, etc. later???
     """
 
     prettyPrint(msg)
-    
+
+
 def getOffset(ticks, ranLow=None, ranHigh=None):
-    """ Calculate a midi offset into a song.
+    """Calculate a midi offset into a song.
 
-        ticks == offset into the current bar.
-        ran   == random adjustment from RTIME
+    ticks == offset into the current bar.
+    ran   == random adjustment from RTIME
 
-        When calculating the random factor the test ensures
-        that a note never starts before the start of the bar.
-        This is important ... voice changes, etc. will be
-        buggered if we put the voice change after the first
-        note-on event.
+    When calculating the random factor the test ensures
+    that a note never starts before the start of the bar.
+    This is important ... voice changes, etc. will be
+    buggered if we put the voice change after the first
+    note-on event.
 
-        CAUTION: If you pass either ranLow or ranHigh make sure
-                 both are set. If one has a value and the other
-                 is None a crash is ensured. The existing callers
-                 are okay (setRtime creates both values).
+    CAUTION: If you pass either ranLow or ranHigh make sure
+             both are set. If one has a value and the other
+             is None a crash is ensured. The existing callers
+             are okay (setRtime creates both values).
     """
 
-    p = gbl.tickOffset + int(ticks)     # int() cast is important!
+    p = gbl.tickOffset + int(ticks)  # int() cast is important!
 
     if ranLow is not None:
-        r = randrange(ranLow, ranHigh+1)
+        r = randrange(ranLow, ranHigh + 1)
         if ticks == 0 and r < 0:
             r = 0
         p += r
@@ -163,8 +174,8 @@ def getOffset(ticks, ranLow=None, ranHigh=None):
     return p
 
 
-def stoi(s:str, errmsg:str|None=None) -> int:
-    """ string to integer. """
+def stoi(s: str, errmsg: str | None = None) -> int:
+    """string to integer."""
 
     try:
         return int(s, 0)
@@ -176,8 +187,8 @@ def stoi(s:str, errmsg:str|None=None) -> int:
         return 0
 
 
-def stof(s:str, errmsg:str|None=None) -> float:
-    """ String to floating point. """
+def stof(s: str, errmsg: str | None = None) -> float:
+    """String to floating point."""
 
     try:
         return float(s)
@@ -191,9 +202,10 @@ def stof(s:str, errmsg:str|None=None) -> float:
                 error("Expecting a  value, not %s" % s)
         return 0.0
 
-def stotick(s:str, default:str='B', errmsg:str|None=None) -> int:
-    """ Convert string to midi ticks. Will apply default M, B, or T if
-        not given to string ending in a digit.
+
+def stotick(s: str, default: str = "B", errmsg: str | None = None) -> int:
+    """Convert string to midi ticks. Will apply default M, B, or T if
+    not given to string ending in a digit.
     """
 
     # Parse out extension (M, B, T)
@@ -205,7 +217,7 @@ def stotick(s:str, default:str='B', errmsg:str|None=None) -> int:
 
     # convert to value for measures, beats or ticks
     try:
-        mult={'M': gbl.barLen, 'B': gbl.BperQ, 'T': 1}[ext]
+        mult = {"M": gbl.barLen, "B": gbl.BperQ, "T": 1}[ext]
     except KeyError:
         error("The extension '%s' is not valid. Use M, B or T." % ext)
 
@@ -221,19 +233,19 @@ def stotick(s:str, default:str='B', errmsg:str|None=None) -> int:
     return int(v * mult)  # return ticks as int
 
 
-def pextract(s:str, open:str, close:str, onlyone=None, insert:str=''):
-    """ Extract a parenthesized set of substrings.
+def pextract(s: str, open: str, close: str, onlyone=None, insert: str = ""):
+    """Extract a parenthesized set of substrings.
 
-        s        - original string
-        open    - substring start tag / can be multiple character
-        close   - substring end tag   / strings (ie. "<<" or "-->")
-        onlyone - optional, if set only the first set is extracted
-        insert  - optional, insert string where extraction
+    s        - original string
+    open    - substring start tag / can be multiple character
+    close   - substring end tag   / strings (ie. "<<" or "-->")
+    onlyone - optional, if set only the first set is extracted
+    insert  - optional, insert string where extraction
 
-        returns ( original sans subs, [subs, ...] )
+    returns ( original sans subs, [subs, ...] )
 
-        eg: pextract( "x{123}{666}y", '{',    '}' )
-            Returns:  ( 'xy', [ '123', '666' ] )
+    eg: pextract( "x{123}{666}y", '{',    '}' )
+        Returns:  ( 'xy', [ '123', '666' ] )
 
     """
 
@@ -241,41 +253,41 @@ def pextract(s:str, open:str, close:str, onlyone=None, insert:str=''):
     magic = chr(1)
     while 1:
         lstart = s.find(open)
-        lend   = s.find(close)
+        lend = s.find(close)
 
         if lstart > -1 and lstart < lend:
-            subs.append(s[lstart + len(open):lend].strip())
-            s = s[:lstart] + magic + s[lend+len(close):]
+            subs.append(s[lstart + len(open) : lend].strip())
+            s = s[:lstart] + magic + s[lend + len(close) :]
             if onlyone:
                 break
         else:
             break
 
     s = s.replace(magic, insert)
-    
+
     return s.strip(), subs
 
 
 def seqBump(l):
-    """ Expand/contract an existing sequence list to the current seqSize."""
+    """Expand/contract an existing sequence list to the current seqSize."""
 
     while len(l) < gbl.seqSize:
         l.extend(l)
-    return l[:gbl.seqSize]
+    return l[: gbl.seqSize]
 
 
-def lnExpand(ln:list[str], msg:str) -> list[str]:
-    """ Validate and expand a list passed to a set command. """
-    
+def lnExpand(ln: list[str], msg: str) -> list[str]:
+    """Validate and expand a list passed to a set command."""
+
     if len(ln) > gbl.seqSize:
         if not gbl.inAllGrooves:
-            warning("{} list truncated to {} patterns".format(msg, gbl.seqSize) )
-        ln = ln[:gbl.seqSize]
+            warning("{} list truncated to {} patterns".format(msg, gbl.seqSize))
+        ln = ln[: gbl.seqSize]
 
     last = None
 
     for i, n in enumerate(ln):
-        if n == '/':
+        if n == "/":
             if last is None:
                 error("%s cannot use a '/' as the first item in list." % msg)
             else:
@@ -287,20 +299,18 @@ def lnExpand(ln:list[str], msg:str) -> list[str]:
 
 
 def opt2pair(
-        ln:list[str], 
-        toupper:bool=False, 
-        notoptstop:bool=False
-    ) -> tuple[list[str], list[tuple[str, str]]]:
-    """ Parse a list of options. Separate out "=" option pairs.
+    ln: list[str], toupper: bool = False, notoptstop: bool = False
+) -> tuple[list[str], list[tuple[str, str]]]:
+    """Parse a list of options. Separate out "=" option pairs.
 
-        Returns:
-           newln - original list stripped of opts
-           opts  - list of options. Each option is a tuple(opt, value)
+     Returns:
+        newln - original list stripped of opts
+        opts  - list of options. Each option is a tuple(opt, value)
 
-       Note: default is to leave case alone. Setting toupper converts 
-                everything to upper.
-             default is to parse entire line. Setting notoptstop stops parse at first
-                word which is not a xx=yy pair.
+    Note: default is to leave case alone. Setting toupper converts
+             everything to upper.
+          default is to parse entire line. Setting notoptstop stops parse at first
+             word which is not a xx=yy pair.
     """
 
     opts: list[tuple[str, str]] = []
@@ -315,38 +325,39 @@ def opt2pair(
     #     Beats = $Macro1 , $Macro2
     # since macros need to have spaces around them.
 
-    ln = ' '.join(ln)\
-        .replace('  ', ' ')\
-        .replace('= ', '=')\
-        .replace(' =', '=')\
-        .replace(', ', ',')\
-        .replace(' ,', ',')\
-        .split()\
-
+    ln = (
+        " ".join(ln)
+        .replace("  ", " ")
+        .replace("= ", "=")
+        .replace(" =", "=")
+        .replace(", ", ",")
+        .replace(" ,", ",")
+        .split()
+    )
     for i, a in enumerate(ln):
         if toupper:
             a = a.upper()
-        if a == '--':   # Just in case user needs opt=val passed
-            newln.extend(ln[i+1:])  # Drop/ignore '--'
+        if a == "--":  # Just in case user needs opt=val passed
+            newln.extend(ln[i + 1 :])  # Drop/ignore '--'
             break
         try:
-            o, v = a.split('=', 1)
+            o, v = a.split("=", 1)
             opts.append((o, v))
-        except ValueError:   # this means no '=', split() failed
+        except ValueError:  # this means no '=', split() failed
             newln.append(a)
             if notoptstop:
-                newln.extend(ln[i+1:])
+                newln.extend(ln[i + 1 :])
                 break
 
     return newln, opts
 
 
-def getTF(option:str, e:str='') -> bool:
-    """ Test the STRING option for a true/false value and return the boolean
-         True, On, 1 -- True
-         False, Off, 0 -- False
+def getTF(option: str, e: str = "") -> bool:
+    """Test the STRING option for a true/false value and return the boolean
+    True, On, 1 -- True
+    False, Off, 0 -- False
 
-         Optional e arg is prepended to any error message.
+    Optional e arg is prepended to any error message.
     """
 
     option = option.upper()
@@ -357,7 +368,6 @@ def getTF(option:str, e:str='') -> bool:
         return False
 
     if e:
-        e+=": "
-    error("{}Requires True or False, not '{}'.".format(e,option))
+        e += ": "
+    error("{}Requires True or False, not '{}'.".format(e, option))
     return False  # Added to satisfy function return type
-         

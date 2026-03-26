@@ -37,27 +37,26 @@ import neomma.MMA.debug
 from . import gbl
 from neomma.MMA.common import *
 
-trkClasses:dict[str,type] = {
-    'BASS'     : neomma.MMA.patBass.Bass,
-    'CHORD'    : neomma.MMA.patChord.Chord,
-    'ARPEGGIO' : neomma.MMA.patArpeggio.Arpeggio,
-    'SCALE'    : neomma.MMA.patScale.Scale,
-    'DRUM'     : neomma.MMA.patDrum.Drum,
-    'WALK'     : neomma.MMA.patWalk.Walk,
-    'MELODY'   : neomma.MMA.patSolo.Melody,
-    'SOLO'     : neomma.MMA.patSolo.Solo,
-    'ARIA'     : neomma.MMA.patAria.Aria,
-    'PLECTRUM' : neomma.MMA.patPlectrum.Plectrum
-
+trkClasses: dict[str, type] = {
+    "BASS": neomma.MMA.patBass.Bass,
+    "CHORD": neomma.MMA.patChord.Chord,
+    "ARPEGGIO": neomma.MMA.patArpeggio.Arpeggio,
+    "SCALE": neomma.MMA.patScale.Scale,
+    "DRUM": neomma.MMA.patDrum.Drum,
+    "WALK": neomma.MMA.patWalk.Walk,
+    "MELODY": neomma.MMA.patSolo.Melody,
+    "SOLO": neomma.MMA.patSolo.Solo,
+    "ARIA": neomma.MMA.patAria.Aria,
+    "PLECTRUM": neomma.MMA.patPlectrum.Plectrum,
 }
 
 
-def trackAlloc(name:str, err:bool) -> None:
-    """ Check existence of track and create if possible.
+def trackAlloc(name: str, err: bool) -> None:
+    """Check existence of track and create if possible.
 
-        If 'err' is set, the function will 'error out' if
-        it's not possible to create the track. Otherwise,
-        it is content to return without creation taking place.
+    If 'err' is set, the function will 'error out' if
+    it's not possible to create the track. Otherwise,
+    it is content to return without creation taking place.
     """
 
     # If the track already exists, just return
@@ -67,8 +66,8 @@ def trackAlloc(name:str, err:bool) -> None:
 
     # Get the trackname. Can be just a type, or type-name.
 
-    if '-' in name:
-        base, ext = name.split('-', 1)
+    if "-" in name:
+        base, ext = name.split("-", 1)
     else:
         ext = None
         base = name

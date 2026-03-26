@@ -29,58 +29,57 @@ import neomma.MMA.midiC
 import neomma.MMA.midiM
 
 from . import gbl
-from   neomma.MMA.common import *
+from neomma.MMA.common import *
 
 
-def mdefine(ln:list[str]):
-    """ Set a midi seq pattern. """
+def mdefine(ln: list[str]):
+    """Set a midi seq pattern."""
 
     if not ln:
         error("MDefine needs arguments")
 
     name = ln[0]
-    if name.startswith('_'):
+    if name.startswith("_"):
         error("Names with a leading underscore are reserved")
 
-    if name.upper() == 'Z':
+    if name.upper() == "Z":
         error("The name 'Z' is reserved")
 
-    mdef.create(name, ' '.join(ln[1:]))
+    mdef.create(name, " ".join(ln[1:]))
 
 
-def trackMdefine(name, ln:list[str]):
-    """ Set a midi seq pattern. Ignore track name."""
+def trackMdefine(name, ln: list[str]):
+    """Set a midi seq pattern. Ignore track name."""
 
     mdefine(ln)
 
 
 class Mdefine:
-
     def __init__(self):
         self.defs = {}
 
     def get(self, name):
-        """ Return a predefined MIDI pattern."""
+        """Return a predefined MIDI pattern."""
 
         try:
             return self.defs[name]
         except:
             error("The MDEFINE pattern %s has not been defined" % name)
 
-    def create(self, name:str, ln:str):
-        """ Parse a MDEFINE line.
+    def create(self, name: str, ln: str):
+        """Parse a MDEFINE line.
 
-            The line must be in the form:
+        The line must be in the form:
 
-                NAME <beat> <ctrl> <dat> [; ...]
+            NAME <beat> <ctrl> <dat> [; ...]
 
         """
 
         name = name.upper()
 
-        ln = ln.rstrip('; ')     # dump trailing ';' and whitespace
+        ln = ln.rstrip("; ")  # dump trailing ';' and whitespace
         evs = []
-        for linestr in ln.split(';'):
+        for linestr in ln.split(";"):
             l = linestr.split()
 
             if len(l) == 1:
@@ -95,15 +94,16 @@ class Mdefine:
             c = neomma.MMA.midiC.ctrlToValue(l[1])
             if c < 0:
                 c = stoi(l[1])
-                if c < 0 or c > 0x7f:
+                if c < 0 or c > 0x7F:
                     error("Controller values must be 0x00 to 0x7f")
 
             d = stoi(l[2])
-            if d < 0 or d > 0x7f:
+            if d < 0 or d > 0x7F:
                 error("MIDI Control Datum value must be 0x00 to 0x7f")
 
             evs.append([off, neomma.MMA.midiM.packBytes(c, d)])
 
         self.defs[name] = evs
+
 
 mdef = Mdefine()

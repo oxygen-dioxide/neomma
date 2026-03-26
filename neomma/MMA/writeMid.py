@@ -32,12 +32,13 @@ import subprocess
 import neomma.MMA.midi
 import neomma.MMA.lyric
 from . import gbl
-from   neomma.MMA.common import *
+from neomma.MMA.common import *
 
 splitOutput = None
 
+
 def createMIDI(outfile):
-    
+
     fileExist = os.path.exists(outfile)
 
     if fileExist:
@@ -45,22 +46,25 @@ def createMIDI(outfile):
     else:
         msg = "Creating new"
 
-    print("%s midi file (%s bars, %.2f min / %d:%02d m:s): '%s'" %
-        (msg, gbl.barNum, gbl.totTime, gbl.totTime, (gbl.totTime%1)*60, outfile))
+    print(
+        "%s midi file (%s bars, %.2f min / %d:%02d m:s): '%s'"
+        % (msg, gbl.barNum, gbl.totTime, gbl.totTime, (gbl.totTime % 1) * 60, outfile)
+    )
 
     # Insert the estimated play time in seconds into a comment line.
     # A player program can search for this and display it. The value
     # will be terminated by a null which should be easy enuf to search for.
 
-    gbl.mtrks[0].addText(0, "DURATION: %d" % (gbl.totTime*60) )
-    
+    gbl.mtrks[0].addText(0, "DURATION: %d" % (gbl.totTime * 60))
+
     try:
-        out = open(outfile, 'wb')
+        out = open(outfile, "wb")
     except OSError:
         error("Can't open file '%s' for writing" % outfile)
 
     neomma.MMA.midi.writeTracks(out)
     out.close()
+
 
 def createOutName(name, subname):
     if name.endswith(".mid"):
@@ -69,28 +73,29 @@ def createOutName(name, subname):
         name = "{}-{}".format(name, subname)
     return name
 
-   
+
 def channelSplit(outfile):
-    """ Write midi files split by channel number. """
+    """Write midi files split by channel number."""
 
     if len(sys.argv) > 3:
         error("Command line arguments are not permitted using '-xTsplit'.")
-        
-    tempMtrk = copy.copy(gbl.mtrks)  # keep this copy pristine 
+
+    tempMtrk = copy.copy(gbl.mtrks)  # keep this copy pristine
     # zap all tracks out
     for c in sorted(list(tempMtrk))[1:]:
         del gbl.mtrks[c]
     # we now have an empty mtrk, except for 0 which is for meta data
     # now process each separately
-    for c in sorted(list(tempMtrk))[1:]:   
+    for c in sorted(list(tempMtrk))[1:]:
         gbl.mtrks[c] = copy.copy(tempMtrk[c])  # restore only 1 track
-        createMIDI( createOutName(outfile, "%02d" % c) )
+        createMIDI(createOutName(outfile, "%02d" % c))
         del gbl.mtrks[c]
     gbl.mtrks = copy.copy(tempMtrk)
-    
+
+
 def trackSplit(outfile):
-    """ Write midi files split by trackname. Recursively calls neomma.MMA. """
-    
+    """Write midi files split by trackname. Recursively calls neomma.MMA."""
+
     if len(sys.argv) > 3:
         error("Command line arguments are not permitted using '-xTsplit'.")
 
@@ -98,15 +103,17 @@ def trackSplit(outfile):
     print("Splitting by tracks:")
     for ff in sorted(gbl.tnames.keys()):
         oname = "-f%s" % createOutName(outfile, ff)
-        z=subprocess.run([ mma, gbl.infile, oname, "-T%s" % ff])
+        z = subprocess.run([mma, gbl.infile, oname, "-T%s" % ff])
+
 
 #########################3
 
+
 def maker():
-    """ Called from the main loop to create the midi, etc.
-        returns: Name of output file
+    """Called from the main loop to create the midi, etc.
+    returns: Name of output file
     """
-    import neomma.MMA.debug   # here! avoid circular import
+    import neomma.MMA.debug  # here! avoid circular import
 
     ####################################
     # Dry run, no output
@@ -115,11 +122,11 @@ def maker():
         gbl.lineno = -1
         warning("Input file parsed successfully. No midi file generated")
         sys.exit(0)
-        
+
     ##############################
     # Create the output (MIDI) file
 
-    gbl.lineno = -1    # disable line nums for error/warning
+    gbl.lineno = -1  # disable line nums for error/warning
 
     # We fix the outPath now. This lets you set outpath in the song file.
     #
@@ -139,9 +146,13 @@ def maker():
 
     outfile = neomma.MMA.paths.outfile
 
-    if (not outfile.startswith('/')) and gbl.outPath \
-            and not gbl.outfile and not gbl.playFile:
-        if gbl.outPath[0] in '.\\/':
+    if (
+        (not outfile.startswith("/"))
+        and gbl.outPath
+        and not gbl.outfile
+        and not gbl.playFile
+    ):
+        if gbl.outPath[0] in ".\\/":
             outfile = "{}/{}".format(gbl.outPath, outfile)
         else:
             head, tail = os.path.split(outfile)
@@ -166,15 +177,16 @@ def maker():
     #   in the track at offset 0 for the track name, etc. So, if the
     #   track only has one entry we can safely skip the entire track.
 
-    trackCount = 1    # account for meta track
+    trackCount = 1  # account for meta track
 
-    for n in sorted(gbl.mtrks.keys())[1:]:     # check all but 0 (meta)
+    for n in sorted(gbl.mtrks.keys())[1:]:  # check all but 0 (meta)
         if len(gbl.mtrks[n].miditrk) > 1:
             trackCount += 1
-    
+
     if gbl.printProcessed:
         import neomma.MMA.rangeify
-        print ("Bars processed: %s" % neomma.MMA.rangeify.rangeify(gbl.barLabels))
+
+        print("Bars processed: %s" % neomma.MMA.rangeify.rangeify(gbl.barLabels))
 
     if trackCount == 1:  # only meta track
         if fileExist:
@@ -188,15 +200,16 @@ def maker():
 
     # go and write file (or files if splitting)
 
-    if splitOutput == 'CHANNELS':
+    if splitOutput == "CHANNELS":
         channelSplit(outfile)
-    elif splitOutput == 'TRACKS':
+    elif splitOutput == "TRACKS":
         trackSplit(outfile)
     else:
         createMIDI(outfile)
-    
+
     if gbl.playFile:
         import neomma.MMA.player
+
         neomma.MMA.player.playMidi(outfile)
 
-    return(outfile)
+    return outfile

@@ -22,7 +22,6 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-
 import random
 
 
@@ -35,20 +34,22 @@ from neomma.MMA.pat import PC, Pgroup
 
 
 class Walk(PC):
-    """ Pattern class for a walking bass track. """
+    """Pattern class for a walking bass track."""
 
-    vtype = 'WALK'
+    vtype = "WALK"
     walkChoice = 0
 
     def getPgroup(self, ev):
-        """ Get group for walking bass pattern.
+        """Get group for walking bass pattern.
 
-            Fields - start, length, volume
+        Fields - start, length, volume
         """
 
         if len(ev) != 3:
-            error("There must be at exactly 3 items in each group in "
-                  "a Walking Bass definition, not <%s>" % ' '.join(ev))
+            error(
+                "There must be at exactly 3 items in each group in "
+                "a Walking Bass definition, not <%s>" % " ".join(ev)
+            )
 
         a = Pgroup()
 
@@ -63,7 +64,7 @@ class Walk(PC):
         self.walkChoice = 0
 
     def trackBar(self, pattern, ctable):
-        """ Do a waling     bass bar.
+        """Do a waling     bass bar.
 
         Called from self.bar()
 
@@ -73,7 +74,6 @@ class Walk(PC):
         dir = self.direction[sc]
 
         for p in pattern:
-
             tb = self.getChordInPos(p.offset, ctable)
 
             if tb.walkZ:
@@ -101,12 +101,12 @@ class Walk(PC):
 
             wNotes = list(tb.chord.scaleList[0:6])
 
-            if dir not in ('UP', 'DOWN'):
+            if dir not in ("UP", "DOWN"):
                 b = list(tb.chord.scaleList[1:5])
                 b.reverse()
                 wNotes += b
 
-            if dir == 'DOWN':
+            if dir == "DOWN":
                 wNotes.reverse()
 
             # Ensure that the offset is in range.
@@ -131,11 +131,11 @@ class Walk(PC):
                 not-at-all. With BOTH we have a preference to move up.
             """
 
-            if dir in ('UP', 'DOWN'):
+            if dir in ("UP", "DOWN"):
                 self.walkChoice += 1
-            elif dir == 'RANDOM':
+            elif dir == "RANDOM":
                 self.walkChoice += random.choice((0, 1, -1))
-            else:    # BOTH
+            else:  # BOTH
                 self.walkChoice += random.choice((-1, 0, 0, 2, 2, 1, 1, 1, 1, 1, 1, 1))
 
             if not self.harmonyOnly[sc]:
@@ -152,9 +152,13 @@ class Walk(PC):
                 harmlist = []
 
             offset = p.offset
-            if self.ornaments['type']:
-                offset = neomma.MMA.ornament.doOrnament(self, notelist,
-                                self.getChordInPos(offset, ctable).chord.scaleList, p)
+            if self.ornaments["type"]:
+                offset = neomma.MMA.ornament.doOrnament(
+                    self,
+                    notelist,
+                    self.getChordInPos(offset, ctable).chord.scaleList,
+                    p,
+                )
                 notelist = []
 
             self.sendChord(notelist + harmlist, p.duration, offset)

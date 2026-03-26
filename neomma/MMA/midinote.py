@@ -24,18 +24,17 @@ This module does all the midinote stuff.
 
 """
 
-
 import neomma.MMA.notelen
 import neomma.MMA.midiC
-from   neomma.MMA.midiM import packBytes
+from neomma.MMA.midiM import packBytes
 import neomma.MMA.debug
 from . import gbl
-from   neomma.MMA.common import *
-from   neomma.MMA.keysig import keySig
+from neomma.MMA.common import *
+from neomma.MMA.keysig import keySig
 
 
-def parse(name, ln:list[str]):
-    """ Called from parser for a <Track MidiNote> This figures the right routine."""
+def parse(name, ln: list[str]):
+    """Called from parser for a <Track MidiNote> This figures the right routine."""
 
     if not len(ln):
         error("MidiNote: Needs arguments")
@@ -49,58 +48,62 @@ def parse(name, ln:list[str]):
     for o, v in opts:
         o = o.upper()
         v = v.upper()
-        if o == 'TRANSPOSE':
-            if v in ('0', 'OFF'):
+        if o == "TRANSPOSE":
+            if v in ("0", "OFF"):
                 trk.transpose = 0
-            elif v in ('1', 'ON'):
+            elif v in ("1", "ON"):
                 trk.transpose = gbl.transpose
             else:
                 error("MIDINote: TRANSPOSE expecting ON or OFF, not %s." % v)
 
-        elif o == 'OFFSETS':
-            if v == 'BEATS':
+        elif o == "OFFSETS":
+            if v == "BEATS":
                 trk.useticks = 0
-            elif v == 'TICKS':
+            elif v == "TICKS":
                 trk.useticks = 1
             else:
                 error("MIDINote: OFFSETS expecting BEATS or TICKS, not %s." % v)
 
-        elif o == 'DURATION':
-            if v == 'NOTES':
+        elif o == "DURATION":
+            if v == "NOTES":
                 trk.tickdur = 0
-            elif v == 'TICKS':
+            elif v == "TICKS":
                 trk.tickdur = 1
             else:
                 error("MIDINote: DURATION expecting NOTES or TICKS, not %s." % v)
 
-        elif o == 'ARTICULATE':
-            if v in ('1,' 'ON'):
+        elif o == "ARTICULATE":
+            if v in ("1,ON"):
                 trk.articulate = 1
-            elif v in ('0', 'OFF'):
+            elif v in ("0", "OFF"):
                 trk.articulate = 0
             else:
                 error("MIDINote: ARTICULATE expecting ON or OFF, not %s." % v)
 
-        elif o == 'OCTAVE':
+        elif o == "OCTAVE":
             trk.oadjust = stoi(v)
             if trk.oadjust < -4 or trk.oadjust > 4:
-                error("MIDINote: Octave adjustment must be -4..4, not '%s'." % trk.oadjust)
+                error(
+                    "MIDINote: Octave adjustment must be -4..4, not '%s'." % trk.oadjust
+                )
 
-        elif o == 'VOLUME':
+        elif o == "VOLUME":
             trk.vadjust = stof(v) / 100
             if trk.vadjust <= 0:
-                error("MIDINote: Volume %% adjustment must be > 0, not '%s'." % trk.vadjust)
+                error(
+                    "MIDINote: Volume %% adjustment must be > 0, not '%s'."
+                    % trk.vadjust
+                )
 
-        elif o == 'ADJUST':
+        elif o == "ADJUST":
             trk.tadjust = stoi(v)
 
         else:
             error("MIDINote: unknown option pair {}={}.".format(o, v))
-    
+
     # end of option pairs.
 
     if ln:  # process rest of the stuff ... real midi events.
-
         trk.setForceOut()
 
         a = ln[0].upper()
@@ -135,63 +138,70 @@ def parse(name, ln:list[str]):
 
 
 def mopts(trk):
-    """ Return options string to macro and setoption-debug. """
+    """Return options string to macro and setoption-debug."""
 
     if trk.useticks:
-        a1 = 'Ticks'
+        a1 = "Ticks"
     else:
-        a1 = 'Beats'
+        a1 = "Beats"
 
     if trk.tickdur:
-        a2 = 'Ticks';
+        a2 = "Ticks"
     else:
-        a2 = 'Notes'
+        a2 = "Notes"
 
     if trk.transpose:
-        a3 = 'On'
+        a3 = "On"
     else:
-        a3 = 'Off'
+        a3 = "Off"
 
     if trk.articulate:
-        a4 = 'On'
+        a4 = "On"
     else:
-        a4 = 'Off'
+        a4 = "Off"
 
-    return "Offsets=%s Duration=%s Transpose=%s Articulate=%s Adjust=%s Volume=%s Octave=%s" \
+    return (
+        "Offsets=%s Duration=%s Transpose=%s Articulate=%s Adjust=%s Volume=%s Octave=%s"
         % (a1, a2, a3, a4, trk.tadjust, trk.vadjust * 100, trk.oadjust)
+    )
 
 
 def getoffset(trk, v):
-    """ Convert a string (value) to an offset. Convert to beats if nesc."""
+    """Convert a string (value) to an offset. Convert to beats if nesc."""
 
     offset = stof(v)
     if trk.useticks:
         if offset != int(offset):
-            error("MidiNote: Offset set to ticks, float '%s' given. Integer must be used." %
-                  offset)
+            error(
+                "MidiNote: Offset set to ticks, float '%s' given. Integer must be used."
+                % offset
+            )
         offset += trk.tadjust
 
     else:
         if offset < 1:
-            warning("MidiNote: Offset %s generates notes before start of current bar." % offset)
+            warning(
+                "MidiNote: Offset %s generates notes before start of current bar."
+                % offset
+            )
 
         if offset >= gbl.QperBar + 1:
             warning("MidiNote: Offset %s is past end of current bar." % offset)
 
-        offset = (offset-1) * gbl.BperQ
+        offset = (offset - 1) * gbl.BperQ
 
     return int(offset)  # conversion to int is nescessary
 
 
 def note2val(trk, acctable, orig):
-    """ Convert a note name to a value. In this case the OCTAVE setting
-        is used!
+    """Convert a note name to a value. In this case the OCTAVE setting
+    is used!
     """
 
     t = list(orig)
     n = t.pop(0)
     try:
-        val = {'c': 0, 'd': 2, 'e': 4, 'f': 5, 'g': 7, 'a': 9, 'b': 11}[n]
+        val = {"c": 0, "d": 2, "e": 4, "f": 5, "g": 7, "a": 9, "b": 11}[n]
     except:
         error("MidiNote: Expecting valid note name, not '%s'." % orig)
 
@@ -199,14 +209,14 @@ def note2val(trk, acctable, orig):
 
     # Modify the note with either the keysignature or given accidental.
 
-    if t:   # override modifier if #,& or n
-        if t[0] == '#':
+    if t:  # override modifier if #,& or n
+        if t[0] == "#":
             acctable[n] = 1
             t.pop(0)
-        elif t[0] == '&':
+        elif t[0] == "&":
             acctable[n] = -1
             t.pop(0)
-        elif t[0] == 'n':
+        elif t[0] == "n":
             acctable[n] = 0
             t.pop(0)
 
@@ -214,53 +224,57 @@ def note2val(trk, acctable, orig):
 
     # adjust for octave - or +
 
-    while t and (t[0] == '-' or t[0] == '+'):
-        if t[0] == '+':
+    while t and (t[0] == "-" or t[0] == "+"):
+        if t[0] == "+":
             val += 12
         else:
             val -= 12
         t.pop(0)
 
     if t:  # anything left? Error.
-        error("MidiNote: Unknown note specifier '{}' in '{}'.".format(''.join(t), orig))
+        error("MidiNote: Unknown note specifier '{}' in '{}'.".format("".join(t), orig))
 
     return val
 
 
 def insertNote(trk, ln):
-    """ Insert specified (raw) MIDI notes into track. """
+    """Insert specified (raw) MIDI notes into track."""
 
     if len(ln) != 4:
         error("Use: %s MidiNote: <offset> <note> <velocity> <duration>" % trk.name)
 
-    acctable = keySig.accList   # keysig modifier, use for chord
+    acctable = keySig.accList  # keysig modifier, use for chord
 
     offset = getoffset(trk, ln[0])
 
     # Set a flag if this is a drum track.
 
-    if trk.vtype == 'DRUM':
+    if trk.vtype == "DRUM":
         isdrum = 1
-    elif trk.vtype in ('MELODY', 'SOLO') and trk.drumType:
+    elif trk.vtype in ("MELODY", "SOLO") and trk.drumType:
         isdrum = 1
     else:
         isdrum = 0
 
     notes = []
-    for n in ln[1].split(','):
-        if n[0] in '0123456789':
+    for n in ln[1].split(","):
+        if n[0] in "0123456789":
             n = stoi(n)
         else:
             if isdrum:
-                if n == '*':
-                    if trk.vtype in ('MELODY', 'SOLO'):
+                if n == "*":
+                    if trk.vtype in ("MELODY", "SOLO"):
                         n = trk.drumTone
                     else:
                         n = trk.toneList[gbl.seqCount]
                 else:
                     n = neomma.MMA.midiC.drumToValue(n)
                     if n < 0:
-                        error("MidiNote: unknown drum tone '{}' in {}.".format(n, trk.name))
+                        error(
+                            "MidiNote: unknown drum tone '{}' in {}.".format(
+                                n, trk.name
+                            )
+                        )
             else:
                 n = note2val(trk, acctable, n)
 
@@ -275,7 +289,7 @@ def insertNote(trk, ln):
                 n -= 12
 
         if trk.oadjust and not isdrum:
-            n += (trk.oadjust * 12)
+            n += trk.oadjust * 12
             while n < 0:
                 n += 12
             while n > 127:
@@ -295,7 +309,7 @@ def insertNote(trk, ln):
     elif velocity > 127:
         velocity = 127
 
-    velocity = int(velocity)   # trk.adjust can be a float
+    velocity = int(velocity)  # trk.adjust can be a float
 
     if trk.tickdur:
         duration = stoi(ln[3])
@@ -310,18 +324,22 @@ def insertNote(trk, ln):
     track = gbl.mtrks[channel]
 
     for n in notes:
-        onEvent = packBytes((0x90 | channel-1, n, velocity))
+        onEvent = packBytes((0x90 | channel - 1, n, velocity))
         offEvent = packBytes(onEvent[:-1], 0)
 
         track.addToTrack(gbl.tickOffset + offset, onEvent)
         track.addToTrack(gbl.tickOffset + offset + duration, offEvent)
 
     if neomma.MMA.debug.debug:
-        dPrint("MidiNote Note {}: inserted note {} at offset {}.".format(trk.name, notes, offset))
+        dPrint(
+            "MidiNote Note {}: inserted note {} at offset {}.".format(
+                trk.name, notes, offset
+            )
+        )
 
 
 def insertPB(trk, ln):
-    """ Insert a pitch controller event. """
+    """Insert a pitch controller event."""
 
     if len(ln) != 2:
         error("MidiNote: PB expecting 2 arguments.")
@@ -336,29 +354,35 @@ def insertPB(trk, ln):
 
     channel = trk.channel
     track = gbl.mtrks[channel]
-    track.addToTrack(gbl.tickOffset + offset, packBytes((0xe0 | channel-1, v % 128, v // 128)))
+    track.addToTrack(
+        gbl.tickOffset + offset, packBytes((0xE0 | channel - 1, v % 128, v // 128))
+    )
 
     if neomma.MMA.debug.debug:
-        dPrint("MidiNote PB {}: inserted bend {} at offset {}.".format(trk.name, v-8192, offset))
+        dPrint(
+            "MidiNote PB {}: inserted bend {} at offset {}.".format(
+                trk.name, v - 8192, offset
+            )
+        )
 
 
 def insertPBrange(trk, ln):
-    """ Insert a range of PB events. """
+    """Insert a range of PB events."""
 
     if len(ln) != 3:
         error("MidiNote: PBR expecting 3 arguments <count> <start,end> <v1,v2>.")
 
     count = stoi(ln[0])
     try:
-        s1, s2 = ln[1].split(',')
+        s1, s2 = ln[1].split(",")
     except:
         error("MidiNote PBR: event range must be 'v1,v2', not '%s'." % ln[1])
     s1 = getoffset(trk, s1)
     s2 = getoffset(trk, s2)
-    tinc = (s2-s1) / float(count)
+    tinc = (s2 - s1) / float(count)
 
     try:
-        v1, v2 = ln[2].split(',')
+        v1, v2 = ln[2].split(",")
     except:
         error("MidiNote PBR: pitch blend range must be 'v1,v2', not '%s'." % ln[2])
     v1 = stoi(v1)
@@ -369,27 +393,29 @@ def insertPBrange(trk, ln):
 
     v1 += 8192  # convert to 0..16383, max 14 bit value
     v2 += 8192
-    vinc = (v2-v1) / float(count)
+    vinc = (v2 - v1) / float(count)
 
     channel = trk.channel
     track = gbl.mtrks[channel]
 
-    ev = packBytes(0xe0 | channel-1)
+    ev = packBytes(0xE0 | channel - 1)
     offset = s1
     bend = v1
-    for i in range(count+1):
+    for i in range(count + 1):
         v = int(bend)
         track.addToTrack(gbl.tickOffset + int(offset), packBytes(ev, v % 128, v // 128))
         offset += tinc
         bend += vinc
 
     if neomma.MMA.debug.debug:
-        dPrint("MidiNote PBR %s: inserted bends %s to %s at offsets %s to %s." % 
-            (trk.name, v1-8192, v2-8192, s1, s2))
+        dPrint(
+            "MidiNote PBR %s: inserted bends %s to %s at offsets %s to %s."
+            % (trk.name, v1 - 8192, v2 - 8192, s1, s2)
+        )
 
 
 def insertControl(trk, ln):
-    """ Insert a controller event. """
+    """Insert a controller event."""
 
     if len(ln) != 3:
         error("MidiNote: Controller expecting 3 arguments.")
@@ -399,11 +425,11 @@ def insertControl(trk, ln):
     v = neomma.MMA.midiC.ctrlToValue(ln[1])
     if v < 0:
         v = stoi(ln[1])
-        if v < 0 or v > 0x7f:
+        if v < 0 or v > 0x7F:
             error("MidiNote: Controller values must be 0x00 to 0x7f, not '%s'." % ln[1])
 
     d = stoi(ln[2])
-    if d < 0 or d > 0x7f:
+    if d < 0 or d > 0x7F:
         error("MidiNote: Control Datum value must be 0x00 to 0x7f, not '%s'." % ln[2])
 
     channel = trk.channel
@@ -413,15 +439,17 @@ def insertControl(trk, ln):
     # module similar. We should have add**() command in midi.py for the above stuff
     # and redo this.???
 
-    track.addToTrack(gbl.tickOffset + offset, packBytes((0xb0 | channel-1, v, d)) )
+    track.addToTrack(gbl.tickOffset + offset, packBytes((0xB0 | channel - 1, v, d)))
 
     if neomma.MMA.debug.debug:
-        dPrint("MidiNote Ctrl %s: inserted Controller %s value %s at offset %s." % 
-            (trk.name, v, d, offset))
+        dPrint(
+            "MidiNote Ctrl %s: inserted Controller %s value %s at offset %s."
+            % (trk.name, v, d, offset)
+        )
 
 
 def insertChTouch(trk, ln):
-    """ Insert a channel aftertouch) event. """
+    """Insert a channel aftertouch) event."""
 
     if len(ln) != 2:
         error("MidiNote: ChAT expecting 2 arguments.")
@@ -436,30 +464,32 @@ def insertChTouch(trk, ln):
     channel = trk.channel
     track = gbl.mtrks[channel]
 
-    track.addToTrack(gbl.tickOffset + offset, packBytes((0xd0 | channel-1, v)))
- 
+    track.addToTrack(gbl.tickOffset + offset, packBytes((0xD0 | channel - 1, v)))
+
     if neomma.MMA.debug.debug:
-        dPrint("MidiNote ChAT %s: inserted channel aftertouch %s at offset %s." % 
-            (trk.name, v, offset))
+        dPrint(
+            "MidiNote ChAT %s: inserted channel aftertouch %s at offset %s."
+            % (trk.name, v, offset)
+        )
 
 
 def insertChTouchRange(trk, ln):
-    """ Insert a range of channel aftertouch events. """
+    """Insert a range of channel aftertouch events."""
 
     if len(ln) != 3:
         error("MidiNote: ChATR expecting 3 arguments <count> <start,end> <v1,v2>.")
 
     count = stoi(ln[0])
     try:
-        s1, s2 = ln[1].split(',')
+        s1, s2 = ln[1].split(",")
     except:
         error("MidiNote ChATR: event range must be 'v1,v2', not '%s'." % ln[1])
     s1 = getoffset(trk, s1)
     s2 = getoffset(trk, s2)
-    tinc = (s2-s1) / float(count)
+    tinc = (s2 - s1) / float(count)
 
     try:
-        v1, v2 = ln[2].split(',')
+        v1, v2 = ln[2].split(",")
     except:
         error("MidiNote ChATR: range must be 'v1,v2', not '%s'." % ln[2])
     v1 = stoi(v1)
@@ -468,20 +498,22 @@ def insertChTouchRange(trk, ln):
     if v1 < 0 or v1 > 127 or v2 < 0 or v2 > 127:
         error("MidiNote: ChATR values must be 0.. 127, not '%s'." % ln[2])
 
-    vinc = (v2-v1) / float(count)
+    vinc = (v2 - v1) / float(count)
 
     channel = trk.channel
     track = gbl.mtrks[channel]
 
-    ev = packBytes(0xd0 | channel-1)
+    ev = packBytes(0xD0 | channel - 1)
     offset = s1
     bend = v1
-    for i in range(count+1):
+    for i in range(count + 1):
         v = int(bend)
         track.addToTrack(gbl.tickOffset + int(offset), packBytes(ev, v))
         offset += tinc
         bend += vinc
 
     if neomma.MMA.debug.debug:
-        dPrint("MidiNote ChATR %s: inserted events %s to %s at offsets %s to %s." %
-            (trk.name, v1, v2, s1, s2))
+        dPrint(
+            "MidiNote ChATR %s: inserted events %s to %s at offsets %s to %s."
+            % (trk.name, v1, v2, s1, s2)
+        )

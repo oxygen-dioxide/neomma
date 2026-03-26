@@ -29,7 +29,7 @@ import neomma.MMA.translate
 
 
 def decodeVoice(n):
-    """ Convert a single voice item. Used by setVoice() and tweaks. """
+    """Convert a single voice item. Used by setVoice() and tweaks."""
 
     n = neomma.MMA.translate.vtable.get(n)
     voc = instToValue(n)
@@ -39,11 +39,11 @@ def decodeVoice(n):
         if not t < 0 and n[0].isalpha():
             emsg = "(Note: %s is a valid DRUM tone.)" % n
         else:
-            emsg = ''
+            emsg = ""
         error("Voice '{}' is not defined. {}".format(n, emsg))
-        
+
     if voc < 0:  # not a valid name, assume vv.msb(ctrl0).lsb(ctrl32) value
-        nn = n.split('.')
+        nn = n.split(".")
         if len(nn) > 3 or len(nn) < 1:
             error("Expecting a voice value Prog.MSB.LSB, not '%s'" % n)
         voc = 0
@@ -68,20 +68,20 @@ def decodeVoice(n):
 
 
 def voice2tup(x):
-    """ Convert integer into 3 byte tuple: Voice, LSB, MSB. """
+    """Convert integer into 3 byte tuple: Voice, LSB, MSB."""
 
     if x == -1:
-        return (-1, -1, -1) # TSO added to ensure bank 0/0 is setup first time
-    
-    if x > 0xffff:
+        return (-1, -1, -1)  # TSO added to ensure bank 0/0 is setup first time
+
+    if x > 0xFFFF:
         msb = x >> 16
-        x &= 0xffff
+        x &= 0xFFFF
     else:
         msb = 0
 
-    if x > 0xff:
+    if x > 0xFF:
         lsb = x >> 8
-        x &= 0xff
+        x &= 0xFF
     else:
         lsb = 0
 
@@ -91,19 +91,20 @@ def voice2tup(x):
 def extVocStr(v):
 
     v = "%s.%s.%s" % voice2tup(v)
-    if v[-2:] == '.0':
+    if v[-2:] == ".0":
         v = v[:-2]
-    if v[-2:] == '.0':
+    if v[-2:] == ".0":
         v = v[:-2]
     return v
+
 
 ###############################
 
 
 def drumToValue(name):
-    """ Get the value of the drum tone (-1==error).
-        Note that this is quite different from instToValue() ... in that
-        case the caller does a bunch of validation stuff for controllers, etc.
+    """Get the value of the drum tone (-1==error).
+    Note that this is quite different from instToValue() ... in that
+    case the caller does a bunch of validation stuff for controllers, etc.
     """
 
     try:  # assuming that 'name' is an integer
@@ -120,7 +121,7 @@ def drumToValue(name):
 
 
 def valueToDrum(val):
-    """ Get the name of the drum tone.  """
+    """Get the name of the drum tone."""
 
     try:
         return drumNames[val]
@@ -129,7 +130,7 @@ def valueToDrum(val):
 
 
 def instToValue(name):
-    """ Get the value of the instrument name (-1==error). """
+    """Get the value of the instrument name (-1==error)."""
 
     try:
         return voiceInx[name.upper()]
@@ -138,7 +139,7 @@ def instToValue(name):
 
 
 def valueToInst(val):
-    """ Get the name of the inst. (or 'ERR'). """
+    """Get the name of the inst. (or 'ERR')."""
 
     try:
         return voiceNames[val]
@@ -151,7 +152,7 @@ def valueToInst(val):
 
 
 def ctrlToValue(name):
-    """ Get the value of the controler name (-1==error). """
+    """Get the value of the controler name (-1==error)."""
 
     try:
         return ctrlInx[name.upper()]
@@ -160,7 +161,7 @@ def ctrlToValue(name):
 
 
 def valueToCtrl(val):
-    """ Get the name of the controller (or 'ERR'). """
+    """Get the name of the controller (or 'ERR')."""
 
     try:
         return ctrlNames[val]

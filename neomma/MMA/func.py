@@ -33,7 +33,8 @@ from neomma.MMA.macro import macros
 from neomma.MMA.common import *
 import neomma.MMA.debug
 
-# Storage for our functions 
+
+# Storage for our functions
 class Funcs:
     def __init__(self, params, body, defaults, fname, lineN):
         self.params = params
@@ -41,22 +42,24 @@ class Funcs:
         self.defaults = defaults
         self.lineN = lineN
         self.fname = fname
-        
+
+
 funcList = {}
 
 ########################
 
+
 def defCall(l):
-    """ Define a function.  """
+    """Define a function."""
 
     if len(l) < 1:
         error("DefCall: At least one argument (name) is needed.")
-        
+
     lineN = gbl.lineno
-        
+
     # Grab 1st arg. This is the function name
     fname = l[0].strip().upper()
-    if '$' in fname:
+    if "$" in fname:
         error("DefCall: '$' is not permitted in function name.")
 
     # The params are split into words. Join together just so we can
@@ -65,7 +68,7 @@ def defCall(l):
     #                           join together with space delims (skip func name)
     #                           split up at ','
 
-    p = ' '.join(l[1:]).replace(r'\,', chr(255)).split(',')
+    p = " ".join(l[1:]).replace(r"\,", chr(255)).split(",")
 
     # Convert the param names so they have a leading '$'. The '$'
     # is not permitted in a param name.
@@ -76,21 +79,21 @@ def defCall(l):
         a = a.strip().replace(chr(255), ",")
         if not a:
             continue
-        if '=' in a:
-            a,d = a.split('=')
+        if "=" in a:
+            a, d = a.split("=")
             a = a.strip()
             d = d.strip()
         else:
             d = None
-        if '$' in a:
+        if "$" in a:
             error("DefCall: '$' is not permitted in paramater name.")
-        a = '$'+a
+        a = "$" + a
         if a in params:
             error("DefCall: '%s' is a duplicate paramater name." % a)
 
         params.append(a.upper())
         defaults.append(d)
-    
+
     body = []
     while 1:
         ln = gbl.inpath.read()
@@ -105,42 +108,48 @@ def defCall(l):
         if cmd == "DEFAULT":
             if len(ln) < 2:
                 error("Default: Requires at least one argument.")
-            a = '$'+ln[1].strip().upper()
-            d = ''
+            a = "$" + ln[1].strip().upper()
+            d = ""
             if len(ln) >= 2:
-                d = ' '.join(ln[2:])
+                d = " ".join(ln[2:])
             try:
                 i = params.index(a)
             except:
-                error("DefCall Default: param '{}' does not exist in '{}'.".format(a, fname))
+                error(
+                    "DefCall Default: param '{}' does not exist in '{}'.".format(
+                        a, fname
+                    )
+                )
             if defaults[i]:
-                warning("DefCall Default: param '%s' default value '%s' was set in param list."
-                        " Overriding with '%s'." % (a, defaults[i], d))
+                warning(
+                    "DefCall Default: param '%s' default value '%s' was set in param list."
+                    " Overriding with '%s'." % (a, defaults[i], d)
+                )
             defaults[i] = d
             continue
-            
+
         body.append(ln)
-    
+
     funcList[fname] = Funcs(params, body, defaults, gbl.inpath.fname, lineN)
-    
-    if neomma.MMA.debug.debug: 
-        t = [ a[1:] for a in params]
-        dPrint("DefCall: Created function '{}': {}".format(fname, ', '.join(t)))
+
+    if neomma.MMA.debug.debug:
+        t = [a[1:] for a in params]
+        dPrint("DefCall: Created function '{}': {}".format(fname, ", ".join(t)))
 
 
 def callFunction(l):
-    """ Call a function. """
+    """Call a function."""
 
     if len(l) < 1:
         error("DefCall: At least one argument (name) is needed.")
 
     fname = l[0].strip().upper()
-    
+
     if fname not in funcList:
         error("Call: '%s' has not been defined." % fname)
 
     # Convert any escaped '\,' into $ff ... see explanation in defCall()
-    p = ' '.join(l[1:]).replace(r'\,', chr(255)).split(',')
+    p = " ".join(l[1:]).replace(r"\,", chr(255)).split(",")
 
     # Validate calling params
     params = funcList[fname].params
@@ -149,12 +158,12 @@ def callFunction(l):
     usingDefaults = False
     namedParams = {}
     for a in p:
-        a = a.strip().replace(chr(255), ',')   # commas restored
-        if a:   # new list of params
-            if '=' in a: 
+        a = a.strip().replace(chr(255), ",")  # commas restored
+        if a:  # new list of params
+            if "=" in a:
                 usingDefaults = True
-                a,d = a.split('=')
-                a = '$'+a.strip().upper()
+                a, d = a.split("=")
+                a = "$" + a.strip().upper()
                 d = d.strip()
                 if a not in params:
                     error("Call: '{}' is not a param of '{}'.".format(a, fname))
@@ -163,30 +172,31 @@ def callFunction(l):
                 error("Call: cannot use a non-named param after a named one.")
             else:
                 callParams.append(a)
-                
+
     if usingDefaults or len(params) != len(callParams):
         s = len(callParams)
         for i, p in enumerate(params[s:]):
             if p in namedParams:
                 callParams.append(namedParams[p])
             else:
-                d = funcList[fname].defaults[i+s]
+                d = funcList[fname].defaults[i + s]
                 if d is None:
-                    #error("Call: '%s' has no default for '%s'." % (fname, p))
-                    d="UNDEFINED"
+                    # error("Call: '%s' has no default for '%s'." % (fname, p))
+                    d = "UNDEFINED"
                 callParams.append(d)
 
     if len(params) != len(callParams):
-           error("Call: Function '%s' needs %s params, '%s' given." % \
-                 (fname, len(params), len(callParams)))
+        error(
+            "Call: Function '%s' needs %s params, '%s' given."
+            % (fname, len(params), len(callParams))
+        )
 
     # First, push the current values on the stack.
     # To avoid pushing not existant values, NewSet is called before pushing.
     # Then, set parameters as global values.
     # At the end of the function, stack values are restored.
-    # 
-    # This way, the parameters become local.  
-
+    #
+    # This way, the parameters become local.
 
     existingParams = [name for name in params if name[1:] in macros.vars]
     pushStack = [["StackValue", name] for name in existingParams]
@@ -196,28 +206,26 @@ def callFunction(l):
     unset = [["UnSet", name[1:]] for name in params if name[1:] not in macros.vars]
 
     fullbody = pushStack + sets + body + popStack + unset
-  
+
     # we use the source line for each, but:
     # - there is no stack for error displaying; error just display current line in input
-    # - there is no saving of original file name 
-     
-    #lineNs = [funcList[fname].lineN] * (len(newSets) + len(pushStack) + len(sets))
-    #lineNs += range(funcList[fname].lineN+1, funcList[fname].lineN+1+len(funcList[fname].body))
-    #lineNs += [lineNs[-1]+1] * len(popStack)
+    # - there is no saving of original file name
+
+    # lineNs = [funcList[fname].lineN] * (len(newSets) + len(pushStack) + len(sets))
+    # lineNs += range(funcList[fname].lineN+1, funcList[fname].lineN+1+len(funcList[fname].body))
+    # lineNs += [lineNs[-1]+1] * len(popStack)
     ##print zip(lineNs, fullbody)
-    #lineNsS = ["{} ({}:{})".format(gbl.lineno, funcList[fname].fname, l) for l in lineNs]
-    #gbl.inpath.push(fullbody, lineNsS) 
+    # lineNsS = ["{} ({}:{})".format(gbl.lineno, funcList[fname].fname, l) for l in lineNs]
+    # gbl.inpath.push(fullbody, lineNsS)
 
     # push the converted body lines into the input stream
-    gbl.inpath.push(fullbody, [gbl.lineno] * len(fullbody)) 
+    gbl.inpath.push(fullbody, [gbl.lineno] * len(fullbody))
 
-    #print "=" * 80
-    #print fname
-    #print zip(params, callParams)
-    #print body
-    #print "=" * 80
+    # print "=" * 80
+    # print fname
+    # print zip(params, callParams)
+    # print body
+    # print "=" * 80
 
     if neomma.MMA.debug.debug:
-        dPrint ("Call: function '%s' expanded." % fname)
-
-
+        dPrint("Call: function '%s' expanded." % fname)

@@ -22,7 +22,7 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-# Plugin registration. 
+# Plugin registration.
 # plugin() is called by the PLUGIN command. It searchs and loads
 # the required plugin code and adds them to the command tables in parse.py.
 
@@ -37,7 +37,7 @@ from neomma.MMA.paths import plugPaths
 from neomma.MMA.common import *
 import neomma.MMA.parse
 from neomma.MMA.alloc import trkClasses
-import neomma.MMA.appdirs   # not mine, but it works!
+import neomma.MMA.appdirs  # not mine, but it works!
 
 # In python3 raw_input() has been renamed input()
 raw_input = input
@@ -53,10 +53,10 @@ entry = "plugin"
 prefix = "@"
 
 # these are for the macro funcs and for debug.
-plugList = []      # all loaded plugins
-simplePlugs = []   # simple funcs registered
-trackPlugs = []    # track funcs registered
-dataPlugs = []     # data plugs registered
+plugList = []  # all loaded plugins
+simplePlugs = []  # simple funcs registered
+trackPlugs = []  # track funcs registered
+dataPlugs = []  # data plugs registered
 
 # A list of entry points for the command line help
 # function. Each plugin should have a function printUsage().
@@ -70,43 +70,46 @@ permFile = None
 
 # This can be set to TRUE from the cmd line with -II
 # If set the security file is ignored.
-secOverRide=False
+secOverRide = False
 
 # For security we disable various load paths. These can
 # disabled via the Plugin Disable=... command. They can
 # not be enabled!
-tryLocal = True     # from the same dir as the current file
-tryDot = True       # from the users current dir
-tryPlugDir = True   # from the plugin directory
-plugsOff = False    # disable plug loading completely
+tryLocal = True  # from the same dir as the current file
+tryDot = True  # from the users current dir
+tryPlugDir = True  # from the plugin directory
+plugsOff = False  # disable plug loading completely
+
 
 def findPlugin(targ):
-    """ Search for the plugin. 
+    """Search for the plugin.
 
-        p - the plugin name (eg. hello)
+    p - the plugin name (eg. hello)
 
-        We search, in order, the following paths for the file hello/plugin.py
-    
-           - the users current directory
-           - the directory in which the current file being processed lives
-           - the plugin directories.
+    We search, in order, the following paths for the file hello/plugin.py
 
-           The search is case-insensitive.
+       - the users current directory
+       - the directory in which the current file being processed lives
+       - the plugin directories.
 
-        Returns - complete path to the directory containing "hello/plugin.py",
-                  and the module name (hello.plugin).
+       The search is case-insensitive.
+
+    Returns - complete path to the directory containing "hello/plugin.py",
+              and the module name (hello.plugin).
     """
 
-    plugEntry = "{}.{}".format(entry, 'py')
-    
+    plugEntry = "{}.{}".format(entry, "py")
+
     def matchName(d):
-        """ Find a directory entry in 'd' matching the plugin name """
+        """Find a directory entry in 'd' matching the plugin name"""
 
         if os.access(d, os.R_OK):  # skip non-exist dirs and ones we can't access
             if [b.upper() for b in os.listdir(d)].count(targ) > 1:
-                warning("Plugin: there are duplicate entries of '%s' in '%s'. This "
-                   "is most likly due to the same name with different cases. You "
-                   "should check and delete/rename one!" % (targ, d))
+                warning(
+                    "Plugin: there are duplicate entries of '%s' in '%s'. This "
+                    "is most likly due to the same name with different cases. You "
+                    "should check and delete/rename one!" % (targ, d)
+                )
 
             for a in os.listdir(d):
                 if a.lower() == targ.lower():
@@ -120,7 +123,7 @@ def findPlugin(targ):
 
     # 1. Current dir. If found convert to complete path
     if tryDot:
-        for dir in ('.', 'plugins'):
+        for dir in (".", "plugins"):
             mdir, modName = matchName(dir)
             if mdir:
                 return os.path.realpath(dir), mdir, modName
@@ -146,13 +149,14 @@ def findPlugin(targ):
 
     return None, None, None
 
-def hashfile(p):
-    """ Calculate a sha-256 hash value on a file. """
 
-    sha256 = hashlib.sha256(b'mmaIsWonderful')
+def hashfile(p):
+    """Calculate a sha-256 hash value on a file."""
+
+    sha256 = hashlib.sha256(b"mmaIsWonderful")
 
     try:
-        f = open(p, 'rb')
+        f = open(p, "rb")
     except:
         error("Plugin: Cannot open file '%s'." % p)
 
@@ -165,8 +169,9 @@ def hashfile(p):
 
     return sha256.hexdigest()
 
+
 def getPermission(path, name):
-    """ Check the file for plugin permissions."""
+    """Check the file for plugin permissions."""
 
     global permFile
 
@@ -175,8 +180,8 @@ def getPermission(path, name):
 
     # We need somewhere to store this registery. appdirs to the rescue!
     if not permFile:
-        cachePath = errorName = neomma.MMA.appdirs.user_data_dir('mma', 'Mellowood')
-        
+        cachePath = errorName = neomma.MMA.appdirs.user_data_dir("mma", "Mellowood")
+
         # Can we access the directory? If not, we first try to create
         # a mma directory (we're assuming that HOME/.config, HOME/.local/config,
         # or MMA/lib already exists.
@@ -187,13 +192,15 @@ def getPermission(path, name):
                 cachePath = None  # couldn't create directory, that's okay
 
         if not cachePath:
-            warning("Plugin: Can't create/access directory to store permission cache"
-                    " file at '%s'. You can still run the plugin, but permissions"
-                    " won't be saved." % errorName)
+            warning(
+                "Plugin: Can't create/access directory to store permission cache"
+                " file at '%s'. You can still run the plugin, but permissions"
+                " won't be saved." % errorName
+            )
 
         # We should have a complete path to our storage file.
         if cachePath:
-            permFile = os.path.join(cachePath, 'plugins.list')
+            permFile = os.path.join(cachePath, "plugins.list")
         else:
             permFile = None
 
@@ -204,7 +211,7 @@ def getPermission(path, name):
     if permFile:
         try:
             f = open(permFile)
-            f.readline()    # Read/discard comment line
+            f.readline()  # Read/discard comment line
             permlist = json.load(f)
             f.close()
         except:
@@ -213,26 +220,28 @@ def getPermission(path, name):
     # we have a valid permlist dictionary (or an empty one) in memory.
     # if the entries match, all's well
 
-    if path in permlist and  permlist[path] == sha:
-        return 
+    if path in permlist and permlist[path] == sha:
+        return
 
-    prettyPrint("PLUGIN: This file is attempting to load the plugin '%s'."
-                " As detailed in the documentation a plugin can run arbitrary"
-                " Python code and can be dangerous to your system."
-                " If you don't understand this, DO NOT"
-                " accept loading this plugin!"
-                " If you are sure you want to grant permission to load this plugin"
-                " press the <y> key followed by <Enter> to register; <o><Enter>"
-                " to permit running only once. Any other key combination"
-                " will terminate this run." % name)
+    prettyPrint(
+        "PLUGIN: This file is attempting to load the plugin '%s'."
+        " As detailed in the documentation a plugin can run arbitrary"
+        " Python code and can be dangerous to your system."
+        " If you don't understand this, DO NOT"
+        " accept loading this plugin!"
+        " If you are sure you want to grant permission to load this plugin"
+        " press the <y> key followed by <Enter> to register; <o><Enter>"
+        " to permit running only once. Any other key combination"
+        " will terminate this run." % name
+    )
     a = raw_input("       Your choice: ")
 
     # Just return. Don't bother to update the permissions table
-    if a == 'o':
+    if a == "o":
         return
 
     # Abort
-    if a != 'y':
+    if a != "y":
         error("Plugin: permission refused for loading plugin.")
 
     # update our permissions dictionary and save it for the next run.
@@ -240,19 +249,22 @@ def getPermission(path, name):
     if permFile:
         permlist[path] = sha
         try:
-            f = open(permFile, 'w')
+            f = open(permFile, "w")
             f.write("### MMA plugin permissions. DO NOT EDIT ###\n")
             json.dump(permlist, f)
             f.close()
         except:
-            warning("Plugin: Could not access/create file '%s'. Plugin permission has"
-                    " not been saved. You probably have a"
-                    " permissions problem on this system." % permFile)
+            warning(
+                "Plugin: Could not access/create file '%s'. Plugin permission has"
+                " not been saved. You probably have a"
+                " permissions problem on this system." % permFile
+            )
+
 
 def registerPlugin(p):
-    """ Search for the plugin and register any found methods. """
+    """Search for the plugin and register any found methods."""
 
-    if p.startswith(prefix):  # user has option to use 
+    if p.startswith(prefix):  # user has option to use
         p = p[1:]
 
     pdir, mdir, modName = findPlugin(p.upper())
@@ -268,15 +280,15 @@ def registerPlugin(p):
         warning("Plugin '%s' attempted reload ignored." % modName)
         return
 
-    initMod = os.path.join(pdir, os.path.split(mdir)[0],  "__init__.py")
+    initMod = os.path.join(pdir, os.path.split(mdir)[0], "__init__.py")
     if not os.path.exists(initMod):
         error("Plugin needs an empty file '%s'." % initMod)
 
     if os.stat(initMod).st_size > 0:
         error("Plugin '__init__.py' module must be empty (security concern).")
 
-    plugPath = os.path.join(pdir,mdir)
-    plugName =  modName.split('.')[0]
+    plugPath = os.path.join(pdir, mdir)
+    plugName = modName.split(".")[0]
 
     getPermission(plugPath, plugName)
 
@@ -285,18 +297,22 @@ def registerPlugin(p):
     # module function will find our plugs.
     sys.path.insert(0, pdir)
 
-    # load the module. 
+    # load the module.
     if plugName in sys.modules.keys():
-        error("Plugin: the name of the '%s' is already is use by the system. "
-              "Most likely MMA has already imported a module by that name. "
-              "Please rename the package!" % plugName)
+        error(
+            "Plugin: the name of the '%s' is already is use by the system. "
+            "Most likely MMA has already imported a module by that name. "
+            "Please rename the package!" % plugName
+        )
     try:
         e = importlib.import_module(modName, package=None)
     except ImportError as err:
-        error("Plugin: Error loading module '%s'. Python is reporting '%s'. "
-              "Most likely there is an Import statement in the module which is not working." %
-              (modName, str(err)))
-        
+        error(
+            "Plugin: Error loading module '%s'. Python is reporting '%s'. "
+            "Most likely there is an Import statement in the module which is not working."
+            % (modName, str(err))
+        )
+
     # restore old sys.path.
     sys.path.pop(0)
 
@@ -305,10 +321,7 @@ def registerPlugin(p):
 
     cmdName = prefix + p.upper()
 
-    e.plugInName = {'name': plugName,
-                    'dir':  pdir,
-                    'path': plugPath,
-                    'cmd':  cmdName   }
+    e.plugInName = {"name": plugName, "dir": pdir, "path": plugPath, "cmd": cmdName}
 
     try:
         neomma.MMA.parse.simpleFuncs[cmdName] = e.run
@@ -317,7 +330,7 @@ def registerPlugin(p):
             dPrint("Plugin: %s simple plugin RUN registered." % cmdName.title())
     except:
         pass
-    
+
     try:
         neomma.MMA.parse.trackFuncs[cmdName] = e.trackRun
         trackPlugs.append(cmdName)
@@ -325,7 +338,7 @@ def registerPlugin(p):
             dPrint("Plugin: %s track plugin TrackRun registered." % cmdName.title())
     except:
         pass
-    
+
     try:
         neomma.MMA.parse.dataFuncs[cmdName] = e.dataRun
         dataPlugs.append(cmdName)
@@ -333,7 +346,7 @@ def registerPlugin(p):
             dPrint("Plugin: %s data plugin DataRun registered." % cmdName.title())
     except:
         pass
-    
+
     try:
         plugHelp[cmdName] = e.printUsage
     except:
@@ -343,9 +356,9 @@ def registerPlugin(p):
 
 
 def pluginHelp(p):
-    """ Called from options to print help message. This is called
-        ONLY from the MMA command line ... so no plugs have been
-        loaded. We attempt to find the plug, then call its help.
+    """Called from options to print help message. This is called
+    ONLY from the MMA command line ... so no plugs have been
+    loaded. We attempt to find the plug, then call its help.
     """
 
     cmd = registerPlugin(p)
@@ -357,7 +370,7 @@ def pluginHelp(p):
 
 
 def plugin(ln):
-    """ Search for, load and install requested plugin(s) """
+    """Search for, load and install requested plugin(s)"""
 
     global plugsOff, tryLocal, tryDot, tryPlugDir
 
@@ -369,16 +382,16 @@ def plugin(ln):
 
     ln, optpair = opt2pair(ln, toupper=True)  # get options
     for cmd, opt in optpair:
-        if cmd == 'DISABLE':
-            for o in opt.split(','):
+        if cmd == "DISABLE":
+            for o in opt.split(","):
                 a = o.upper()
-                if a == 'ALL':
+                if a == "ALL":
                     plugsOff = True
-                elif a  == 'LOCAL':
+                elif a == "LOCAL":
                     tryLocal = False
-                elif a == 'DOT':
+                elif a == "DOT":
                     tryDot = False
-                elif a == 'PLUGDIR':
+                elif a == "PLUGDIR":
                     tryPlugDir = False
                 else:
                     error("Plugin Disable: '%s' is an unknown or illegal option." % o)
@@ -402,5 +415,3 @@ def plugin(ln):
 
     for p in ln:
         registerPlugin(p)
-
-

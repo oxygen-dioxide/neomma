@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 Bob van der Poel <bob@mellowood.ca>
 
 """
+
 import json
 import os
 import time
@@ -29,16 +30,32 @@ import neomma.MMA.midiC
 import neomma.MMA.grooves
 
 from . import gbl
-from   neomma.MMA.common import *
+from neomma.MMA.common import *
 
 
 def docDrumNames(order):
-    """ Print LaTex table of drum names. """
+    """Print LaTex table of drum names."""
 
-    notenames = ['E\\flat', 'E', 'F', 'G\\flat', 'G', 'A\\flat',
-                 'A', 'B\\flat', 'B', 'C', 'D\\flat', 'D'] * 5
+    notenames = [
+        "E\\flat",
+        "E",
+        "F",
+        "G\\flat",
+        "G",
+        "A\\flat",
+        "A",
+        "B\\flat",
+        "B",
+        "C",
+        "D\\flat",
+        "D",
+    ] * 5
 
-    n = zip(neomma.MMA.midiC.drumNames, range(27, len(neomma.MMA.midiC.drumNames)+27), notenames)
+    n = zip(
+        neomma.MMA.midiC.drumNames,
+        range(27, len(neomma.MMA.midiC.drumNames) + 27),
+        notenames,
+    )
 
     if order == "a":
         for a, v, m in sorted(n):
@@ -50,7 +67,7 @@ def docDrumNames(order):
 
 
 def docCtrlNames(order):
-    """ Print LaTex table of MIDI controller names. """
+    """Print LaTex table of MIDI controller names."""
 
     n = zip(neomma.MMA.midiC.ctrlNames, range(len(neomma.MMA.midiC.ctrlNames)))
 
@@ -64,17 +81,17 @@ def docCtrlNames(order):
 
 
 def docInstNames(order):
-    """ Print LaTex table of instrument names. """
+    """Print LaTex table of instrument names."""
 
     n = zip(neomma.MMA.midiC.voiceNames, range(len(neomma.MMA.midiC.voiceNames)))
     if order == "a":
         for a, v in sorted(n):
-            a = a.replace('&', r'\&')
+            a = a.replace("&", r"\&")
             print("\\insline{{{}}} {{{}}}".format(a, v))
 
     else:
         for a, v in n:
-            a = a.replace('&', r'\&')
+            a = a.replace("&", r"\&")
             print("\\insline{{{}}} {{{}}}".format(v, a))
 
 
@@ -90,21 +107,21 @@ def docInstNames(order):
     Storage is done is in the following arrays.
 """
 
-fname     = ''
-author    = ""
-notes     = ""
-defs      = []
+fname = ""
+author = ""
+notes = ""
+defs = []
 variables = []
 
 
-def docAuthor(ln:list[str]):
+def docAuthor(ln: list[str]):
     global author
 
-    author = ' '.join(ln)
+    author = " ".join(ln)
 
 
-def docNote(ln:list[str]):
-    """ Add a doc line. """
+def docNote(ln: list[str]):
+    """Add a doc line."""
 
     global fname, notes
 
@@ -115,12 +132,12 @@ def docNote(ln:list[str]):
 
     fname = os.path.basename(gbl.inpath.fname)
     if notes:
-        notes += ' '
-    notes += ' '.join(ln)
+        notes += " "
+    notes += " ".join(ln)
 
 
-def docVars(ln:list[str]):
-    """ Add a VARIABLE line (docs vars used in lib file)."""
+def docVars(ln: list[str]):
+    """Add a VARIABLE line (docs vars used in lib file)."""
 
     global fname, variables
 
@@ -128,15 +145,15 @@ def docVars(ln:list[str]):
         return
 
     fname = os.path.basename(gbl.inpath.fname)
-    variables.append([ln[0], ' '.join(ln[1:])])
+    variables.append([ln[0], " ".join(ln[1:])])
 
 
-def docDefine(ln:list[str]):
-    """ Save a DEFGROOVE comment string.
+def docDefine(ln: list[str]):
+    """Save a DEFGROOVE comment string.
 
-        Entries are stored as a list. Each item in the list is
-        complete groove def looking like:
-        defs[ [ Name, Seqsize, Description, [ [TRACK,INST, [Sequences...] ]...]] ...]
+    Entries are stored as a list. Each item in the list is
+    complete groove def looking like:
+    defs[ [ Name, Seqsize, Description, [ [TRACK,INST, [Sequences...] ]...]] ...]
 
     """
 
@@ -146,14 +163,14 @@ def docDefine(ln:list[str]):
     if not gbl.createDocs:
         return
 
-    des = ' '.join(ln[1:])  
-    if not des[-1] in ".!?": # Add a '.' to the end of all descriptions
-        des += '.'
+    des = " ".join(ln[1:])
+    if not des[-1] in ".!?":  # Add a '.' to the end of all descriptions
+        des += "."
     l = [ln[0], gbl.seqSize, des]
     for a in sorted(gbl.tnames.keys()):
         c = gbl.tnames[a]
         if c.sequence and len(c.sequence) != c.sequence.count(None):
-            if c.vtype == 'DRUM':
+            if c.vtype == "DRUM":
                 v = [neomma.MMA.midiC.valueToDrum(x) for x in c.toneList]
             else:
                 v = [neomma.MMA.midiC.valueToInst(x) for x in c.voice]
@@ -164,16 +181,16 @@ def docDefine(ln:list[str]):
 
 
 def docDump():
-    """ Print the LaTex docs. """
+    """Print the LaTex docs."""
 
     global fname, author, notes, defs, variables
 
-    if gbl.createDocs == 1:    # latex docs
+    if gbl.createDocs == 1:  # latex docs
         if notes:
             notes = notes.replace("<P>", "\\\\[.5ex]")
             notes = notes.replace("<p>", "\\\\[.5ex]")
             if fname.endswith(gbl.EXT):
-                fname = '.'.join(fname.split('.')[:-1])
+                fname = ".".join(fname.split(".")[:-1])
             print("\\filehead{{{}}}{{{}}}\n".format(totex(fname), totex(notes)))
 
         if variables:
@@ -191,39 +208,45 @@ def docDump():
                     else:
                         alias = "Alias: %s" % alias
                 else:
-                    alias = ''
-                print("     \\instable{%s}{%s}{%s}{%s}{" % 
-                    (totex(l[0]), totex(l[2]), l[1], alias))
+                    alias = ""
+                print(
+                    "     \\instable{%s}{%s}{%s}{%s}{"
+                    % (totex(l[0]), totex(l[2]), l[1], alias)
+                )
                 for c, v, s in l[3:]:  # we ignore the seqence data here
                     print("       \\insline{{{}}}{{{}}}".format(c.title(), totex(v[0])))
                 print("     }")
 
-    elif gbl.createDocs == 2:    # html docs
+    elif gbl.createDocs == 2:  # html docs
         if notes:
-            print('<!-- Auto-Generated by MMA on: %s -->' % time.ctime())
-            print('<HTML>')
+            print("<!-- Auto-Generated by MMA on: %s -->" % time.ctime())
+            print("<HTML>")
             print('<BODY  BGCOLOR="#B7DFFF" Text=Black>')
             if fname.endswith(gbl.EXT):
-                fname = '.'.join(fname.split('.')[:-1])
+                fname = ".".join(fname.split(".")[:-1])
             print("<H1>%s</H1>" % fname.title())
             print("<P>%s" % notes)
 
         if variables:
             print("<P>")
-            print('<Table Border=3 CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="60%">')
-            print('  <TR><TD>')
-            print('    <H2> Variables </H2> ')
-            print('  </TD></TR>')
-            print('  <TR><TD>')
-            print('    <Table CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="100%">')
+            print(
+                '<Table Border=3 CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="60%">'
+            )
+            print("  <TR><TD>")
+            print("    <H2> Variables </H2> ")
+            print("  </TD></TR>")
+            print("  <TR><TD>")
+            print(
+                '    <Table CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="100%">'
+            )
             for l in variables:
                 print("       <TR>")
                 print("          <TD Valign=Top> <B> %s </B> </TD> " % l[0])
                 print("          <TD Valign=Top> %s </TD>" % l[1])
                 print("       </TR>")
-            print('    </Table>')
-            print('  </TD></TR>')
-            print('</Table>')
+            print("    </Table>")
+            print("  </TD></TR>")
+            print("</Table>")
 
         if defs:
             print("<ul>")
@@ -235,31 +258,43 @@ def docDump():
                 iname = os.path.basename(gbl.infile)
                 iname, ext = os.path.splitext(iname)
                 gfile = "{}_{}.html".format(iname, gg.lower())
-                print('<!-- GROOVE={} FILE={} SRC={} -->'.format(gg.lower(), gfile, gbl.infile))
-                print('<A Name=%s></a>' % gg)
-                print('<Table Border=3 CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="60%">')
-                print('  <TR><TD>')
-                print('    <H2> <A Href={}> {} </a> </H2> '.format(gfile, l[0]))
+                print(
+                    "<!-- GROOVE={} FILE={} SRC={} -->".format(
+                        gg.lower(), gfile, gbl.infile
+                    )
+                )
+                print("<A Name=%s></a>" % gg)
+                print(
+                    '<Table Border=3 CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="60%">'
+                )
+                print("  <TR><TD>")
+                print("    <H2> <A Href={}> {} </a> </H2> ".format(gfile, l[0]))
                 alias = neomma.MMA.grooves.getAlias(l[0])
                 if alias:
                     if len(alias) > 1:
                         ll = "Aliases"
                     else:
                         ll = "Alias"
-                    print(' <H4> {}: {} </H4>'.format(ll, alias))
+                    print(" <H4> {}: {} </H4>".format(ll, alias))
 
-                print('    {} <B>({})</B> '.format(l[2], l[1]))
-                print('  </TD></TR>')
-                print('  <TR><TD>')
-                print('    <Table CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="10%">')
-                for c,v,s in l[3:]:
-                    print("       <TR><TD> {} </TD> <TD> {} </TD></TR>".format(c.title(), v[0]))
-                print('    </Table>')
-                print('  </TD></TR>')
-                print('</Table>')
-            print('\n</Body></HTML>')
+                print("    {} <B>({})</B> ".format(l[2], l[1]))
+                print("  </TD></TR>")
+                print("  <TR><TD>")
+                print(
+                    '    <Table CELLSPACING=0 CELLPADDING=5 BGColor="#eeeeee" Width="10%">'
+                )
+                for c, v, s in l[3:]:
+                    print(
+                        "       <TR><TD> {} </TD> <TD> {} </TD></TR>".format(
+                            c.title(), v[0]
+                        )
+                    )
+                print("    </Table>")
+                print("  </TD></TR>")
+                print("</Table>")
+            print("\n</Body></HTML>")
 
-    elif gbl.createDocs == 3:    # sequence table
+    elif gbl.createDocs == 3:  # sequence table
         for l in defs:
             print("GROOVE %s" % l[0])
             print("DESCRIPTION %s" % l[2])
@@ -269,23 +304,23 @@ def docDump():
                 print("VOICE %s" % v)
                 print("SEQ %s" % s)
 
-    elif gbl.createDocs == 5:    # JSON
+    elif gbl.createDocs == 5:  # JSON
         doc = []
         print("JSON")
         for l in defs:
             groove = {
-                 "groove": l[0],
-                 "description": l[2],
-                 "size": l[1],
+                "groove": l[0],
+                "description": l[2],
+                "size": l[1],
             }
-            groove['tracks'] = [];
-            for c,v,s in l[3:]:
-                groove['tracks'].append({ "track": c, "voice": v, "sequence": s });
+            groove["tracks"] = []
+            for c, v, s in l[3:]:
+                groove["tracks"].append({"track": c, "voice": v, "sequence": s})
             doc.append(groove)
         print(json.dumps(doc, indent=1))
 
     elif gbl.createDocs == 99:  # creating entry for groove browser
-        for a, b in (("``", '"'), ("''", '"'), ('  ', ' ')):
+        for a, b in (("``", '"'), ("''", '"'), ("  ", " ")):
             notes = notes.replace(a, b)
         if not notes:
             notes = "No header available ... please add DOC to file"
@@ -303,16 +338,16 @@ def docDump():
     author = ""
 
 
-def totex(s:str) -> str:
-    """ Parse a string and quote tex stuff.
+def totex(s: str) -> str:
+    """Parse a string and quote tex stuff.
 
-        Also handles proper quotation style.
+    Also handles proper quotation style.
     """
 
     s = s.replace("$", r"\$")
     s = s.replace("*", "$*$")
     s = s.replace("_", "\\_")
-    #s = s.replace("\\", "\\\\")
+    # s = s.replace("\\", "\\\\")
     s = s.replace("#", "\\#")
     s = s.replace("&", "\\&")
     q = "``"
@@ -327,7 +362,7 @@ def totex(s:str) -> str:
 
 
 def htmlGraph(f):
-    """ Print (stdout) an html file representing a graph and details of the current groove."""
+    """Print (stdout) an html file representing a graph and details of the current groove."""
 
     global fname, author, notes, variables, defs
 
@@ -338,9 +373,9 @@ def htmlGraph(f):
             return "{},{}".format(x1, x2)
 
     def docol(lab, data):
-        if lab == '':
+        if lab == "":
             return
-        
+
         if not isinstance(data, list):
             data = [data]
         print("  <td width=50%> ")
@@ -348,7 +383,7 @@ def htmlGraph(f):
         if len(set(data)) == 1:
             print(str(data[0]))
         else:
-            print('&nbsp;&nbsp; '.join([str(x) for x in data]))
+            print("&nbsp;&nbsp; ".join([str(x) for x in data]))
         print("  </td>")
 
     def dorow(a, a1, b, b1):
@@ -363,8 +398,8 @@ def htmlGraph(f):
     author = ""
     desc = ""
 
-    if '/' in f:
-        u, f = f.rsplit('/', 1)
+    if "/" in f:
+        u, f = f.rsplit("/", 1)
         neomma.MMA.parse.usefile([u])
     neomma.MMA.grooves.groove([f])
 
@@ -374,11 +409,11 @@ def htmlGraph(f):
         if a[0].upper() == groove.upper():
             desc = a[2]
 
-    print('<!-- Auto-Generated by MMA on: %s -->' % time.ctime())
-    print('<HTML>')
+    print("<!-- Auto-Generated by MMA on: %s -->" % time.ctime())
+    print("<HTML>")
     print('<BODY  BGCOLOR="#B7DFFF" Text=Black>')
 
-    #if fname.endswith(gbl.EXT):
+    # if fname.endswith(gbl.EXT):
     #    fname='.'.join(fname.split('.')[:-1])
 
     print("<h2>File: %s</h2>" % fname)
@@ -398,7 +433,7 @@ def htmlGraph(f):
             print("          <TD Valign=Top> <B> %s </B> </TD> " % l[0])
             print("          <TD Valign=Top> %s </TD>" % l[1])
             print("       </TR>")
-        print('</Table>')
+        print("</Table>")
 
     for t in sorted(gbl.tnames.keys()):
         trk = gbl.tnames[t]
@@ -415,7 +450,7 @@ def htmlGraph(f):
         v = [str(int(x * 100)) for x in trk.volume]
         if trk.vtype != "DRUM":
             oct = [x // 12 for x in trk.octave]
-            dorow('Unify', trk.unify, "Octave", oct)
+            dorow("Unify", trk.unify, "Octave", oct)
         dorow("Volume", v, "Harmony", trk.harmony)
         v1 = [str(int(x * 100)) for x in trk.rSkip]
         v2 = [getAbsPair(int(x1 * 100), int(x2 * 100)) for x1, x2 in trk.rVolume]
@@ -426,20 +461,20 @@ def htmlGraph(f):
         else:
             v2 = "Off"
         dorow("Rtime", v1, "SeqRND", v2)
-        if trk.vtype == 'CHORD':
+        if trk.vtype == "CHORD":
             vv = trk.voicing.mode
-            v = 'Voicing'
+            v = "Voicing"
         else:
-            vv = v = ''
+            vv = v = ""
         strm = []
         for z in trk.strum:
             if z is None:
-                strm.append( "None")
+                strm.append("None")
             else:
-                strm.append( getAbsPair(z[0], z[1]))
+                strm.append(getAbsPair(z[0], z[1]))
         dorow("Strum", strm, v, vv)
         print("</Table>")
- 
+
         pointx = 2.5
         pointPerS = pointx * gbl.QperBar
         pointy = 5
@@ -447,12 +482,15 @@ def htmlGraph(f):
         boxy = pointy
 
         print(r'<div style="position:relative;background-color:#99bdf4;')
-        print(r'padding:0; border:.1em solid black; left:5em;')
+        print(r"padding:0; border:.1em solid black; left:5em;")
         print(r'height:{}em; width:{}em">'.format(boxy, boxx))
 
         if gbl.seqSize > 1:
             for a in range(1, gbl.seqSize):
-                print(r'<img style="position:absolute; bottom:0; left:%sem;' % (a * pointPerS))
+                print(
+                    r'<img style="position:absolute; bottom:0; left:%sem;'
+                    % (a * pointPerS)
+                )
                 print(r'width:.05em; height:%sem; border:.05em solid white"' % pointy)
                 print(r'src="../black.gif">')
 
@@ -461,13 +499,13 @@ def htmlGraph(f):
             if not s:
                 continue
             for p in s:
-                bwidth = p.duration * pointx * (trk.artic[a] / 100.) / gbl.BperQ 
-                if bwidth < .1:
-                    bwidth = .1
+                bwidth = p.duration * pointx * (trk.artic[a] / 100.0) / gbl.BperQ
+                if bwidth < 0.1:
+                    bwidth = 0.1
                 offset = (p.offset * pointx) // gbl.BperQ + (a * pointPerS)
-                if trk.vtype == 'CHORD' or trk.vtype == 'PLECTRUM':
+                if trk.vtype == "CHORD" or trk.vtype == "PLECTRUM":
                     # A plectrum track with all 0 volumes is a mute, so ignore.
-                    if trk.vtype == 'PLECTRUM' and sum(p.vol) == 0:
+                    if trk.vtype == "PLECTRUM" and sum(p.vol) == 0:
                         continue
                     ll = len(p.vol) - p.vol.count(0)
                     vol = sum(p.vol) // ll
@@ -475,12 +513,14 @@ def htmlGraph(f):
                     vol = p.vol
                 height = (vol * pointy) // 127
 
-                print(r'<img style="position:absolute; border:.02em solid red;bottom:0; ')
-                print(r'left:%sem; width:%sem; height:%sem"'  % ( offset, bwidth, height))
+                print(
+                    r'<img style="position:absolute; border:.02em solid red;bottom:0; '
+                )
+                print(r'left:%sem; width:%sem; height:%sem"' % (offset, bwidth, height))
                 print(r' src="../blue.gif">')
 
-        print(r'</div>')
+        print(r"</div>")
 
-    print('</Body></HTML>')
+    print("</Body></HTML>")
 
     sys.exit(0)

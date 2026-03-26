@@ -34,9 +34,9 @@ import neomma.MMA.auto
 import neomma.MMA.grooves
 import neomma.MMA.exits
 import neomma.MMA.debug
-from  neomma.MMA.safe_eval import safeEnv
+from neomma.MMA.safe_eval import safeEnv
 
-outfile = ''
+outfile = ""
 
 libPath = []
 libDirs = []
@@ -44,19 +44,20 @@ incPath = []
 plugPaths = []
 
 mmaStart = []
-mmaEnd   = []
-mmaRC    = None
+mmaEnd = []
+mmaRC = None
+
 
 def init():
-    """ Called from main. In mma.py we checked for known directories and
-        inserted the first found 'mma' directory into the sys.path list and
-        set MMAdir. Now, set the lib/inc/plug lists. ENV variables are inserted
-        at the beginning of each path.
+    """Called from main. In mma.py we checked for known directories and
+    inserted the first found 'mma' directory into the sys.path list and
+    set MMAdir. Now, set the lib/inc/plug lists. ENV variables are inserted
+    at the beginning of each path.
     """
 
     def testpaths(paths, msg):
-        """ Test validity of paths. No errors ...
-            hope user notices he/she buggered up
+        """Test validity of paths. No errors ...
+        hope user notices he/she buggered up
         """
         for t in paths:
             if not os.path.exists(t):
@@ -65,27 +66,27 @@ def init():
                 warning("{} '{}' is not a directory.".format(msg, t))
 
     # set libpath
-    t = safeEnv('MMA_LIBPATH')
+    t = safeEnv("MMA_LIBPATH")
     if t:
         t = t.split(os.pathsep)
     else:
         t = []
-    t.append(os.path.join(gbl.MMAdir, 'lib'))
+    t.append(os.path.join(gbl.MMAdir, "lib"))
     setLibPath(t, user=0)
     testpaths(libPath, "LIBRARY")
 
     # set incpath
-    t = safeEnv('MMA_INCPATH')
+    t = safeEnv("MMA_INCPATH")
     if t:
         t = t.split(os.pathsep)
     else:
         t = []
-    t.append(os.path.join(gbl.MMAdir, 'includes'))
+    t.append(os.path.join(gbl.MMAdir, "includes"))
     setIncPath(t)
     testpaths(incPath, "INCLUDE")
 
     # set plugpaths
-    t = safeEnv('MMA_PLUGPATH')
+    t = safeEnv("MMA_PLUGPATH")
     if t:
         t = t.split(os.pathsep)
     else:
@@ -95,12 +96,12 @@ def init():
     testpaths(plugPaths, "PLUGIN")
 
 
-
 ##################################
 # Set up the mma start/end paths
 
+
 def mmastart(ln):
-    """ Set/append to the mmastart list. """
+    """Set/append to the mmastart list."""
 
     if not ln:
         error("Use: MMAstart FILE [file...]")
@@ -111,8 +112,9 @@ def mmastart(ln):
     if neomma.MMA.debug.debug:
         dPrint("MMAstart set to: %s" % gbl.mmaStart)
 
+
 def mmaend(ln):
-    """ Set/append to the mmaend list. """
+    """Set/append to the mmaend list."""
 
     if not ln:
         error("Use: MMAend FILE [file...]")
@@ -123,28 +125,36 @@ def mmaend(ln):
     if neomma.MMA.debug.debug:
         dPrint("MMAend set to: %s" % gbl.mmaEnd)
 
+
 def setRC(f):
-    """ Set a rc file from the command line."""
-    
+    """Set a rc file from the command line."""
+
     global mmaRC
 
     mmaRC = f
 
+
 ######################################
 # process the RC, mmastart and mmaend files. Called from main.py
 
-def readRC():
-    """ Process all RC files. """
 
-    docOption = gbl.createDocs   # Disable doc printing for RC file
+def readRC():
+    """Process all RC files."""
+
+    docOption = gbl.createDocs  # Disable doc printing for RC file
     gbl.createDocs = 0
 
     if mmaRC:
         rcfiles = [mmaRC]
     else:
-        rcfiles = ('mmarc', 'c:\\mma\\mmarc',
-                   '~/.config/mma/mmarc', '~/.mmarc',
-                   '/usr/local/etc/mmarc', '/etc/mmarc')
+        rcfiles = (
+            "mmarc",
+            "c:\\mma\\mmarc",
+            "~/.config/mma/mmarc",
+            "~/.mmarc",
+            "/usr/local/etc/mmarc",
+            "/etc/mmarc",
+        )
 
     readDone = 0
     for i in rcfiles:
@@ -163,11 +173,11 @@ def readRC():
         gbl.lineno = -1
         warning("No RC file was found or processed")
 
-    gbl.createDocs = docOption   # Restore doc options
+    gbl.createDocs = docOption  # Restore doc options
 
 
 def dommaStart():
-    """ Process all the mma start files. """
+    """Process all the mma start files."""
 
     for f in mmaStart:
         fn = findIncFile(f)
@@ -175,11 +185,11 @@ def dommaStart():
             warning("MmaStart file '%s' not found/processed" % f)
         else:
             neomma.MMA.parse.parseFile(fn)
-        gbl.lineno = -1   # reset for real code
+        gbl.lineno = -1  # reset for real code
 
 
 def dommaEnd():
-    """ Process all the mma end files."""
+    """Process all the mma end files."""
 
     for f in mmaStart:
         fn = findIncFile(f)
@@ -187,7 +197,7 @@ def dommaEnd():
             warning("MmaStart file '%s' not found/processed" % f)
         else:
             neomma.MMA.parse.parseFile(fn)
-        gbl.lineno = -1   # reset for real code
+        gbl.lineno = -1  # reset for real code
 
 
 #######################################
@@ -195,7 +205,7 @@ def dommaEnd():
 
 
 def findIncFile(fn):
-    """ Find an INC file. Returns complete path or NULL."""
+    """Find an INC file. Returns complete path or NULL."""
 
     global incPath
 
@@ -208,7 +218,7 @@ def findIncFile(fn):
 
 
 def findLibFile(fn):
-    """ Find a LIB file. Returns complete path or NULL."""
+    """Find a LIB file. Returns complete path or NULL."""
 
     global libDirs
 
@@ -226,8 +236,9 @@ def findLibFile(fn):
 ##############################################
 # Set up the lib/inc paths
 
+
 def setLibPath(ln, user=1):
-    """ Set the LibPath variable.  """
+    """Set the LibPath variable."""
 
     global libPath, libDirs
     libPath = []
@@ -240,11 +251,11 @@ def setLibPath(ln, user=1):
     expandLib(user)
 
     if neomma.MMA.debug.debug:
-        dPrint("LibPath set: %s" % ' '.join(libPath))
+        dPrint("LibPath set: %s" % " ".join(libPath))
 
-    
+
 def expandLib(user=0):
-    """ Expand the library paths from the list in libdir. """
+    """Expand the library paths from the list in libdir."""
 
     global libPath, libDirs
 
@@ -256,7 +267,7 @@ def expandLib(user=0):
     for f in libPath:
         for root, dir, files in os.walk(f):
             if root not in libDirs:
-                if os.path.basename(root) == 'stdlib':
+                if os.path.basename(root) == "stdlib":
                     scount += 1
                     if not user:  # system init, stdlib goes first
                         libDirs.insert(0, root)
@@ -273,11 +284,11 @@ def expandLib(user=0):
     neomma.MMA.auto.grooveDB = []
 
     if neomma.MMA.debug.debug:
-        dPrint("LibPath expansion set to: %s" % ' '.join(libDirs))
+        dPrint("LibPath expansion set to: %s" % " ".join(libDirs))
 
 
 def setIncPath(ln):
-    """ Set the IncPath variable.  """
+    """Set the IncPath variable."""
 
     global incPath
     incPath = []
@@ -287,14 +298,15 @@ def setIncPath(ln):
         incPath.append(f)
 
     if neomma.MMA.debug.debug:
-        dPrint("IncPath set: %s" % ' '.join(incPath))
+        dPrint("IncPath set: %s" % " ".join(incPath))
+
 
 ###########################################
 # Output pathname
 
 
 def setOutPath(ln):
-    """ Set the Outpath variable. """
+    """Set the Outpath variable."""
 
     if not ln:
         gbl.outPath = ""
@@ -310,15 +322,15 @@ def setOutPath(ln):
 
 
 def createOutfileName(extension):
-    """ Create the output filename.
+    """Create the output filename.
 
-       Called from the mainline, below and from lyrics karmode.
+    Called from the mainline, below and from lyrics karmode.
 
-       If outfile was specified on cmd line then leave it alone.
-       Otherwise ...
-         1. strip off the extension if it is .mma,
-         2. append .mid
-   """
+    If outfile was specified on cmd line then leave it alone.
+    Otherwise ...
+      1. strip off the extension if it is .mma,
+      2. append .mid
+    """
 
     global outfile
 
@@ -344,16 +356,15 @@ def createOutfileName(extension):
 ##############################################
 # Set up the plugin paths
 
+
 def setPlugPath(ln):
-    """ Set the plugPath variable.  """
+    """Set the plugPath variable."""
 
     global plugPaths
     plugPaths = []
 
     for l in ln:
-        plugPaths.append( neomma.MMA.file.fixfname(l) )
+        plugPaths.append(neomma.MMA.file.fixfname(l))
 
     if neomma.MMA.debug.debug:
-        dPrint("PlugPath set: %s" % ' '.join(plugPaths))
-      
-
+        dPrint("PlugPath set: %s" % " ".join(plugPaths))

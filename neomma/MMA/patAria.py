@@ -35,9 +35,9 @@ from neomma.MMA.pat import PC, Pgroup
 
 
 class Aria(PC):
-    """ Pattern class for an aria (auto-melody) track. """
+    """Pattern class for an aria (auto-melody) track."""
 
-    vtype = 'ARIA'
+    vtype = "ARIA"
     notes = []
     selectDir = [1]
     noteptr = 0
@@ -46,29 +46,31 @@ class Aria(PC):
     deplete = [0]
 
     def setSeqSize(self):
-        """ Expand existing pattern list. """
+        """Expand existing pattern list."""
 
         self.deplete = seqBump(self.deplete)
         PC.setSeqSize(self)
 
     def restoreGroove(self, gname):
-        """ Grooves are not saved/restored for aria tracks. But, seqsize is honored! """
+        """Grooves are not saved/restored for aria tracks. But, seqsize is honored!"""
         self.setSeqSize()
 
     def saveGroove(self, gname):
-        """ No save done for grooves. """
+        """No save done for grooves."""
         pass
 
     def getPgroup(self, ev):
-        """ Get group for aria pattern.
+        """Get group for aria pattern.
 
-            Fields - start, length, velocity
+        Fields - start, length, velocity
 
         """
 
         if len(ev) != 3:
-            error("%s: There must be n groups of 3 in a pattern definition, "
-                  "not <%s>" % (self.name, ' '.join(ev)))
+            error(
+                "%s: There must be n groups of 3 in a pattern definition, "
+                "not <%s>" % (self.name, " ".join(ev))
+            )
 
         a = Pgroup()
 
@@ -79,7 +81,7 @@ class Aria(PC):
         return a
 
     def setScaletype(self, ln):
-        """ Set scale type. """
+        """Set scale type."""
 
         ln = lnExpand(ln, "%s ScaleType" % self.name)
         tmp = []
@@ -87,15 +89,17 @@ class Aria(PC):
 
         for n in ln:
             n = n.upper()
-            if n.endswith('-'):
+            if n.endswith("-"):
                 dlpt.append(1)
                 n = n[:-1]
             else:
                 dlpt.append(0)
 
-            if not n in ('CHROMATIC', 'SCALE', 'AUTO', 'CHORD', 'KEY'):
-                error("%s ScaleType: Only Chromatic, Scale (Auto) Chord "
-                      "and Key are valid." % self.name)
+            if not n in ("CHROMATIC", "SCALE", "AUTO", "CHORD", "KEY"):
+                error(
+                    "%s ScaleType: Only Chromatic, Scale (Auto) Chord "
+                    "and Key are valid." % self.name
+                )
             tmp.append(n)
 
         self.scaleType = seqBump(tmp)
@@ -106,15 +110,15 @@ class Aria(PC):
             msg = ["Set %s ScaleType:" % self.name]
             for a in self.scaleType:
                 msg.append(a)
-            dPrint(' '.join(msg))
+            dPrint(" ".join(msg))
 
     def setDirection(self, ln):
-        """ Set direction for melody creation.
+        """Set direction for melody creation.
 
-            This function replaces the pattern function of the same name ...
-            the command name is shared, the function is different. Note we
-            need to use a different storage name as well since
-            self.direction is managed in the PC class.
+        This function replaces the pattern function of the same name ...
+        the command name is shared, the function is different. Note we
+        need to use a different storage name as well since
+        self.direction is managed in the PC class.
         """
 
         if not len(ln):
@@ -122,15 +126,21 @@ class Aria(PC):
 
         self.selectDir = []
         for a in ln:
-            if set(a.upper()) == set('R'):    # is direction 'r', 'rr', 'rrr', etc.
+            if set(a.upper()) == set("R"):  # is direction 'r', 'rr', 'rrr', etc.
                 if len(a) > 4:
-                    error("%s Direction: too much randomness"
-                          "(Maximum of 4 r's, got %d)." % (self.name, len(a)))
+                    error(
+                        "%s Direction: too much randomness"
+                        "(Maximum of 4 r's, got %d)." % (self.name, len(a))
+                    )
                 self.selectDir.append(a.upper())
-            else:   # not random, has to be an integer -4 ... 4
+            else:  # not random, has to be an integer -4 ... 4
                 a = stoi(a, "Expecting integer value or 'r', 'rr', 'rrr' or 'rrrr'.")
                 if a < -4 or a > 4:
-                    error("{} Direction: args must be 'r' or -4 to 4, not '{}'".format(self.name, a))
+                    error(
+                        "{} Direction: args must be 'r' or -4 to 4, not '{}'".format(
+                            self.name, a
+                        )
+                    )
                 self.selectDir.append(a)
 
         self.restart()
@@ -139,14 +149,14 @@ class Aria(PC):
             msg = ["Set %s Direction:" % self.name]
             for a in self.selectDir:
                 msg.append(str(a))
-            dPrint(' '.join(msg))
+            dPrint(" ".join(msg))
 
     def restart(self):
         self.ssvoice = -1
         self.notes = []
 
     def trackBar(self, pattern, ctable):
-        """ Do the aria bar.
+        """Do the aria bar.
 
         Called from self.bar()
 
@@ -168,23 +178,26 @@ class Aria(PC):
             # Generate notelist if nesc. Note that in the keysig, scale and
             # range funcs restart() is called ... self.notes is reset.
 
-            if stype == 'CHORD' and (not self.notes or self.lastChord != thisChord):
+            if stype == "CHORD" and (not self.notes or self.lastChord != thisChord):
                 notelist = ct.chord.noteList
                 self.notes = []
 
-            elif stype == 'CHROMATIC' and (not self.notes or self.lastChord != thisChord):
+            elif stype == "CHROMATIC" and (
+                not self.notes or self.lastChord != thisChord
+            ):
                 notelist = [ct.chord.rootNote + x for x in range(0, 12)]
                 self.notes = []
 
-            elif stype == 'KEY' and not self.notes:
+            elif stype == "KEY" and not self.notes:
                 k = keySig.getKeysig()
                 ch, t = k.split()
-                if t.lower() == 'minor':
+                if t.lower() == "minor":
                     ch += "m"
                 notelist = list(neomma.MMA.chords.ChordNotes(ch).scaleList)
 
-            elif (stype == 'SCALE' or stype == 'AUTO') and \
-                    (not self.notes or self.lastChord != thisChord):
+            elif (stype == "SCALE" or stype == "AUTO") and (
+                not self.notes or self.lastChord != thisChord
+            ):
                 notelist = list(ct.chord.scaleList)
                 self.notes = []
 
@@ -202,7 +215,7 @@ class Aria(PC):
 
                 if chrange > 0 and chrange < 1:  # for fractional scale lengths
                     chrange = int(len(notelist) * chrange)
-                    if chrange < 2:   # important, must be at least 2 notes in a scale
+                    if chrange < 2:  # important, must be at least 2 notes in a scale
                         chrange = 2
                     for a in notelist[:chrange]:
                         self.notes.append(a + o)
@@ -223,7 +236,6 @@ class Aria(PC):
                 self.noteptr += a
 
             if self.noteptr >= len(self.notes):
-
                 if a > 0:
                     self.noteptr = 0
                 else:
@@ -249,7 +261,9 @@ class Aria(PC):
                 notelist = []
 
             if self.harmony[sc]:
-                h = neomma.MMA.harmony.harmonize(self.harmony[sc], note, ct.chord.noteList)
+                h = neomma.MMA.harmony.harmonize(
+                    self.harmony[sc], note, ct.chord.noteList
+                )
                 harmlist = list(zip(h, [p.vol * self.harmonyVolume[sc]] * len(h)))
             else:
                 harmlist = []

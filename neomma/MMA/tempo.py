@@ -41,48 +41,44 @@ import neomma.MMA.midi
 
 timeTable: dict[str, tuple[float, tuple[float, ...]]] = {
     # duple times
-    '2/2': (4,    (1, 3)),
-    '2/4': (2,    (1, 2)),
-    '6/4': (6,    (1, 4)),
-    '6/8': (6,    (1, 4)),   # need this way to keep compatible with 'stdpats68'
-
+    "2/2": (4, (1, 3)),
+    "2/4": (2, (1, 2)),
+    "6/4": (6, (1, 4)),
+    "6/8": (6, (1, 4)),  # need this way to keep compatible with 'stdpats68'
     # triple
-    '3/2': (6,    (1, 3, 5)),
-    '3/4': (3,    (1, 2, 3)),
-    '3/8': (1.5,  (1, 1.5, 2)),
-    '9/8': (4.5,  (1, 2.5, 4)),
-
+    "3/2": (6, (1, 3, 5)),
+    "3/4": (3, (1, 2, 3)),
+    "3/8": (1.5, (1, 1.5, 2)),
+    "9/8": (4.5, (1, 2.5, 4)),
     # quadruple
-    '4/4': (4,    (1, 2, 3, 4) ),
-    '12/8':(6,    (1, 2.5, 4, 5.5)),
-
+    "4/4": (4, (1, 2, 3, 4)),
+    "12/8": (6, (1, 2.5, 4, 5.5)),
     # quintuple
-    '5/4': (5,    (1, 2, 3, 4, 5) ),
-    '5/8': (2.5,  (1, 1.5, 2, 2.5, 3 ) ),
-
+    "5/4": (5, (1, 2, 3, 4, 5)),
+    "5/8": (2.5, (1, 1.5, 2, 2.5, 3)),
     # septuple
-    '7/4': (7,    (1, 2, 3, 4, 5, 6, 7) )
- }
+    "7/4": (7, (1, 2, 3, 4, 5, 6, 7)),
+}
 
-def setTime(ln:list) -> None:
-    """ Set the 'time' value. This is NOT a time sig, it
-        is the number of quarters/beat.
 
-        We do restrict the time setting to the range of 1..12.
-        No particular reason, but we do need some limit? Certainly
-        it has to be greater than 0.
+def setTime(ln: list) -> None:
+    """Set the 'time' value. This is NOT a time sig, it
+    is the number of quarters/beat.
+
+    We do restrict the time setting to the range of 1..12.
+    No particular reason, but we do need some limit? Certainly
+    it has to be greater than 0.
     """
 
-    
-    tabList:list[float] = []
-    defaultTabs = (1,2,3,4,5,6,7,8,9,10,11,12)
+    tabList: list[float] = []
+    defaultTabs = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
     sigSet = False
 
     ln, options = opt2pair(ln, toupper=True)
 
     for cmd, opt in options:
-        if cmd == 'TABS':
-            tabList = [ stof(i) for i in opt.split(',')]
+        if cmd == "TABS":
+            tabList = [stof(i) for i in opt.split(",")]
             if tabList != sorted(tabList):
                 error("Time: Tabs must be in order, not %s." % tabList)
             if len(tabList) != len(set(tabList)):
@@ -99,10 +95,10 @@ def setTime(ln:list) -> None:
     # is this a timesig?
 
     n = ln[0]
-    if n.upper() == 'COMMON':
-        n = '4/4'
-    elif n.upper() == 'CUT':
-        n = '2/2'
+    if n.upper() == "COMMON":
+        n = "4/4"
+    elif n.upper() == "CUT":
+        n = "2/2"
 
     if n in timeTable:
         i = timeTable[n]
@@ -112,9 +108,11 @@ def setTime(ln:list) -> None:
             tabList = list(i[1])
         sigSet = True
     else:
-        if '/' in n:  # unknown time sig
-            error("Time: Unknown timesignature '%s'. You may need "
-                  "to set TIME and TIMESIG separately." % n)
+        if "/" in n:  # unknown time sig
+            error(
+                "Time: Unknown timesignature '%s'. You may need "
+                "to set TIME and TIMESIG separately." % n
+            )
         time = stof(n)
 
         if time < 1 or time > 12:
@@ -125,40 +123,46 @@ def setTime(ln:list) -> None:
     origTime = gbl.QperBar
     if origTime != time:
         gbl.QperBar = time
-        gbl.barLen =  int(gbl.QperBar * gbl.BperQ)
+        gbl.barLen = int(gbl.QperBar * gbl.BperQ)
 
         # Time changes zap all predfined sequences
 
         for a in gbl.tnames.values():
             if a.riff:
-                warning("Time: Change from %s to %s deleting %s riffs." %
-                        (origTime, n, a.name))
+                warning(
+                    "Time: Change from %s to %s deleting %s riffs."
+                    % (origTime, n, a.name)
+                )
                 a.riff = []
             a.clearSequence()
 
     if not tabList:
-        tabList = [1,2,3,4,5,6,7,8,9,10,11,12][:int(gbl.QperBar)]
+        tabList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12][: int(gbl.QperBar)]
 
     # need to do this after setting time.
-    if (tabList[-1]-1) * gbl.BperQ >= gbl.barLen:
-        error("Time: Last tab must be < %s, not '%s'." %
-              (float(gbl.barLen/gbl.BperQ)+1, tabList[-1]))
+    if (tabList[-1] - 1) * gbl.BperQ >= gbl.barLen:
+        error(
+            "Time: Last tab must be < %s, not '%s'."
+            % (float(gbl.barLen / gbl.BperQ) + 1, tabList[-1])
+        )
 
     setChordTabs(tabList)
 
     if neomma.MMA.debug.debug:
         if sigSet:
-            sig =  "TimeSig %s " % timeSig.getAscii()
+            sig = "TimeSig %s " % timeSig.getAscii()
         else:
-            sig = ''
-        dPrint ("Time: Time %s %sTabs=%s." %
-               (gbl.QperBar, sig,  ','.join([str(x) for x in tabList])))
-        
-    
-def tempo(ln):
-    """ Set tempo.
+            sig = ""
+        dPrint(
+            "Time: Time %s %sTabs=%s."
+            % (gbl.QperBar, sig, ",".join([str(x) for x in tabList]))
+        )
 
-        Note: All tempo stuff is inserted into the meta track.
+
+def tempo(ln):
+    """Set tempo.
+
+    Note: All tempo stuff is inserted into the meta track.
     """
 
     startOffset = 0
@@ -170,21 +174,25 @@ def tempo(ln):
     # Parse off options
 
     for cmd, opt in opts:
-        if cmd == 'OFFSET':
-            startOffset = stotick(opt, 'B', "TEMPO Offset: '%s' is not recognized."
-                                  % opt) // gbl.BperQ
+        if cmd == "OFFSET":
+            startOffset = (
+                stotick(opt, "B", "TEMPO Offset: '%s' is not recognized." % opt)
+                // gbl.BperQ
+            )
             if startOffset < 0:
                 error("TEMPO Offset: Must be => 0, not '%s'" % startOffset)
 
-        elif cmd == 'RESTORE':
-            restore = stotick(opt, 'B', "TEMPO Restore: '%s' is not recognized."
-                                  % opt) + gbl.tickOffset
+        elif cmd == "RESTORE":
+            restore = (
+                stotick(opt, "B", "TEMPO Restore: '%s' is not recognized." % opt)
+                + gbl.tickOffset
+            )
             print(restore, opt, gbl.tickOffset)
             if restore < 0:
                 error("TEMPO Restore: Must be => 0, not '%s'" % restore)
 
         else:
-           error("Tempo '%s' is an unknown command." % cmd)
+            error("Tempo '%s' is an unknown command." % cmd)
 
     if not ln or len(ln) > 2:
         error("Tempo: Use [*,+,-]BperM [BARS]")
@@ -193,42 +201,50 @@ def tempo(ln):
 
     a = ln[0][0]
     if a in "+-*":
-        v = stof(ln[0][1:], "Tempo: Expecting value for rate adjustment, not '%s'" % ln[0])
-        if a == '-':
+        v = stof(
+            ln[0][1:], "Tempo: Expecting value for rate adjustment, not '%s'" % ln[0]
+        )
+        if a == "-":
             v = gbl.tempo - v
-        elif a == '+':
+        elif a == "+":
             v += gbl.tempo
-        elif a == '*':
+        elif a == "*":
             v *= gbl.tempo
 
     else:
         v = stof(ln[0], "Tempo: Expecting rate, not '%s'" % ln[0])
-        
+
     if v <= 1:
         error("Tempo: Value must be greater than 1.")
 
     # is this immediate or over time?
 
     if len(ln) == 1:
-        gbl.tempo = int(v) 
+        gbl.tempo = int(v)
 
         gbl.mtrks[0].addTempo(gbl.tickOffset + startOffset, gbl.tempo)
         lastChange = gbl.tickOffset + startOffset
 
         if neomma.MMA.debug.debug:
-            dPrint("Tempo: Set to {}, offset={} beats".format(gbl.tempo, startOffset/gbl.BperQ))
+            dPrint(
+                "Tempo: Set to {}, offset={} beats".format(
+                    gbl.tempo, startOffset / gbl.BperQ
+                )
+            )
 
-    else:              # Do a tempo change over bar count
-        numbeats = stotick(ln[1], 'B', "TEMPO Offset: '%s' is not recognized."
-                                  % ln[1]) // gbl.BperQ
+    else:  # Do a tempo change over bar count
+        numbeats = (
+            stotick(ln[1], "B", "TEMPO Offset: '%s' is not recognized." % ln[1])
+            // gbl.BperQ
+        )
 
         if numbeats < 1:
             error("Tempo: Beat count must be greater than 0")
 
         # Vary the rate in the meta track
 
-        tincr = (v - gbl.tempo) / float(numbeats)    # incr per beat
-        bstart = gbl.tickOffset + startOffset            # start
+        tincr = (v - gbl.tempo) / float(numbeats)  # incr per beat
+        bstart = gbl.tickOffset + startOffset  # start
         boff = 0
         tempo = gbl.tempo
 
@@ -241,23 +257,26 @@ def tempo(ln):
         if tempo != v:
             gbl.mtrks[0].addTempo(bstart + boff, int(v))
 
-        lastChange = bstart+boff
+        lastChange = bstart + boff
 
         gbl.tempo = int(v)
 
         if neomma.MMA.debug.debug:
-            dPrint("Tempo: Set future value to %s over %s beats" %
-                (int(tempo), numbeats))
+            dPrint(
+                "Tempo: Set future value to %s over %s beats" % (int(tempo), numbeats)
+            )
 
     # Restore the original tempo after specified beats.
     if restore:
         gbl.mtrks[0].addTempo(restore, origTempo)
-        gbl.tempo = origTempo   # not really right, this tempo will be in effect later
+        gbl.tempo = origTempo  # not really right, this tempo will be in effect later
         lastChange = restore
         if neomma.MMA.debug.debug:
-            dPrint("Tempo: Restored to %s in %s beats" %
-               (origTempo, (restore-gbl.tickOffset)/gbl.BperQ))
-        
+            dPrint(
+                "Tempo: Restored to %s in %s beats"
+                % (origTempo, (restore - gbl.tickOffset) / gbl.BperQ)
+            )
+
     if gbl.tempo <= 0:
         error("Tempo: Setting must be greater than 0.")
 
@@ -266,31 +285,35 @@ def tempo(ln):
 
     for p, v in neomma.MMA.midi.tempoChanges:
         if p > lastChange:
-            warning("Tempo change may be invalid since there are more changes after this point.")
+            warning(
+                "Tempo change may be invalid since there are more changes after this point."
+            )
             break
 
-def beatAdjust(ln):
-    """ Delete or insert some beats into the sequence.
 
-        This just adjusts the current song position. Nothing is
-        lost or added to the actual file.
+def beatAdjust(ln):
+    """Delete or insert some beats into the sequence.
+
+    This just adjusts the current song position. Nothing is
+    lost or added to the actual file.
     """
 
     if len(ln) != 1:
         error("BeatAdjust: Expecting single value.")
 
-    adj = stotick(ln[0], 'B', "BeatAdjust: Expecting a value (not %s)." % ln[0])
+    adj = stotick(ln[0], "B", "BeatAdjust: Expecting a value (not %s)." % ln[0])
     gbl.tickOffset += adj
-    gbl.totTime += (adj / gbl.BperQ) / gbl.tempo   # adjust total time
+    gbl.totTime += (adj / gbl.BperQ) / gbl.tempo  # adjust total time
 
     if neomma.MMA.debug.debug:
         dPrint("BeatAdjust: inserted {} ticks at bar {}.".format(adj, gbl.barNum + 1))
 
+
 def cut(ln):
-    """ Insert a all-note-off into ALL tracks. """
+    """Insert a all-note-off into ALL tracks."""
 
     if not len(ln):
-        ln = ['0']
+        ln = ["0"]
 
     if len(ln) != 1:
         error("Cut: Expecting single offset or empty argument.")
@@ -312,15 +335,17 @@ def cut(ln):
 
 
 def trackCut(name, ln):
-    """ Insert a ALL NOTES OFF at the given offset. """
+    """Insert a ALL NOTES OFF at the given offset."""
 
     if not len(ln):
-        ln = ['0']
+        ln = ["0"]
 
     if len(ln) != 1:
         error("Cut %s: Offset missing." % name)
 
-    offset = stof(ln[0], "Cut {}: Expecting value, (not '{}') for offset.".format(name, ln[0]))
+    offset = stof(
+        ln[0], "Cut {}: Expecting value, (not '{}') for offset.".format(name, ln[0])
+    )
 
     if offset < -gbl.QperBar or offset > gbl.QperBar:
         warning("Cut {}: {} is a large beat offset".format(name, offset))
@@ -343,7 +368,7 @@ def trackCut(name, ln):
 
 
 def fermata(ln):
-    """ Apply a fermata timing to the specified beat. """
+    """Apply a fermata timing to the specified beat."""
 
     if len(ln) != 3:
         error("Fermata: use 'offset' 'duration' 'adjustment'")
@@ -390,7 +415,7 @@ def fermata(ln):
     # Also, delete any tempo changes found in the miditrack in our range.
 
     tempos = []
-    tcmd = packBytes((0xff, 0x51, 0x03))   # midi TEMPO
+    tcmd = packBytes((0xFF, 0x51, 0x03))  # midi TEMPO
     mt = gbl.mtrks[0].miditrk  # The meta track
 
     # 1st we copy existing tempos into a new list
@@ -409,7 +434,7 @@ def fermata(ln):
     oldTempo = gbl.tempo
     newTempo = gbl.tempo
 
-    for f, t in tempos:   # f==offsets, t==encoded tempos
+    for f, t in tempos:  # f==offsets, t==encoded tempos
         if f <= moff:
             oldTempo = 60000000 // byte3ToInt(t)
         if f >= moff and f <= mend:
@@ -427,33 +452,33 @@ def fermata(ln):
     if offset < 0:
         for n, tr in gbl.mtrks.items():  # do each track
             if n <= 0:
-                continue        # skip meta track
+                continue  # skip meta track
 
             trk = gbl.mtrks[n].miditrk
             startEvents = []
             endEvents = []
 
-            for f in sorted(trk):          # all in this track (sort keeps orig order)
+            for f in sorted(trk):  # all in this track (sort keeps orig order)
                 if f > moff and f < mend:  # well, only in the fermata range
                     remain = []
-                    for ev in trk[f]:      # all events in the offset
-                        if not ev:         # skip empty events
+                    for ev in trk[f]:  # all events in the offset
+                        if not ev:  # skip empty events
                             continue
                         # Get event type. The [0:1] is needed to
                         # maintain this as a byte() for python3, otherwise
                         # py3 will think it's an int() and barfs
-                        evtype = unpack('B', ev[0:1])[0] >> 4
-                        if evtype == 0x9:         # note event
-                            if ev[2] == 0:    # off to end
+                        evtype = unpack("B", ev[0:1])[0] >> 4
+                        if evtype == 0x9:  # note event
+                            if ev[2] == 0:  # off to end
                                 endEvents.append(ev)
                             else:
                                 startEvents.append(ev)  # on to start
                             continue
-                        if evtype == 0xb or evtype == 0xc:  # program/controller change
-                            startEvents.append(ev)          # all to start (??)
+                        if evtype == 0xB or evtype == 0xC:  # program/controller change
+                            startEvents.append(ev)  # all to start (??)
                             continue
                         remain.append(ev)
-                    trk[f] = remain        # remaining events for this offset
+                    trk[f] = remain  # remaining events for this offset
 
             if startEvents:
                 if moff in trk:
@@ -468,8 +493,12 @@ def fermata(ln):
                     trk[mend] = endEvents
 
     if neomma.MMA.debug.debug:
-        dPrint("Fermata: Beat %s, Duration %s, Change %s, Bar %s" % 
-              (offset, dur, adj, gbl.barNum + 1))
+        dPrint(
+            "Fermata: Beat %s, Duration %s, Change %s, Bar %s"
+            % (offset, dur, adj, gbl.barNum + 1)
+        )
         if offset < 0:
-            dPrint("         NoteOn Events moved in tick range %s to %s" 
-                  % (moff + 1, mend - 1))
+            dPrint(
+                "         NoteOn Events moved in tick range %s to %s"
+                % (moff + 1, mend - 1)
+            )

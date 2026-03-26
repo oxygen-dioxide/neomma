@@ -38,8 +38,8 @@ slashPrinted = []  # for slash chord error message
 # Convert a roman numeral chord to standard notation
 
 
-def defChord(ln:list[str]):
-    """ Add a new chord type to the chords{} dict. """
+def defChord(ln: list[str]):
+    """Add a new chord type to the chords{} dict."""
 
     emsg = "DefChord needs NAME (NOTES) (SCALE)"
 
@@ -52,43 +52,39 @@ def defChord(ln:list[str]):
     if name in chordlist.keys():
         warning("Redefining chordtype '%s'" % name)
 
-    if '/' in name:
+    if "/" in name:
         error("A slash in not permitted in chord type name")
 
-    if '>' in name:
+    if ">" in name:
         error("A '>' in not permitted in chord type name")
 
-    ln = pextract(''.join(ln), '(', ')')
+    ln = pextract("".join(ln), "(", ")")
 
     if ln[0] or len(ln[1]) != 2:
         error(emsg)
 
-    def parse_note(v:str) -> int:
+    def parse_note(v: str) -> int:
         v_value = stoi(v, "Note offsets in chord must be integers, not '%s'" % v)
         if v_value < 0 or v_value > 24:
             error("Note offsets in chord must be 0..24, not '%s'" % v_value)
         return v_value
 
-    notestrs = ln[1][0].split(',')
+    notestrs = ln[1][0].split(",")
     if len(notestrs) < 2 or len(notestrs) > 8:
         error("There must be 2..8 notes in a chord, not '%s'" % len(notestrs))
-    notes = Enumerable(notestrs)\
-        .select(parse_note)\
-        .to_list()
-    
-    def parse_scale(v:str) -> int:
+    notes = Enumerable(notestrs).select(parse_note).to_list()
+
+    def parse_scale(v: str) -> int:
         v_value = stoi(v, "Scale offsets in chord must be integers, not '%s'" % v)
         if v_value < 0 or v_value > 24:
             error("Scale offsets in chord must be 0..24, not '%s'" % v_value)
         return v_value
 
-    scalestrs = ln[1][1].split(',')
+    scalestrs = ln[1][1].split(",")
     if len(scalestrs) != 7:
         error("There must be 7 offsets in chord scale, not '%s'" % len(scalestrs))
 
-    scale = Enumerable(scalestrs)\
-        .select(parse_scale)\
-        .to_list()
+    scale = Enumerable(scalestrs).select(parse_scale).to_list()
 
     chordlist[name] = Chord(notes, scale, "User Defined")
 
@@ -96,14 +92,15 @@ def defChord(ln:list[str]):
         dPrint("ChordType '{}', {}".format(name, chordlist[name]))
 
 
-def printChord(ln:list[str]):
-    """ Display the note/scale/def for chord(s). """
+def printChord(ln: list[str]):
+    """Display the note/scale/def for chord(s)."""
 
     for c in ln:
         try:
-            print("%s: %s %s  %s" % 
-                  (c, tuple(chordlist[c][0]),
-                   tuple(chordlist[c][1]), chordlist[c][2]))
+            print(
+                "%s: %s %s  %s"
+                % (c, tuple(chordlist[c][0]), tuple(chordlist[c][1]), chordlist[c][2])
+            )
         except KeyError:
             error("Chord '%s' is unknown. Use only the chord type (m, M, M7, ...)." % c)
 
@@ -117,25 +114,35 @@ def printChord(ln:list[str]):
 """
 
 cdAdjust = {
-    'Gb': -6,
-    'G' : -5,
-    'G#': -4, 'Ab':-4,
-    'A' : -3,
-    'A#': -2, 'Bb':-2,
-    'B' : -1, 'Cb':-1,
-    'B#':  0, 'C' : 0,
-    'C#': 1, 'Db': 1,
-    'D' : 2,
-    'D#': 3, 'Eb': 3,
-    'E' : 4, 'Fb': 4,
-    'E#': 5, 'F' : 5,
-    'F#': 6 }
+    "Gb": -6,
+    "G": -5,
+    "G#": -4,
+    "Ab": -4,
+    "A": -3,
+    "A#": -2,
+    "Bb": -2,
+    "B": -1,
+    "Cb": -1,
+    "B#": 0,
+    "C": 0,
+    "C#": 1,
+    "Db": 1,
+    "D": 2,
+    "D#": 3,
+    "Eb": 3,
+    "E": 4,
+    "Fb": 4,
+    "E#": 5,
+    "F": 5,
+    "F#": 6,
+}
 
 ### DON'T WRITE TO THIS. IT'S USED TO RESTORE ORIGINAL!
 cdAdjustOrig = copy.copy(cdAdjust)
 
-def chordAdjust(ln:list[str]):
-    """ Adjust the selected chord point(s) up/down one octave. """
+
+def chordAdjust(ln: list[str]):
+    """Adjust the selected chord point(s) up/down one octave."""
 
     global cdAdjust
 
@@ -145,24 +152,29 @@ def chordAdjust(ln:list[str]):
         error("ChordAdjust: Needs at least one argument.")
 
     for a in args:
-        if a.upper() == 'RESET':
+        if a.upper() == "RESET":
             cdAdjust = copy.copy(cdAdjustOrig)
 
         else:
             error("ChordAdjust: %s is not a valid argument." % a)
 
-
     for p, octave_str in opts:
-        octave = stoi(octave_str, "ChordAdjust: expecting integer (-1, 0 or 1), not '%s'" % octave_str)
+        octave = stoi(
+            octave_str,
+            "ChordAdjust: expecting integer (-1, 0 or 1), not '%s'" % octave_str,
+        )
         if octave not in (-1, 0, 1):
             error("ChordAdjust: '%s' is not a valid octave. Use 1, 0 or -1" % octave)
 
-        for pitch in p.upper().split(','):
+        for pitch in p.upper().split(","):
             if pitch not in cdAdjust:
-                error("ChordAdjust: '%s' is not a valid pitch. Chord names must be"
-                      " A..G and can be grouped in a list with ','s." % pitch)
+                error(
+                    "ChordAdjust: '%s' is not a valid pitch. Chord names must be"
+                    " A..G and can be grouped in a list with ','s." % pitch
+                )
 
             cdAdjust[pitch] = cdAdjustOrig[pitch] + (octave * 12)
+
 
 ###############################
 # Chord creation/manipulation #
@@ -170,7 +182,7 @@ def chordAdjust(ln:list[str]):
 
 
 class ChordNotes:
-    """ The Chord class creates and manipulates chords for neomma.MMA. The
+    """The Chord class creates and manipulates chords for neomma.MMA. The
     class is initialized with a call with the chord name. Eg:
 
     ch = ChordNotes("Am")
@@ -227,7 +239,7 @@ class ChordNotes:
                   ch.noteList == [0, 4, 7, 11, 15, 18]
                   ch.limit(4)
                   ch.noteList ==    [0, 4, 7, 11]
-                  
+
                   DROP option deletes specific itervals first:
                       chord  [0, 4, 7, 11, 15, 18]
                       limit(5, Drop=1) - [4, 7, 11, 15, 18]
@@ -239,8 +251,8 @@ class ChordNotes:
     ### Functions ###
     #################
 
-    def __init__(self, name:str):
-        """ Create a chord object. Pass the chord name as the only arg.
+    def __init__(self, name: str):
+        """Create a chord object. Pass the chord name as the only arg.
 
         NOTE: Chord names ARE case-sensitive!
 
@@ -263,44 +275,46 @@ class ChordNotes:
         """
 
         slash = None
-        wmessage = ''   # slash warning msg, builder needed for debug.rmShow
+        wmessage = ""  # slash warning msg, builder needed for debug.rmShow
         octave = 0
         inversion = 0
         polychord = None
         startingName = name
 
-        if name == 'z':
+        if name == "z":
             self.tonic = self.chordType = None
             self.noteListLen = 0
             self.notesList = []
             self.bnoteList = ()
             return
 
-        if '|' in name:
-            if name.count('|') > 1:
+        if "|" in name:
+            if name.count("|") > 1:
                 error("Polychord marker '|' can only be used once.")
 
-            name, polychord = name.split('|')
+            name, polychord = name.split("|")
 
-        if '/' in name and '>' in name:
+        if "/" in name and ">" in name:
             error("You cannot use both an inversion and a slash in the same chord")
 
-        if ':' in name:
-            name, barre_str = name.split(':', 1)
+        if ":" in name:
+            name, barre_str = name.split(":", 1)
             barre = stoi(barre_str, "Expecting integer after ':'")
             if barre < -127 or barre > 127:
-                error("Chord barres limited to -127 to 127 (more than about +/-20 is silly)")
+                error(
+                    "Chord barres limited to -127 to 127 (more than about +/-20 is silly)"
+                )
         else:
             barre = 0
 
-        if '>' in name:
-            name, inversion_str = name.split('>', 1)
+        if ">" in name:
+            name, inversion_str = name.split(">", 1)
             inversion = stoi(inversion_str, "Expecting integer after '>'")
             if inversion < -5 or inversion > 5:
                 error("Chord inversions limited to -5 to 5 (more seems silly)")
 
-        while name[0:1] in ['-', '+']:
-            if name[0] == '-':
+        while name[0:1] in ["-", "+"]:
+            if name[0] == "-":
                 octave -= 12
             else:
                 octave += 12
@@ -310,7 +324,7 @@ class ChordNotes:
 
         # we have just the name part. Save 'origname' for debug print
 
-        self.name = name = name.replace('&', 'b')
+        self.name = name = name.replace("&", "b")
 
         if not name:
             error("Empty chord name generated from '%s'." % startingName)
@@ -318,8 +332,8 @@ class ChordNotes:
         # Strip off the slash part of the chord. Use later
         # to do proper inversion.
 
-        if name.find('/') > 0:
-            name, slash = name.split('/')
+        if name.find("/") > 0:
+            name, slash = name.split("/")
 
         # Name stars with roman (I, V, i, v) then assume
         # rest of name is valid roman. Convert to "standard"
@@ -328,15 +342,15 @@ class ChordNotes:
             name = neomma.MMA.roman.convert(name)
 
         # Split chord name (A,B..) and type (minor, dim)
-        if name[1:2] in ('#b'):
+        if name[1:2] in ("#b"):
             tonic = name[0:2]
             ctype = name[2:]
         else:
             tonic = name[0:1]
             ctype = name[1:]
 
-        if not ctype:        # If no type, make it a Major
-            ctype = 'M'
+        if not ctype:  # If no type, make it a Major
+            ctype = "M"
 
         # Now we get the notes for this chord. Just based on the type.
         # Adjust it up/down for the tonic (c,d...)
@@ -364,15 +378,27 @@ class ChordNotes:
 
         # Do inversions if there is a valid slash notation.
 
-        if slash:   # convert Roman or Arabic to name of note from chord scale
-            if slash[0] in ('I', 'i', 'V', 'v') or slash[0].isdigit():
+        if slash:  # convert Roman or Arabic to name of note from chord scale
+            if slash[0] in ("I", "i", "V", "v") or slash[0].isdigit():
                 n = neomma.MMA.roman.rvalue(slash)
-                n = self.scaleList[n] % 12   # midi value 
+                n = self.scaleList[n] % 12  # midi value
 
-                slash = ('C', 'C#', 'D', 'D#', 'E', 'F',
-                         'F#', 'G', 'G#', 'A', 'A#', 'B')[n]
+                slash = (
+                    "C",
+                    "C#",
+                    "D",
+                    "D#",
+                    "E",
+                    "F",
+                    "F#",
+                    "G",
+                    "G#",
+                    "A",
+                    "A#",
+                    "B",
+                )[n]
             try:
-                r = cdAdjust[slash]    # r = -6 to 6
+                r = cdAdjust[slash]  # r = -6 to 6
             except KeyError:
                 error("The note '%s' in the slash chord is unknown" % slash)
 
@@ -386,12 +412,12 @@ class ChordNotes:
             c_roted = 0
             s = self.noteList
             for octave in [0, 12, 24]:
-                if r+octave in s:
-                    rot = s.index(r+octave)
+                if r + octave in s:
+                    rot = s.index(r + octave)
                     for i in range(rot):
-                        s.append(s.pop(0)+12)
+                        s.append(s.pop(0) + 12)
                     if s[0] >= 12:
-                        s = [v-12 for v in s]
+                        s = [v - 12 for v in s]
                     self.noteList = s
                     self.bnoteList = tuple(s)
                     self.rootNote = self.noteList[0]
@@ -400,16 +426,16 @@ class ChordNotes:
 
             # Check against the scale notes. If the note is in
             # the scale we rotate the scale to force the slash note
-            # to the root position. 
+            # to the root position.
             s_roted = 0
             s = list(self.scaleList)
             for octave in [0, 12, 24]:
-                if r+octave in s:
-                    rot = s.index(r+octave)
+                if r + octave in s:
+                    rot = s.index(r + octave)
                     for i in range(rot):
-                        s.append(s.pop(0)+12)
+                        s.append(s.pop(0) + 12)
                     if s[0] >= 12:
-                        s = [ v-12 for v in s ]
+                        s = [v - 12 for v in s]
                     self.scaleList = tuple(s)
                     s_roted = 1
                     break
@@ -418,10 +444,12 @@ class ChordNotes:
             # not an error ... but the note is ignored. So, print
             # a message and list out alternate chords to use.
             if not c_roted and not s_roted:
-                wmessage = "The slash chord note '%s' not in chord or scale '%s'" % \
-                         (slash, name)
+                wmessage = "The slash chord note '%s' not in chord or scale '%s'" % (
+                    slash,
+                    name,
+                )
 
-                t = "{}/{}".format(name, slash )
+                t = "{}/{}".format(name, slash)
                 if t not in slashPrinted:
                     note = r % 12
                     ll = []
@@ -430,15 +458,16 @@ class ChordNotes:
                             continue
                         # We need 'adj' to convert the chords from "C" to the current tonic.
                         adj = cdAdjust[self.tonic]
-                        if note in  [(x % 12) + adj for x in chordlist[c][0]]:
+                        if note in [(x % 12) + adj for x in chordlist[c][0]]:
                             ll.append("{}{}".format(self.tonic, c))
                     if ll:
-                        wmessage += "\nChords with '{}': {}".format(slash, ' '.join(sorted(ll)))
+                        wmessage += "\nChords with '{}': {}".format(
+                            slash, " ".join(sorted(ll))
+                        )
 
                     slashPrinted.append(t)  # only print this chord/slash once
                 if not neomma.MMA.debug.rmShow:
                     warning(wmessage)
-            
 
         if polychord:
             ctable = ChordNotes(polychord)
@@ -448,29 +477,30 @@ class ChordNotes:
             if len(self.noteList) > 8:
                 i = len(self.noteList)
                 self.noteList = self.noteList[:8]
-                warning("Polychord %s|%s has been truncated from %d to 8 notes." % \
-                        (name, polychord, i))
+                warning(
+                    "Polychord %s|%s has been truncated from %d to 8 notes."
+                    % (name, polychord, i)
+                )
             self.noteListLen = len(self.noteList)
             self.bnoteList = tuple(self.noteList)
 
         if neomma.MMA.debug.rmShow:  # Display roman debug (Debug=Roman)
             if slash:
-                a = '/' + slash
+                a = "/" + slash
             else:
-                a = ''
+                a = ""
             if wmessage:
-                a += '   ' + wmessage
+                a += "   " + wmessage
             dPrint(" %03s] %-09s -> %s%s" % (gbl.lineno, startingName, name, a))
 
     def reset(self):
-        """ Restores notes array to original, undoes mangling. """
+        """Restores notes array to original, undoes mangling."""
 
         self.noteList = list(self.bnoteList[:])
         self.noteListLen = len(self.noteList)
 
-
     def invert(self, n):
-        """ Apply an inversion to a chord.
+        """Apply an inversion to a chord.
 
         This does not reorder any notes, which means that the root note of
         the chord reminds in position 0. We just find that highest/lowest
@@ -481,11 +511,11 @@ class ChordNotes:
 
         if n:
             c = self.noteList[:]
-            while n > 0:        # Rotate up by adding 12 to lowest note
+            while n > 0:  # Rotate up by adding 12 to lowest note
                 n -= 1
                 c[c.index(min(c))] += 12
 
-            while n < 0:        # Rotate down, subtract 12 from highest note
+            while n < 0:  # Rotate down, subtract 12 from highest note
                 n += 1
                 c[c.index(max(c))] -= 12
 
@@ -493,15 +523,13 @@ class ChordNotes:
 
         return None
 
-
-
     def compress(self):
-        """ Compress a chord to one ocatve. """
+        """Compress a chord to one ocatve."""
 
         # Get the max value in the chord list. This is the
         # lowest note in the chord + 12. Note: use the unmodifed value bnoteList!
         mx = min(self.bnoteList) + 12
-        c=[]
+        c = []
         for n in self.noteList:
             if n > mx:
                 n -= 12
@@ -510,13 +538,11 @@ class ChordNotes:
         self.noteList = c
         return None
 
-
-
     def limit(self, v, mode, force):
-        """ Limit the number of notes in a chord. """
+        """Limit the number of notes in a chord."""
 
-        #z = self.noteList[:] # orig notes
-        
+        # z = self.noteList[:] # orig notes
+
         # Look for a matching note from the scale in the chord
         # By using remove() we only remove the 1st instance (a good thing)
         # Note: on a 3 note chord this could make it into 2 note chord.
@@ -526,7 +552,7 @@ class ChordNotes:
         #       a problem since we only remove the 1st match. Uuuggghhh!
         if mode and (v < self.noteListLen or force):
             try:
-                self.noteList.remove(self.scaleList[mode-1])
+                self.noteList.remove(self.scaleList[mode - 1])
                 self.noteListLen = len(self.noteList)
             except ValueError:
                 pass
@@ -536,49 +562,51 @@ class ChordNotes:
             self.noteList = self.noteList[:v]
             self.noteListLen = len(self.noteList)
 
-        #print (f"Dropmode={mode} Force={force} Transform{z}->{self.noteList}")
-        
+        # print (f"Dropmode={mode} Force={force} Transform{z}->{self.noteList}")
+
         return None
 
     def keycenter(self):
-        """ Rotate the chord notes until the tonic is close to
-            the keysig value. Note that keysig is set C=0, D=2, etc
-            which matches the note values in the noteList.
+        """Rotate the chord notes until the tonic is close to
+        the keysig value. Note that keysig is set C=0, D=2, etc
+        which matches the note values in the noteList.
         """
 
         key = keySig.keyNoteValue
         notes = self.noteList  # just a shorter variable name
 
-        nbelow=0
-        nabove=0
+        nbelow = 0
+        nabove = 0
 
         for n in notes:
-            if n<key: nbelow+=1
-            elif n>key: nabove+=1
+            if n < key:
+                nbelow += 1
+            elif n > key:
+                nabove += 1
 
-        if nbelow>nabove:
-            for a in range(nbelow-nabove-1): # this is 0,1 ... start of list
+        if nbelow > nabove:
+            for a in range(nbelow - nabove - 1):  # this is 0,1 ... start of list
                 notes[a] += 12
 
-        elif nbelow<nabove:
-            for a in range(1,nabove-nbelow):   # this should give 1,2 
-                notes[-a] -= 12                # and the - means end of list
+        elif nbelow < nabove:
+            for a in range(1, nabove - nbelow):  # this should give 1,2
+                notes[-a] -= 12  # and the - means end of list
 
         return None
 
     def key2center(self):
-        """ This is the same as 'key', but the 9th, 11th, etc. are not modified.
-            We do this by changing the note list so that 9th, etc. are deleted,
-            the 'key' function is called and the deleted notes are restored.
+        """This is the same as 'key', but the 9th, 11th, etc. are not modified.
+        We do this by changing the note list so that 9th, etc. are deleted,
+        the 'key' function is called and the deleted notes are restored.
         """
-        
+
         orig = self.noteList[:]
 
-        saved=[]
+        saved = []
         self.noteList = []
         root = orig[0]
-        for n in orig: 
-            if n >= root+12:
+        for n in orig:
+            if n >= root + 12:
                 saved.append(n)
             else:
                 self.noteList.append(n)
@@ -588,40 +616,40 @@ class ChordNotes:
         return None
 
     def rootkey(self):
-        """ Modify the chord so that the notes are all close to, but above, the 
-            root note (from the key sig).
+        """Modify the chord so that the notes are all close to, but above, the
+        root note (from the key sig).
         """
-        
+
         key = keySig.keyNoteValue
         new = []
 
-        for n in self.noteList: 
-            while n<0:
-                n+=12
-            while n>12:
-                n-=12
+        for n in self.noteList:
+            while n < 0:
+                n += 12
+            while n > 12:
+                n -= 12
 
-            if n-12 >= key:
-                new.append(n-12)
+            if n - 12 >= key:
+                new.append(n - 12)
             else:
                 new.append(n)
 
         self.noteList = new
 
     def center1(self, lastChord):
-        """ Descriptive comment needed here!!!! """
+        """Descriptive comment needed here!!!!"""
 
         def minDistToLast(x, lastChord):
-            dist=99
+            dist = 99
             for j in range(len(lastChord)):
-                if abs(x-lastChord[j]) < abs(dist):
-                    dist = x-lastChord[j]
+                if abs(x - lastChord[j]) < abs(dist):
+                    dist = x - lastChord[j]
             return dist
 
         def sign(x):
-            if (x>0):
+            if x > 0:
                 return 1
-            elif (x<0):
+            elif x < 0:
                 return -1
             else:
                 return 0
@@ -630,90 +658,82 @@ class ChordNotes:
         # (leave notes where they are if they are in the new chord as well).
 
         if lastChord:
-            ch=self.noteList
+            ch = self.noteList
 
             for i in range(len(ch)):
-
                 # minimize distance to last chord
 
                 oldDist = minDistToLast(ch[i], lastChord)
-                while abs(minDistToLast(ch[i] - sign(oldDist)*12,
-                                lastChord)) < abs(oldDist):
-                    ch[i] -= 12* sign(oldDist)
+                while abs(minDistToLast(ch[i] - sign(oldDist) * 12, lastChord)) < abs(
+                    oldDist
+                ):
+                    ch[i] -= 12 * sign(oldDist)
                     oldDist = minDistToLast(ch[i], lastChord)
 
         return None
 
     def center2(self, centerNote, noteRange):
-        """ Need COMMENT """
+        """Need COMMENT"""
 
-        ch=self.noteList
-        for i,v in enumerate(ch):
-
+        ch = self.noteList
+        for i, v in enumerate(ch):
             dist = v - centerNote
             if dist < -noteRange:
-                ch[i] = v + 12 * ( abs(dist) // 12+1 )
+                ch[i] = v + 12 * (abs(dist) // 12 + 1)
             if dist > noteRange:
-                ch[i] = v - 12 * ( abs(dist) // 12+1 )
-
+                ch[i] = v - 12 * (abs(dist) // 12 + 1)
 
         return None
 
-
     def drop2(self):
-        """ Take the 2nd note of the chord from the top and
-            lower it by one octave.
+        """Take the 2nd note of the chord from the top and
+        lower it by one octave.
         """
 
-        try:    # just in case some future chords are not long enuf (assume 2+)
+        try:  # just in case some future chords are not long enuf (assume 2+)
             self.noteList[-2] -= 12
         except:
             pass
         return None
 
     def drop2key(self):
-        """ Drop2 plus key rotate. """
-        
+        """Drop2 plus key rotate."""
+
         self.drop2()
         self.keycenter()
         return None
-        
+
     def drop3(self):
-        """ Take the 3rd note of the chord from the top
-            and lower it by one octave.
+        """Take the 3rd note of the chord from the top
+        and lower it by one octave.
         """
 
-        try: # just in case some future chords are not long enuf (assume 3+)
+        try:  # just in case some future chords are not long enuf (assume 3+)
             self.noteList[-3] -= 12
         except:
             pass
         return None
 
     def drop3key(self):
-        """ Drop3 and key rotate. """
+        """Drop3 and key rotate."""
 
         self.drop3()
         self.keycenter()
         return None
-    
+
     def drop23(self):
-        """ Combined Drop2 and Drop3. """
-        
+        """Combined Drop2 and Drop3."""
+
         self.drop2()
         self.drop3()
         return None
 
     def drop23key(self):
-        """ Drop2/3 and key rotate. """
+        """Drop2/3 and key rotate."""
 
         self.drop23()
         self.keycenter()
         return None
 
 
-
 ######## End of Chord class #####
-
-
-
-

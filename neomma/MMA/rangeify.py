@@ -28,18 +28,21 @@ values of '?' indicating un-numbered lines and the
 conversion of string values to integers.
 
 """
+
 from itertools import count, groupby
 
-def rangeify(l):
-    for i,v in enumerate(l):
-        try:
-            l[i]=int(v)
-        except ValueError:
-            l[i]=-987654321
 
-    G=(list(x) for _,x in groupby(l, lambda x,c=count(): next(c)-x))
-    ret = ", ".join("-".join(map(str,(g[0],g[-1])[:len(g)])) for g in G)
-    ret = ret.replace('-987654321', '?')
+def rangeify(l):
+    for i, v in enumerate(l):
+        try:
+            l[i] = int(v)
+        except ValueError:
+            l[i] = -987654321
+
+    G = (list(x) for _, x in groupby(l, lambda x, c=count(): next(c) - x))
+    ret = ", ".join("-".join(map(str, (g[0], g[-1])[: len(g)])) for g in G)
+    ret = ret.replace("-987654321", "?")
     return ret
 
-#print( rangeify(['1', '2', '?', '4', '?', '?', '4','5']))
+
+# print( rangeify(['1', '2', '?', '4', '?', '?', '4','5']))

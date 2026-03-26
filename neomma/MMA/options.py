@@ -27,17 +27,17 @@ import sys
 from . import gbl
 from neomma.MMA.common import *
 from neomma.MMA.macro import macros
+
 cmdSMF = None
 
 
 def setBarRange(v):
-    """ Set a range of bars to compile. This is the -B/b option."""
-    
+    """Set a range of bars to compile. This is the -B/b option."""
+
     if gbl.barRange:
         error("Only one -b or -B permitted.")
 
-    for ll in v.split(','):
-
+    for ll in v.split(","):
         l = ll.split("-")
 
         if len(l) == 2:
@@ -118,7 +118,8 @@ import click
 )
 @click.option("-d", "--debug", is_flag=True, help="Enable debugging messages")
 @click.option(
-    "-D", "--doc",
+    "-D",
+    "--doc",
     type=click.Choice(["keywords", "latex", "html", "json", "sequence", "grooves"]),
     help="Extract documentation: keywords, latex, html, json, sequence, grooves",
 )
@@ -146,9 +147,7 @@ import click
 @click.option(
     "-s", "--show-sequence", is_flag=True, help="Display Sequence info during run"
 )
-@click.option(
-    "-S", "--set-macro", multiple=True, help="Set macro 'var' to 'data'"
-)
+@click.option("-S", "--set-macro", multiple=True, help="Set macro 'var' to 'data'")
 @click.option(
     "-T", "--tracks", help="Limit generation to specified tracks (comma-separated)"
 )
@@ -165,33 +164,33 @@ import click
 @click.option("-v", "--version", is_flag=True, help="Display version number")
 @click.argument("infile", required=False)
 def cli(
-    bar_range:str,
-    bar_range_abs:str,
-    output:str,
-    init:str,
-    no_output:bool,
-    play:bool,
-    show_channels:bool,
-    debug:bool,
-    show_expanded:bool,
-    show_patterns:bool,
-    show_progress:bool,
-    show_sequence:bool,
-    show_bar_order:bool,
-    no_warnings:bool,
-    smf:str,
-    tracks:str,
-    groove_db:bool,
-    create_groove_db:bool,
-    doc:str,
-    tsplit:bool,
-    csplit:bool,
-    nocredit:bool,
-    syncstart:bool,
-    syncend:bool,
-    version:bool,
-    infile:str,
-    set_macro:list[str],
+    bar_range: str,
+    bar_range_abs: str,
+    output: str,
+    init: str,
+    no_output: bool,
+    play: bool,
+    show_channels: bool,
+    debug: bool,
+    show_expanded: bool,
+    show_patterns: bool,
+    show_progress: bool,
+    show_sequence: bool,
+    show_bar_order: bool,
+    no_warnings: bool,
+    smf: str,
+    tracks: str,
+    groove_db: bool,
+    create_groove_db: bool,
+    doc: str,
+    tsplit: bool,
+    csplit: bool,
+    nocredit: bool,
+    syncstart: bool,
+    syncend: bool,
+    version: bool,
+    infile: str,
+    set_macro: list[str],
 ):
     """MMA - Musical Midi Accompaniment.
 
@@ -251,7 +250,7 @@ def cli(
         import neomma.MMA.debug
 
         neomma.MMA.debug.cmdLineDebug("s")
-    
+
     for opt in set_macro:
         macros.setvar(opt.split("=", 1))
 

@@ -22,7 +22,7 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-version = "25.05.0"        # Version -- May/ 2025
+version = "25.05.0"  # Version -- May/ 2025
 
 """ A few globals are actually set in the calling stub, mma.py. This is
     done to make future ports and platform specific settings a bit easier.
@@ -35,8 +35,10 @@ version = "25.05.0"        # Version -- May/ 2025
     the form "gbl.MMAdir", etc.
 """
 import os
+
 MMAdir = os.path.dirname(os.path.dirname(__file__))
 import platform as platformlib
+
 platform = platformlib.system()
 
 """ mtrks is storage for the MIDI data as it is created.
@@ -60,7 +62,7 @@ tnames = {}
     now this is only used in -c reporting.
 """
 
-midiAssigns: dict[int,list[str]] = {}
+midiAssigns: dict[int, list[str]] = {}
 for c in range(0, 17):
     midiAssigns[c] = []
 
@@ -69,9 +71,9 @@ for c in range(0, 17):
     is inc/decremented.
 """
 
-midiAvail: list[int] = [0] * 17   # slots 0..16, slot 0 is not used.
+midiAvail: list[int] = [0] * 17  # slots 0..16, slot 0 is not used.
 
-deletedTracks: list[str] = []    # list of deleted tracks for -c report
+deletedTracks: list[str] = []  # list of deleted tracks for -c report
 
 """ This is a user constructed list of names/channels. The keys
     are names, data is a channel. Eg. midiChPrefs['BASS-SUS']==9
@@ -90,43 +92,43 @@ muteTracks: list[str] = []
 ############# String constants ####################
 
 
-EXT = ".mma"        # extension for song/lib files (STATIC).
+EXT = ".mma"  # extension for song/lib files (STATIC).
 
 
 ##############  Tempo, and other midi positioning.  #############
 
 
-BperQ       =  192    # midi ticks per quarter note (STATIC)
-Bper128     =  BperQ/16  # a 1/128 note. Used for small timings (STATIC)
-QperBar:float =  4      # Beats/bar, set with TIME (this is a fp value!)
-barLen      =  int(BperQ * QperBar)  # convenience (updated by TIME)
-tickOffset  =  0      # offset of current bar in ticks
-tempo       =  120    # current tempo
-seqSize     =  1      # variation sequence table size
-seqCount    =  0      # running count of variation
+BperQ = 192  # midi ticks per quarter note (STATIC)
+Bper128 = BperQ / 16  # a 1/128 note. Used for small timings (STATIC)
+QperBar: float = 4  # Beats/bar, set with TIME (this is a fp value!)
+barLen = int(BperQ * QperBar)  # convenience (updated by TIME)
+tickOffset = 0  # offset of current bar in ticks
+tempo = 120  # current tempo
+seqSize = 1  # variation sequence table size
+seqCount = 0  # running count of variation
 
-totTime     = 0.0     # running duration count in seconds
+totTime = 0.0  # running duration count in seconds
 
-transpose   =  0      # Transpose is global (ignored by drum tracks)
+transpose = 0  # Transpose is global (ignored by drum tracks)
 
-lineno      = -1      # used for error reporting
+lineno = -1  # used for error reporting
 
-barLabels: list[str] = []      # a list of bar (number) labels as encountered
-barNum      =  0      # Current line number
+barLabels: list[str] = []  # a list of bar (number) labels as encountered
+barNum = 0  # Current line number
 
-barPtrs     = {}      # for each bar, pointers to event start/end
+barPtrs = {}  # for each bar, pointers to event start/end
 
-outPath    =   ''      # Directory for MIDI file
-inpath     =   None    # input file
+outPath = ""  # Directory for MIDI file
+inpath = None  # input file
 
-midiFileType   = 1     # type 1 file, "MidiFile SMF" command can change to 0/1
-runningStatus  = 1     # running status enabled "MidiFile Running" changes to 0/1
+midiFileType = 1  # type 1 file, "MidiFile SMF" command can change to 0/1
+runningStatus = 1  # running status enabled "MidiFile Running" changes to 0/1
 
-inAllGrooves = False   # set if running an ALLGROOVES command
+inAllGrooves = False  # set if running an ALLGROOVES command
 
-encoding = 'cp1252'
-noCredit = False   # set to not have credits in midi file
-logFile = ''    # this is set if user wants logging to be buffered.
+encoding = "cp1252"
+noCredit = False  # set to not have credits in midi file
+logFile = ""  # this is set if user wants logging to be buffered.
 
 #############  Options. #############
 
@@ -136,20 +138,18 @@ logFile = ''    # this is set if user wants logging to be buffered.
     it hurts too much.
 """
 
-barRange: list[str]       =     []      # both -B and -b use this
+barRange: list[str] = []  # both -B and -b use this
 
 printProcessed = False  # command line flag -L sets this
 
-outfile        =     None
-infile         =     None  # file NAME, probably from CLI
-createDocs     =     0
-makeGrvDefs    =     0
+outfile = None
+infile = None  # file NAME, probably from CLI
+createDocs = 0
+makeGrvDefs = 0
 
-#splitOutput    =     None  # xtra sets to 'TRACKS' or 'CHANNELS'
-playFile       =     0       # set if we want to call a player
+# splitOutput    =     None  # xtra sets to 'TRACKS' or 'CHANNELS'
+playFile = 0  # set if we want to call a player
 
 # set if an exception is catching unknown chords
-# this is used by -xCHORDS 
+# this is used by -xCHORDS
 ignoreBadChords = False
-
-

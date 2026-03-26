@@ -22,7 +22,6 @@ Bob van der Poel <bob@mellowood.ca>
 
 """
 
-
 import neomma.MMA.notelen
 import neomma.MMA.harmony
 import neomma.MMA.ornament
@@ -33,20 +32,22 @@ from neomma.MMA.pat import PC, Pgroup
 
 
 class Bass(PC):
-    """ Pattern class for a bass track. """
+    """Pattern class for a bass track."""
 
-    vtype = 'BASS'
+    vtype = "BASS"
 
     def getPgroup(self, ev):
-        """ Get group for bass pattern.
+        """Get group for bass pattern.
 
-            Fields - start, length, note, volume
+        Fields - start, length, note, volume
 
         """
 
         if len(ev) != 4:
-            error("There must be n groups of 4 in a pattern definition, "
-                  "not <%s>" % ' '.join(ev))
+            error(
+                "There must be n groups of 4 in a pattern definition, "
+                "not <%s>" % " ".join(ev)
+            )
 
         a = Pgroup()
 
@@ -58,28 +59,28 @@ class Bass(PC):
         offset = ev[2]
 
         # move leading +/- to end of string (leading +/- is an option)
-        while offset[0:1] in ['-', '+']:
+        while offset[0:1] in ["-", "+"]:
             offset = offset[1:] + offset[:1]
 
         # grab digit(s) for the offset into the scale (we use base 1)
         point = 0
-        while(offset[point:point+1].isdigit()): 
+        while offset[point : point + 1].isdigit():
             point += 1
-        n = int(offset[0:point])   # from 0..point are all "valid" digits
+        n = int(offset[0:point])  # from 0..point are all "valid" digits
         if n < 1:
             error("Note offset in Bass must be greater that 0, not '%s'." % n)
         while n > 7:
             n -= 7
             a.addoctave += 12
         a.noteoffset = n - 1
-        
+
         # grab accidental (#,S,s or &,B,b) .. no double sharp/flat
         emsg = offset[point:]
-        n = offset[point:point+1]
-        if n == '#' or n == 'S': 
+        n = offset[point : point + 1]
+        if n == "#" or n == "S":
             a.accidental = 1
             point += 1
-        elif n == 'B' or n == '&':
+        elif n == "B" or n == "&":
             a.accidental = -1
             point += 1
         else:
@@ -87,12 +88,14 @@ class Bass(PC):
 
         # Trailing octave modifiers
         for n in offset[point:]:
-            if n == '+':
+            if n == "+":
                 a.addoctave += 12
-            elif n == '-':
+            elif n == "-":
                 a.addoctave -= 12
             else:
-                error("Only '- + # b &' are permitted after a noteoffset, not '%s'" % emsg)
+                error(
+                    "Only '- + # b &' are permitted after a noteoffset, not '%s'" % emsg
+                )
 
         # and, finally, the volume
         a.vol = stoi(ev[3], "Note volume in Bass definition not int")
@@ -103,7 +106,7 @@ class Bass(PC):
         self.ssvoice = -1
 
     def trackBar(self, pattern, ctable):
-        """ Do the bass bar.
+        """Do the bass bar.
 
         Called from self.bar()
 
@@ -113,7 +116,7 @@ class Bass(PC):
 
         for p in pattern:
             ct = self.getChordInPos(p.offset, ctable)
-            
+
             if ct.bassZ:
                 continue
 
@@ -125,15 +128,21 @@ class Bass(PC):
                 notelist = []
 
             if self.harmony[sc]:
-                h = neomma.MMA.harmony.harmonize(self.harmony[sc], note, ct.chord.noteList)
+                h = neomma.MMA.harmony.harmonize(
+                    self.harmony[sc], note, ct.chord.noteList
+                )
                 harmlist = list(zip(h, [p.vol * self.harmonyVolume[sc]] * len(h)))
             else:
                 harmlist = []
 
             offset = p.offset
-            if self.ornaments['type']:
-                offset = neomma.MMA.ornament.doOrnament(self, notelist,
-                                        self.getChordInPos(offset, ctable).chord.scaleList, p)
+            if self.ornaments["type"]:
+                offset = neomma.MMA.ornament.doOrnament(
+                    self,
+                    notelist,
+                    self.getChordInPos(offset, ctable).chord.scaleList,
+                    p,
+                )
                 notelist = []
 
             self.sendChord(notelist + harmlist, p.duration, offset)

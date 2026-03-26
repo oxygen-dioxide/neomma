@@ -38,7 +38,6 @@ import neomma.MMA.debug
 
 
 class Vtable:
-
     def __init__(self):
         self.table = {}
 
@@ -48,10 +47,10 @@ class Vtable:
         for n in sorted(self.table.keys()):
             l.append("{}={}".format(n.title(), self.table[n]))
 
-        return ' '.join(l)
+        return " ".join(l)
 
     def create(self, ln):
-        """ Set a name/alias for voice translation, called from parser. """
+        """Set a name/alias for voice translation, called from parser."""
 
         if not ln:
             self.table = {}
@@ -68,10 +67,13 @@ class Vtable:
             self.table[v] = a
 
         if neomma.MMA.debug.debug:
-            dPrint("Voice Translations: %s" % ' '.join(["{}={}".format(v, a) for v, a in opts]))
+            dPrint(
+                "Voice Translations: %s"
+                % " ".join(["{}={}".format(v, a) for v, a in opts])
+            )
 
     def get(self, name):
-        """ Return a translation or original. """
+        """Return a translation or original."""
 
         name = name.upper()
         try:
@@ -79,7 +81,8 @@ class Vtable:
         except KeyError:
             return name
 
-vtable = Vtable()            # Create single class instance.
+
+vtable = Vtable()  # Create single class instance.
 
 
 """ This is just like the Vtable, but it is used for DRUM TONES. We use
@@ -89,7 +92,6 @@ vtable = Vtable()            # Create single class instance.
 
 
 class Dtable:
-
     def __init__(self):
         self.table = {}
 
@@ -97,13 +99,17 @@ class Dtable:
 
         l = []
         for n in sorted(self.table.keys()):
-            l.append("{}={}".format(neomma.MMA.midiC.valueToDrum(n),
-                                neomma.MMA.midiC.valueToDrum(self.table[n])))
+            l.append(
+                "{}={}".format(
+                    neomma.MMA.midiC.valueToDrum(n),
+                    neomma.MMA.midiC.valueToDrum(self.table[n]),
+                )
+            )
 
-        return ' '.join(l)
+        return " ".join(l)
 
     def set(self, ln):
-        """ Set a name/alias for drum tone translation, called from parser. """
+        """Set a name/alias for drum tone translation, called from parser."""
 
         if not ln:
             self.table = {}
@@ -129,14 +135,23 @@ class Dtable:
             self.table[v1] = a1
 
         if neomma.MMA.debug.debug:
-            dPrint("TONETR Translations: %s" % 
-                  ' '.join(["{}({})={}".format(v, neomma.MMA.midiC.drumToValue(v), 
-                                           neomma.MMA.midiC.drumToValue(a)) for v, a in opts]))
-
+            dPrint(
+                "TONETR Translations: %s"
+                % " ".join(
+                    [
+                        "{}({})={}".format(
+                            v,
+                            neomma.MMA.midiC.drumToValue(v),
+                            neomma.MMA.midiC.drumToValue(a),
+                        )
+                        for v, a in opts
+                    ]
+                )
+            )
 
     def get(self, name):
-        """ Return a translation or original. Note that this also does
-            validation of 'name'. It is called from patDrum and patSolo.
+        """Return a translation or original. Note that this also does
+        validation of 'name'. It is called from patDrum and patSolo.
         """
 
         v = neomma.MMA.midiC.drumToValue(name)
@@ -145,7 +160,7 @@ class Dtable:
             if neomma.MMA.midiC.instToValue(name) >= 0 and name[0].isalpha():
                 emsg = "(Note: %s is a valid TONE name.)" % name
             else:
-                emsg = ''
+                emsg = ""
             error("Drum Tone '{}' not defined. {}".format(name, emsg))
 
         try:
@@ -164,7 +179,6 @@ dtable = Dtable()
 
 
 class VoiceVolTable:
-
     def __init__(self):
         self.table = {}
 
@@ -173,10 +187,10 @@ class VoiceVolTable:
         for n in sorted(self.table.keys()):
             l.append("{}={}".format(neomma.MMA.midiC.valueToInst(n), self.table[n]))
 
-        return ' '.join(l)
+        return " ".join(l)
 
     def set(self, ln):
-        """ Set a name/alias for voice volume adjustment, called from parser. """
+        """Set a name/alias for voice volume adjustment, called from parser."""
 
         if not ln:
             self.table = {}
@@ -198,26 +212,31 @@ class VoiceVolTable:
 
             a = stoi(a)
             if a < 1 or a > 200:
-                error("VOICEVOLTR: adjustments must be in range 1 to 200, not '%s'." % a)
+                error(
+                    "VOICEVOLTR: adjustments must be in range 1 to 200, not '%s'." % a
+                )
 
-            self.table[val] = a / 100.
+            self.table[val] = a / 100.0
 
         if neomma.MMA.debug.debug:
-            dPrint("VOICEVOLTR: %s" % ' '.join(["{}={}".format(v.upper(), a) for v, a in opts]))
+            dPrint(
+                "VOICEVOLTR: %s"
+                % " ".join(["{}={}".format(v.upper(), a) for v, a in opts])
+            )
 
     def get(self, v, vol):
-        """ Return an adjusted value or original. """
+        """Return an adjusted value or original."""
 
         try:
             return vol * self.table[v]
         except:
             return vol
 
+
 voiceVolTable = VoiceVolTable()
 
 
 class DrumVolTable:
-
     def __init__(self):
         self.table = {}
 
@@ -227,10 +246,10 @@ class DrumVolTable:
         for n in sorted(self.table.keys()):
             l.append("{}={}".format(neomma.MMA.midiC.valueToDrum(n), self.table[n]))
 
-        return ' '.join(l)
+        return " ".join(l)
 
     def set(self, ln):
-        """ Set a name/alias for drumtone volume adjustment, called from parser. """
+        """Set a name/alias for drumtone volume adjustment, called from parser."""
 
         if not ln:
             self.table = {}
@@ -254,20 +273,27 @@ class DrumVolTable:
             if a < 1 or a > 200:
                 error("DRUMVOLTR: adjustments must be in range 1 to 200, not '%s'." % a)
 
-            self.table[val] = a / 100.
+            self.table[val] = a / 100.0
 
         if neomma.MMA.debug.debug:
-            dPrint("DRUMVOLTR: %s" %
-                  ' '.join(["{}={}".format(neomma.MMA.midiC.valueToDrum(val), a) for v, a in opt]))
-
+            dPrint(
+                "DRUMVOLTR: %s"
+                % " ".join(
+                    [
+                        "{}={}".format(neomma.MMA.midiC.valueToDrum(val), a)
+                        for v, a in opt
+                    ]
+                )
+            )
 
     def get(self, v, vol):
-        """ Return an adjusted value or original. """
+        """Return an adjusted value or original."""
 
         try:
             return vol * self.table[v]
 
-        except:         # not the best, but any errors just return the orignal volume.
+        except:  # not the best, but any errors just return the orignal volume.
             return vol
+
 
 drumVolTable = DrumVolTable()

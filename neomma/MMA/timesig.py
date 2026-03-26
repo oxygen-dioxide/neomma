@@ -28,48 +28,47 @@ proper time sigs for correct operation. So, here you go.
 
 from . import gbl
 import neomma.MMA.midi
-from   neomma.MMA.common import *
+from neomma.MMA.common import *
+
 
 class TimeSig:
-    """ Track and set the current time signature.
+    """Track and set the current time signature.
 
-        Timesigs are completely optional and are inserted into
-        the MIDI file by addTimeSig(). MMA routines ignore timesig
-        settings.
+    Timesigs are completely optional and are inserted into
+    the MIDI file by addTimeSig(). MMA routines ignore timesig
+    settings.
 
-        NOTE: The actual func to place a timesig meta into the midi 
-              stream is not here. It's part of the Mtrk() class.
+    NOTE: The actual func to place a timesig meta into the midi
+          stream is not here. It's part of the Mtrk() class.
     """
 
     def __init__(self):
-        """ Initialze to null value, user will never set to this."""
+        """Initialze to null value, user will never set to this."""
 
         self.lastsig = (None, None)
 
-
     def create(self, nn, dd):
-        """ Set timesig. If no change from last value, ignore. """
+        """Set timesig. If no change from last value, ignore."""
 
         if self.lastsig == (nn, dd):
             return
 
         cc = 48  # apparently clocks per beat, don't understand so just use default
-        bb = 8   # number of 32nd notes in quarter. Is it ever not 8?
+        bb = 8  # number of 32nd notes in quarter. Is it ever not 8?
         gbl.mtrks[0].addTimeSig(gbl.tickOffset, nn, dd, cc, bb)
         self.lastsig = (nn, dd)
 
-
     def setSig(self, ln):
-        """ Set the midi time signature from parser. """
+        """Set the midi time signature from parser."""
 
         if len(ln) == 1:
             a = ln[0].upper()
-            if a == 'COMMON':
-                ln = ('4', '4')
-            elif a == 'CUT':
-                ln = ('2', '2')
-            elif '/' in ln[0]:
-                ln = ln[0].split('/',1)
+            if a == "COMMON":
+                ln = ("4", "4")
+            elif a == "CUT":
+                ln = ("2", "2")
+            elif "/" in ln[0]:
+                ln = ln[0].split("/", 1)
 
         if len(ln) != 2:
             error("TimeSig: Usage (numerator denominator) or ('cut' or 'common')")
@@ -80,28 +79,29 @@ class TimeSig:
             error("Timesig: Numerator must be 1..126")
 
         try:
-            dd = {'1':0, '2':1, '4':2, '8':3, '16':4, '32':5, '64':6, '128':7 }[ln[1]]
+            dd = {"1": 0, "2": 1, "4": 2, "8": 3, "16": 4, "32": 5, "64": 6, "128": 7}[
+                ln[1]
+            ]
         except:
-            error("Timesig: Denominator must be 1, 2, 4, 8, 16, 32, 64 or 128ot '%s'." % ln[1])
+            error(
+                "Timesig: Denominator must be 1, 2, 4, 8, 16, 32, 64 or 128ot '%s'."
+                % ln[1]
+            )
 
         self.create(nn, dd)
 
-
     def get(self):
-        """ Return existing timesig in MIDI format. """
+        """Return existing timesig in MIDI format."""
 
         return self.lastsig
 
-
     def getAscii(self):
-        """ Return existing timesig in readable format. """
-        
+        """Return existing timesig in readable format."""
+
         if not self.lastsig[0]:
             return "Not Set"
         n, d = self.lastsig
-        return "{}/{}".format(n, ['1', '2', '4', '8',  '16', '32', '64'][d] )
+        return "{}/{}".format(n, ["1", "2", "4", "8", "16", "32", "64"][d])
 
 
-timeSig = TimeSig()  # singleton 
-
-
+timeSig = TimeSig()  # singleton

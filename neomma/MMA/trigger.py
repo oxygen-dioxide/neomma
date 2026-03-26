@@ -30,7 +30,8 @@ from . import gbl
 import neomma.MMA.truncate
 
 import random
-import copy 
+import copy
+
 
 # Each track class has a pointer to a unique copy of this object
 class Trigger:
@@ -49,12 +50,12 @@ class Trigger:
 
 
 def makeTriggerSequence(self, ctable, pattern):
-    """ Create a new sequence based on a trigger setting. 
-        This is called only from bar().
+    """Create a new sequence based on a trigger setting.
+    This is called only from bar().
     """
 
     trigger = self.trigger
-    
+
     if trigger.bars and gbl.seqCount not in trigger.bars:
         return []
 
@@ -67,38 +68,40 @@ def makeTriggerSequence(self, ctable, pattern):
     if trigger.seq:
         pattern = trigger.seq
 
-    # Not redundant! 
+    # Not redundant!
     if not pattern:
         return []
-    
+
     tpats = []
 
     # If we have trigger set to "AUTO" then we create a set of offsets
     # based on the chord changes in ctable.
-    if trigger.mode == 'AUTO':
+    if trigger.mode == "AUTO":
         trigs = []
         for c in ctable:
-            if c.name != 'z' and c.name != c.lastchord:
+            if c.name != "z" and c.name != c.lastchord:
                 trigs.append(c.chStart)
 
     # This works with 'z' chords only, not 'XXzYY'
-    elif trigger.mode == 'REST':
+    elif trigger.mode == "REST":
         trigs = []
         for c in ctable:
-            if c.name == 'z' and c.name != c.lastchord:
-                trigs.append(c.chStart)                    
+            if c.name == "z" and c.name != c.lastchord:
+                trigs.append(c.chStart)
 
     # different 'beat' combinations
-    elif trigger.mode == 'BEATS':
-
+    elif trigger.mode == "BEATS":
         # If chord names are set set if the beat and the
         # chord NAME at that point
         if trigger.cnames:
             trigs = []
             for t in trigger.beats:
                 for c in ctable:
-                    if t >= c.chStart and t < c.chEnd and \
-                             c.chord.name in trigger.cnames:
+                    if (
+                        t >= c.chStart
+                        and t < c.chEnd
+                        and c.chord.name in trigger.cnames
+                    ):
                         trigs.append(t)
                         break
 
@@ -107,8 +110,11 @@ def makeTriggerSequence(self, ctable, pattern):
             trigs = []
             for t in trigger.beats:
                 for c in ctable:
-                    if t >= c.chStart and t < c.chEnd and \
-                            c.chord.tonic in trigger.ctonics:
+                    if (
+                        t >= c.chStart
+                        and t < c.chEnd
+                        and c.chord.tonic in trigger.ctonics
+                    ):
                         trigs.append(t)
                         break
 
@@ -116,22 +122,25 @@ def makeTriggerSequence(self, ctable, pattern):
             trigs = []
             for t in trigger.beats:
                 for c in ctable:
-                    if t >= c.chStart and t < c.chEnd and \
-                           c.chord.chordType in trigger.ctypes:
+                    if (
+                        t >= c.chStart
+                        and t < c.chEnd
+                        and c.chord.chordType in trigger.ctypes
+                    ):
                         trigs.append(t)
                         break
-                    
+
         # use the user defined beat list
         else:
             trigs = trigger.beats
-        
+
     else:
         return []
 
     # make copies of pattern(s) for each beat.
     # the number of patterns to copy are determined by the 'count'
     # option (default==1).
-    
+
     c = min(len(pattern), trigger.count)
     if c < 1:  # either no pattern or no count
         return []
@@ -139,7 +148,7 @@ def makeTriggerSequence(self, ctable, pattern):
     for t in trigs:
         for i in range(c):
             base = copy.deepcopy(pattern[i])
-            base.offset += t 
+            base.offset += t
             if base.offset >= gbl.barLen:
                 continue
             tpats.append(base)
@@ -148,52 +157,54 @@ def makeTriggerSequence(self, ctable, pattern):
     # terminate at the next pattern or the end of the bar
     if trigger.truncate:
         for i in range(len(tpats)):
-           if i < len(tpats) - 1:  # another chord follows, truncate at start of next chord
-               maxd = tpats[i+1].offset - tpats[i].offset
-           else: # last chord, truncate at end of bar
-               # Note to braindead self, the TRUNCATE option is
-               # used to shorten a bar's duration. So the end of
-               # bar can be 'gbl.barlen' or 'truncate.length'
-               if neomma.MMA.truncate.length:
-                   barEnd = neomma.MMA.truncate.length
-               else:
-                   barEnd = gbl.barLen
-               maxd = barEnd - tpats[i].offset
-           tpats[i].duration = min(tpats[i].duration, maxd)
+            if (
+                i < len(tpats) - 1
+            ):  # another chord follows, truncate at start of next chord
+                maxd = tpats[i + 1].offset - tpats[i].offset
+            else:  # last chord, truncate at end of bar
+                # Note to braindead self, the TRUNCATE option is
+                # used to shorten a bar's duration. So the end of
+                # bar can be 'gbl.barlen' or 'truncate.length'
+                if neomma.MMA.truncate.length:
+                    barEnd = neomma.MMA.truncate.length
+                else:
+                    barEnd = gbl.barLen
+                maxd = barEnd - tpats[i].offset
+            tpats[i].duration = min(tpats[i].duration, maxd)
     return tpats
 
 
 def setTrigger(name, ln):
-    """ Set a trigger for a track. 
+    """Set a trigger for a track.
 
-        A trigger is simply a list of offsets which are processed
-        by the trackBar() functions for each track.
+    A trigger is simply a list of offsets which are processed
+    by the trackBar() functions for each track.
 
-        This is called from the parser. We grab the track class from 'name'.
+    This is called from the parser. We grab the track class from 'name'.
 
     """
 
     self = gbl.tnames[name]
 
-    if self.vtype in ('MELODY', 'SOLO'):
+    if self.vtype in ("MELODY", "SOLO"):
         error("Trigger is not valid in %s track." % self.vtype)
 
     self.trigger = trigger = Trigger()  # always reset to default
 
     sequence = None
 
-    if not ln:        # empty line is same as singleton 'off'
-        ln = ['OFF']
+    if not ln:  # empty line is same as singleton 'off'
+        ln = ["OFF"]
 
     argCount = len(ln)
-    trigger.mode = 'ON'
+    trigger.mode = "ON"
 
     # extract a possible sequence. Only 1st is extracted and
     # saved for use by the 'SEQUENCE = ' command. The stuff in {}
     # is replaced by an empty {}.
-    l = ' '.join(ln)
-    if '{' in l and '}' in l:
-        ln, sequence = pextract(l, '{', '}', onlyone=True, insert='{}')
+    l = " ".join(ln)
+    if "{" in l and "}" in l:
+        ln, sequence = pextract(l, "{", "}", onlyone=True, insert="{}")
         ln = ln.split()
         sequence = sequence[0]
 
@@ -204,63 +215,68 @@ def setTrigger(name, ln):
 
     for cmd, opt in opts:
         cmd = cmd.upper()
-        if cmd == 'BEATS':
-            trigger.mode = 'BEATS'
-            for t in opt.split(','):
+        if cmd == "BEATS":
+            trigger.mode = "BEATS"
+            for t in opt.split(","):
                 trigger.beats.append(self.setBarOffset(t))
             trigger.beats.sort()
 
-        elif cmd == 'BARS':
-            for t in opt.split(','):
+        elif cmd == "BARS":
+            for t in opt.split(","):
                 v = stoi(t)
                 if v < 1 or v > gbl.seqSize:
-                    warning("%s Trigger Bars: setting of %s may be "
-                            "ignored since SeqSize is %s." %
-                            (self.name, v, gbl.seqSize))
+                    warning(
+                        "%s Trigger Bars: setting of %s may be "
+                        "ignored since SeqSize is %s." % (self.name, v, gbl.seqSize)
+                    )
                 trigger.bars.append(v - 1)
 
-        elif cmd == 'CNAMES':
-            for a in opt.split(','):
+        elif cmd == "CNAMES":
+            for a in opt.split(","):
                 trigger.cnames.append(a)
 
-        elif cmd == 'CTYPES':
-            for a in opt.split(','):
+        elif cmd == "CTYPES":
+            for a in opt.split(","):
                 trigger.ctypes.append(a)
 
-        elif cmd == 'CTONICS':
-            for a in opt.split(','):
+        elif cmd == "CTONICS":
+            for a in opt.split(","):
                 trigger.ctonics.append(a)
 
-        elif cmd == 'COUNT':
+        elif cmd == "COUNT":
             trigger.count = stoi(opt)
             if trigger.count <= 0:
-                error("%s Trigger Count must be greater than 0, not '%s'." %
-                      (self.name, trigger.count))
+                error(
+                    "%s Trigger Count must be greater than 0, not '%s'."
+                    % (self.name, trigger.count)
+                )
 
-        elif cmd == 'MEASURES':
-            for a in opt.split(','):
+        elif cmd == "MEASURES":
+            for a in opt.split(","):
                 if not a.isdigit():
-                    warning("%s Trigger: Measures should be bar labels, not '%s'."
-                            "This trigger will be ignored." % (self.name, a))
+                    warning(
+                        "%s Trigger: Measures should be bar labels, not '%s'."
+                        "This trigger will be ignored." % (self.name, a)
+                    )
                     continue
-                trigger.measures.append(a.lstrip('0'))
+                trigger.measures.append(a.lstrip("0"))
 
-        elif cmd == 'OVERRIDE':
+        elif cmd == "OVERRIDE":
             trigger.override = getTF(opt, "Trigger 'OverRide'")
 
-        elif cmd == 'TRUNCATE':
+        elif cmd == "TRUNCATE":
             trigger.truncate = getTF(opt, "Trigger 'Turncate'")
 
-        elif cmd == 'SEQUENCE':
+        elif cmd == "SEQUENCE":
             if not sequence and opt:
                 sequence = opt
             if sequence:
-                sequence = sequence.rstrip('; ')
+                sequence = sequence.rstrip("; ")
                 trigger.seq = self.defPatRiff(sequence)
             else:
                 error("%s Trigger Sequence expecting {patterns...}." % self.name)
 
-        elif cmd == 'STICKY':
+        elif cmd == "STICKY":
             self.sticky = getTF(opt, "Trigger 'Sticky'")
 
         else:
@@ -269,15 +285,15 @@ def setTrigger(name, ln):
     # opts without args
     for cmd in ln:
         cmd = cmd.upper()
-        if cmd == 'AUTO':
-            trigger.mode = 'AUTO'
+        if cmd == "AUTO":
+            trigger.mode = "AUTO"
 
-        elif cmd == 'OFF': # It's all been set to default at top, so leave it alone
+        elif cmd == "OFF":  # It's all been set to default at top, so leave it alone
             if argCount > 1:
                 error("Trigger: 'OFF' argument must be the only arg.")
 
-        elif cmd == 'REST':
-            trigger.mode = 'REST'
+        elif cmd == "REST":
+            trigger.mode = "REST"
 
         else:
             error("{} Trigger '{}' is an unknown command.".format(self.name, cmd))
@@ -285,53 +301,66 @@ def setTrigger(name, ln):
     if neomma.MMA.debug.debug:
         neomma.MMA.debug.trackSet(self.name, "TRIGGER")
 
+
 def getTriggerOptions(self):
-    """ Called from setTrigger() and macro. Returns string with current options. """
+    """Called from setTrigger() and macro. Returns string with current options."""
 
     trigger = self.trigger
 
-    mode = ''
+    mode = ""
 
-    if trigger.mode in ('AUTO', 'REST'):
+    if trigger.mode in ("AUTO", "REST"):
         mode = trigger.mode
-    
+
     if not trigger.beats:
-        beats = '[]'
+        beats = "[]"
     else:
-        beats =  ','.join([str(1 + (i / float(gbl.BperQ))) for i in trigger.beats])
+        beats = ",".join([str(1 + (i / float(gbl.BperQ))) for i in trigger.beats])
 
     if trigger.cnames:
-        cnames = ','.join([i for i in trigger.cnames])
+        cnames = ",".join([i for i in trigger.cnames])
     else:
-        cnames = '[]'
+        cnames = "[]"
 
-    if trigger.ctypes: 
-        ctypes = ','.join([i for i in trigger.ctypes])
+    if trigger.ctypes:
+        ctypes = ",".join([i for i in trigger.ctypes])
     else:
-        ctypes = '[]'
+        ctypes = "[]"
 
     if trigger.ctonics:
-        tonics = ','.join([i for i in trigger.ctonics])
+        tonics = ",".join([i for i in trigger.ctonics])
     else:
-        tonics = '[]'
+        tonics = "[]"
 
     if not trigger.bars:
-        bars = '[]'
+        bars = "[]"
     else:
-        bars = ','.join([str(a + 1) for a in trigger.bars])
+        bars = ",".join([str(a + 1) for a in trigger.bars])
 
     if trigger.seq:
-        seq =  "Sequence={%s}" % self.formatPattern(trigger.seq)
+        seq = "Sequence={%s}" % self.formatPattern(trigger.seq)
     else:
         seq = "Sequence={}"
 
     if trigger.measures:
-        measures = ','.join([i for i in trigger.measures])
+        measures = ",".join([i for i in trigger.measures])
     else:
-        measures = '[]'
-        
-    return "%s Beats=%s CNames=%s CTypes=%s CTonics=%s Bars=%s " \
-              "Count=%s Truncate=%s Override=%s Measures=%s %s" % \
-          ( mode, beats, cnames, ctypes, tonics, bars, trigger.count,
-            trigger.truncate, trigger.override, measures, seq)
+        measures = "[]"
 
+    return (
+        "%s Beats=%s CNames=%s CTypes=%s CTonics=%s Bars=%s "
+        "Count=%s Truncate=%s Override=%s Measures=%s %s"
+        % (
+            mode,
+            beats,
+            cnames,
+            ctypes,
+            tonics,
+            bars,
+            trigger.count,
+            trigger.truncate,
+            trigger.override,
+            measures,
+            seq,
+        )
+    )

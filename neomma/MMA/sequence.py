@@ -34,8 +34,9 @@ from neomma.MMA.pat import pats
 
 import neomma.MMA.seqrnd
 
+
 def trackSequence(name, ln):
-    """ Define a sequence for a track.
+    """Define a sequence for a track.
 
     The format for a sequence:
     TrackName Seq1 [Seq2 ... ]
@@ -47,11 +48,11 @@ def trackSequence(name, ln):
     if not ln:
         error("Use: %s Sequence NAME [...]" % name)
 
-    ln = ' '.join(ln)
+    ln = " ".join(ln)
     self = gbl.tnames[name]  # this is the pattern class
 
     if self.vtype == "SOLO":
-            warning("Sequences for SOLO tracks are not saved in Grooves.")
+        warning("Sequences for SOLO tracks are not saved in Grooves.")
 
     # Before we do extraction of {} stuff make sure we have matching {}s.
     # Count the number of { and } and if they don't match read more lines and
@@ -59,19 +60,19 @@ def trackSequence(name, ln):
     # is to make sure we do macro expansion! This code lets one have long
     # sequence lines without bothering with '\' continuations.
 
-    oLine = gbl.lineno   # in case we error out, report start line
-    while ln.count('{') != ln.count('}'):
+    oLine = gbl.lineno  # in case we error out, report start line
+    while ln.count("{") != ln.count("}"):
         l = gbl.inpath.read()
-        if l is None:   # reached eof, error
+        if l is None:  # reached eof, error
             gbl.lineno = oLine
             error("%s Sequence {}s do not match" % name)
 
-        l = ' '.join(macros.expand(l))
+        l = " ".join(macros.expand(l))
 
-        if l[-1] != '}' and l[-1] != ';':
+        if l[-1] != "}" and l[-1] != ";":
             error("%s: Expecting multiple sequence lines to end in ';'" % name)
 
-        ln += ' ' + l
+        ln += " " + l
 
     # Extract out any {} definitions and assign them to new
     # define variables (__1, __99, etc) and melt them
@@ -81,7 +82,7 @@ def trackSequence(name, ln):
     # don't care about the old setting.
 
     ids = 1
-        
+
     while 1:
         sp = ln.find("{")
 
@@ -95,7 +96,7 @@ def trackSequence(name, ln):
         pn = "_%s" % ids
         ids += 1
 
-        trk = name.split('-')[0]
+        trk = name.split("-")[0]
         trackAlloc(trk, 1)
 
         # We need to mung the plectrum classes. Problem is that we define all
@@ -106,7 +107,7 @@ def trackSequence(name, ln):
         #
         # NOTE: at this point the base and current tracks have been initialized.
 
-        if trk == 'PLECTRUM' and name != trk:
+        if trk == "PLECTRUM" and name != trk:
             z = gbl.tnames[trk]._tuning[:]
             gbl.tnames[trk]._tuning = gbl.tnames[name]._tuning
         else:
@@ -116,8 +117,7 @@ def trackSequence(name, ln):
         if z:
             gbl.tnames[trk]._tuning = z
 
-        ln = ln[:sp] + ' ' + pn + ' ' + ln[sp:]
-
+        ln = ln[:sp] + " " + pn + " " + ln[sp:]
 
     ln = ln.split()
 
@@ -139,16 +139,16 @@ def trackSequence(name, ln):
     #    the definitions for B1 or B2, the stored pointer DOESN'T
     #    change. So, changing pattern definitions has NO EFFECT.
 
-    ln = lnExpand(ln, '%s Sequence' % self.name)
+    ln = lnExpand(ln, "%s Sequence" % self.name)
     tmp = [None] * len(ln)
 
     for i, n in enumerate(ln):
         n = n.upper()
 
-        if n in ('Z', '-'):
+        if n in ("Z", "-"):
             tmp[i] = None
 
-        elif n == '*':
+        elif n == "*":
             tmp[i] = self.sequence[i]
 
         else:
@@ -166,11 +166,11 @@ def trackSequence(name, ln):
                 msg.append("-")
             else:
                 msg.append(a)
-        dPrint(' '.join(msg))
+        dPrint(" ".join(msg))
 
 
 def seqsize(ln):
-    """ Set the length of sequences. """
+    """Set the length of sequences."""
 
     if len(ln) != 1:
         error("Usage 'SeqSize N'")
@@ -200,7 +200,7 @@ def seqsize(ln):
 
 
 def seq(ln):
-    """ Set the sequence point. """
+    """Set the sequence point."""
 
     if len(ln) == 0:
         s = 0
@@ -210,8 +210,7 @@ def seq(ln):
         error("Use: SEQ or SEQ NN to reset seq point")
 
     if s > gbl.seqSize:
-        error("Sequence size is '%d', you can't set to '%d'" %
-              (gbl.seqSize, s))
+        error("Sequence size is '%d', you can't set to '%d'" % (gbl.seqSize, s))
 
     if s == 0:
         s = 1
@@ -227,23 +226,23 @@ def seq(ln):
 
 
 def seqClear(ln):
-    """ Clear all sequences (except SOLO/ARIA and STICKY tracks). """
+    """Clear all sequences (except SOLO/ARIA and STICKY tracks)."""
 
     if ln:
         error("Use: 'SeqClear' with no args")
 
     for n in gbl.tnames.values():
-        if n.vtype in ('SOLO', 'ARIA') or n.sticky:
+        if n.vtype in ("SOLO", "ARIA") or n.sticky:
             continue
         n.clearSequence()
 
     neomma.MMA.volume.futureVol = []
 
-    neomma.MMA.seqrnd.setSeqRndWeight(['1'])
+    neomma.MMA.seqrnd.setSeqRndWeight(["1"])
 
 
 def restart(ln):
-    """ Restart all tracks to almost-default conditions. """
+    """Restart all tracks to almost-default conditions."""
 
     if ln:
         error("Use: 'Restart' with no args")
@@ -251,11 +250,13 @@ def restart(ln):
     for n in gbl.tnames.values():
         n.restart()
 
+
 #####################################################
 ## Misc track sequence commands. Called from parser.
 
+
 def trackSeqClear(name, ln):
-    """ Clear sequence for specified tracks.
+    """Clear sequence for specified tracks.
 
     Note: "Drum SeqClear" clears all Drum tracks,
           "Drum-3 SeqClear" clears track Drum-3.
@@ -272,7 +273,7 @@ def trackSeqClear(name, ln):
 
 
 def trackSeqRnd(name, ln):
-    """ Set random order for specified track. """
+    """Set random order for specified track."""
 
     if len(ln) != 1:
         error("Use: %s SeqRnd [On, Off]" % name)
@@ -291,17 +292,16 @@ def trackSeqRnd(name, ln):
 
 
 def trackSeqRndWeight(name, ln):
-    """ Set rnd weight for track. """
- 
+    """Set rnd weight for track."""
+
     tr = gbl.tnames[name]
     tr.seqRndWeight = neomma.MMA.seqrnd.getweights(ln, "%s SeqRndWeight" % name)
- 
+
 
 def trackRestart(name, ln):
-    """ Restart track to almost-default condidions. """
+    """Restart track to almost-default condidions."""
 
     if ln:
         error("Use: '%s Resart' with no args", name)
 
     gbl.tnames[name].restart()
-

@@ -28,8 +28,10 @@ import platform
 
 MMAdir = os.path.dirname(__file__)
 
+
 def main():
-    from neomma.MMA import main as mmaMain    # this runs the program
+    from neomma.MMA import main as mmaMain  # this runs the program
+
 
 if __name__ == "__main__":
     main()

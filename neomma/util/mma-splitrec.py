@@ -16,71 +16,73 @@ import getopt
 
 # These can be reset from command line options
 
-midiopts   = "-p 20"                #  -p
-recordopts = "-D hw:2,0 -f cd"      #  -r
-timopts    = "-OwM"                 #  -o
-createbg = True                     #  -b
-usetimidity = False                 #  -i
+midiopts = "-p 20"  #  -p
+recordopts = "-D hw:2,0 -f cd"  #  -r
+timopts = "-OwM"  #  -o
+createbg = True  #  -b
+usetimidity = False  #  -i
 
 # Create option list. This copies defaults from above
 # and freezes them into the message.
 
-optmsg= ["  -m  set midi opts      (default = %s)" % midiopts,
-         "  -r  recorder opts      (default = %s)" % recordopts,
-         "  -o  timidity opts      (default = %s)" % timopts,
-         "  -i  use TiMidity++     (default = %s)" % ("No", "Yes")[usetimidity],
-         "  -b  create full track  (default = %s)" % ("No", "Yes")[createbg],
-         "  -t  do only track X",
-         "  -x  eXclude track X" ]
+optmsg = [
+    "  -m  set midi opts      (default = %s)" % midiopts,
+    "  -r  recorder opts      (default = %s)" % recordopts,
+    "  -o  timidity opts      (default = %s)" % timopts,
+    "  -i  use TiMidity++     (default = %s)" % ("No", "Yes")[usetimidity],
+    "  -b  create full track  (default = %s)" % ("No", "Yes")[createbg],
+    "  -t  do only track X",
+    "  -x  eXclude track X",
+]
 
 # screwing with these is optional
 
-midiplayer = "/usr/bin/aplaymidi"    # path to player
-recorder   = "/usr/bin/arecord"      # path to record program
-timidity   = "/usr/bin/timidity"     # path to timidity
+midiplayer = "/usr/bin/aplaymidi"  # path to player
+recorder = "/usr/bin/arecord"  # path to record program
+timidity = "/usr/bin/timidity"  # path to timidity
 MMA = "mma"
 tmpname = "tmp-%s" % os.getpid()
-tmpmid  = "%s.mid" % tmpname 
+tmpmid = "%s.mid" % tmpname
 bgtrack = "bg"
 
 # Don't touch.
 
 excludelist = []  # tracks to skip
-onlylist    = []  # only do these tracks
+onlylist = []  # only do these tracks
+
 
 def opts():
-    """ Option parser. """
+    """Option parser."""
 
     global midiopts, recordopts
     global usetimidity, timopts
     global createbg, excludelist, onlylist
 
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:],
-            "m:r:o:bix:t:", [] )
+        opts, args = getopt.gnu_getopt(sys.argv[1:], "m:r:o:bix:t:", [])
     except getopt.GetoptError:
         usage()
 
-    for o,a in opts:
-        if o == '-m':
+    for o, a in opts:
+        if o == "-m":
             midiopts = a
 
-        elif o == '-r':
+        elif o == "-r":
             recordopts = a
 
-        elif o == '-i':
+        elif o == "-i":
             usetimidity = True
 
-        elif o == '-o':
+        elif o == "-o":
             timopts = a
 
-        elif o == '-b':
+        elif o == "-b":
             createbg = False
 
-        elif o == '-t':
+        elif o == "-t":
             onlylist.append(a.upper())
 
-        elif o == '-x':
+        elif o == "-x":
             excludelist.append(a.upper())
 
         else:
@@ -94,7 +96,7 @@ def opts():
         error("Too many filenames on command line.")
     elif not args:
         error("One filename required.")
-    
+
     return args[0]
 
 
@@ -110,7 +112,7 @@ def usage():
 
 
 def isint(i):
-    """ See if passed STRING is an integer. """
+    """See if passed STRING is an integer."""
 
     try:
         int(i)
@@ -127,17 +129,17 @@ def error(m, e=None):
 
 
 def mid2wav(trackname, midifile):
-    """ Play the midi file and record to wav. 
+    """Play the midi file and record to wav.
 
-        This uses arecord as a background process to record
-        and aplaymidi in the foreground to play the midi file.
+    This uses arecord as a background process to record
+    and aplaymidi in the foreground to play the midi file.
     """
 
     print("Creating: %s.wav" % trackname)
 
     # start recording
 
-    cmd = [recorder ] + recordopts.split() + ["%s.wav" % trackname]
+    cmd = [recorder] + recordopts.split() + ["%s.wav" % trackname]
     print(cmd)
     try:
         recpid = subprocess.Popen(cmd, shell=False)
@@ -146,7 +148,7 @@ def mid2wav(trackname, midifile):
 
     # start playing midi
 
-    cmd = [midiplayer] + midiopts.split() + [ midifile ]
+    cmd = [midiplayer] + midiopts.split() + [midifile]
 
     try:
         midpid = subprocess.Popen(cmd, shell=False)
@@ -154,36 +156,36 @@ def mid2wav(trackname, midifile):
         recpid.kill()  # stop recorder
         error("Can't fork midi player.", e)
 
-    midpid.wait()       # wait for midi play to stop
+    midpid.wait()  # wait for midi play to stop
 
     try:
-        recpid.terminate()       # stop recorder
+        recpid.terminate()  # stop recorder
     except OSError as e:
         error("Can't stop recorder.", e)
 
 
 def tim2wav(trackname, midifile):
-    """ Use timidity to create wav file.  """
+    """Use timidity to create wav file."""
 
     print("Creating: %s.wav with timidity" % trackname)
 
-    cmd = [timidity] + timopts.split() + [ "-o%s.wav" % trackname,  midifile ]
-    
+    cmd = [timidity] + timopts.split() + ["-o%s.wav" % trackname, midifile]
+
     try:
         midpid = subprocess.Popen(cmd, shell=False)
     except OSError as e:
         recpid.kill()  # stop recorder
         error("Can't fork midi player.", e)
 
-    midpid.wait()       # wait for midi play to stop
+    midpid.wait()  # wait for midi play to stop
 
 
 def makemidi(infile, outfile, opts):
-    """ Create a midifile using mma. """
+    """Create a midifile using mma."""
 
-    cmd = [ MMA, '-0', infile]
+    cmd = [MMA, "-0", infile]
     if outfile:
-        cmd.extend(['-f', outfile])
+        cmd.extend(["-f", outfile])
     cmd.extend(opts)
 
     try:
@@ -210,7 +212,7 @@ else:
 basemid += ".mid"
 
 
-# Create the background midi and wav. 
+# Create the background midi and wav.
 
 if createbg:
     data, err, retcode = makemidi(mmafile, basemid, ["-0"])
@@ -223,25 +225,28 @@ if createbg:
 # Before we can split out the tracks we need to know the names
 # of the tracks in the file. Using the -c option in mma will
 # give us a list of allocated tracks and channel assignments.
-# We grab the names after the "Channel assignments:" and parse 
+# We grab the names after the "Channel assignments:" and parse
 # out the track names.
 
-txt, err, retcode = makemidi(mmafile, '', ['-c'])
+txt, err, retcode = makemidi(mmafile, "", ["-c"])
 if err or retcode:
     error("MMA error.", err)
 
 txt = txt.split()
-txt=txt[txt.index('assignments:')+1:]
-tracklist=[]
+txt = txt[txt.index("assignments:") + 1 :]
+tracklist = []
 for a in sorted(txt):
-    if isint(a): continue
-    if a in excludelist: continue
-    if onlylist and a not in onlylist: continue
+    if isint(a):
+        continue
+    if a in excludelist:
+        continue
+    if onlylist and a not in onlylist:
+        continue
     tracklist.append(a)
 
-print("MMA file '%s' being split to: " % mmafile, end=' ')
+print("MMA file '%s' being split to: " % mmafile, end=" ")
 for a in tracklist:
-    print(a, end=' ')
+    print(a, end=" ")
 print()
 
 
@@ -250,10 +255,9 @@ print()
 # data was created (some tracks will be empty) and play/rec.
 
 for trackname in tracklist:
-  
     trackname = trackname.title()
-    txt, err, retcode = makemidi(mmafile, tmpmid, ['-T', trackname])
-    
+    txt, err, retcode = makemidi(mmafile, tmpmid, ["-T", trackname])
+
     if err or retcode:
         if txt.find("No data created") >= 0:
             print("NO DATA for '%s', skipping" % trackname)
@@ -265,11 +269,4 @@ for trackname in tracklist:
         tim2wav(trackname, tmpmid)
     else:
         mid2wav(trackname, tmpmid)
-    os.remove(tmpmid)   # delete midifile
-
-
-
-
-
-
-
+    os.remove(tmpmid)  # delete midifile

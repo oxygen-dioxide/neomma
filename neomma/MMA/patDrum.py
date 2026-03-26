@@ -31,51 +31,51 @@ from neomma.MMA.pat import PC, Pgroup
 
 
 class Drum(PC):
-    """ Pattern class for a drum track. """
+    """Pattern class for a drum track."""
 
-    vtype = 'DRUM'
+    vtype = "DRUM"
 
     def __init__(self, ln):
-        """ init for drum track. """
+        """init for drum track."""
 
         self.toneList = [38]
 
-        PC.__init__(self, ln)   # This order is important!
+        PC.__init__(self, ln)  # This order is important!
 
-        self.setChannel('10')
+        self.setChannel("10")
         if not gbl.mtrks[self.channel].trackname:
-            gbl.mtrks[self.channel].addTrkName(0, 'Drum')
+            gbl.mtrks[self.channel].addTrkName(0, "Drum")
 
     def saveGroove(self, gname):
-        """ Save special/local variables for groove. """
+        """Save special/local variables for groove."""
 
         PC.saveGroove(self, gname)  # do this 1st. Creates storage.
-        self.grooves[gname]['TONES'] = self.toneList[:]
+        self.grooves[gname]["TONES"] = self.toneList[:]
 
     def restoreGroove(self, gname):
-        """ Restore special/local/variables for groove. """
+        """Restore special/local/variables for groove."""
 
-        self.toneList = self.grooves[gname]['TONES']
+        self.toneList = self.grooves[gname]["TONES"]
         PC.restoreGroove(self, gname)
 
     def setSeqSize(self):
-        """ Expand existing pattern list. """
+        """Expand existing pattern list."""
 
         self.toneList = seqBump(self.toneList)
         PC.setSeqSize(self)
 
     def clearSequence(self):
-        """ Set some initial values. Called from init and clear seq. """
+        """Set some initial values. Called from init and clear seq."""
 
         PC.clearSequence(self)
         self.toneList = seqBump([38])
 
     def setTone(self, ln):
-        """ Set a tone list. Only valid for DRUMs.
+        """Set a tone list. Only valid for DRUMs.
         ln[] is not nesc. the right length.
         """
 
-        ln = lnExpand(ln, '%s Tone' % self.name)
+        ln = lnExpand(ln, "%s Tone" % self.name)
         if not len(ln):
             error("Expecting argument for %s TONE." % self.name)
         tmp = []
@@ -89,14 +89,16 @@ class Drum(PC):
         self.ssvoice = -1
 
     def getPgroup(self, ev):
-        """ Get group for a drum pattern.
+        """Get group for a drum pattern.
 
-            Fields - start, length, volume
+        Fields - start, length, volume
         """
 
         if len(ev) != 3:
-            error("There must be at exactly 3 items in each "
-                  "group of a drum define, not <%s>" % ' '.join(ev))
+            error(
+                "There must be at exactly 3 items in each "
+                "group of a drum define, not <%s>" % " ".join(ev)
+            )
 
         a = Pgroup()
 
@@ -107,13 +109,12 @@ class Drum(PC):
         return a
 
     def trackBar(self, pattern, ctable):
-        """ Do a drum bar.
+        """Do a drum bar.
 
         Called from self.bar()
 
         """
 
-        
         sc = self.seq
 
         for p in pattern:
@@ -125,4 +126,5 @@ class Drum(PC):
                 p.offset,
                 self.getDur(p.duration),
                 self.toneList[sc],
-                self.adjustVolume(p.vol, p.offset))
+                self.adjustVolume(p.vol, p.offset),
+            )

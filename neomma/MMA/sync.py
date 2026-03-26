@@ -29,35 +29,36 @@ Functions/variables for the sync stuff.
 from neomma.MMA.common import *
 import neomma.MMA.debug
 
-synctick    =  0      # flag, set if we want a tick on all tracks at offset 0
-endsync     =  0      # flag, set if we want a eof sync
+synctick = 0  # flag, set if we want a tick on all tracks at offset 0
+endsync = 0  # flag, set if we want a eof sync
 
 syncTone = [80, 90]  # tone/velocity for -0 option. Changable from setSyncTone
 
+
 def synchronize(ln):
-    """ Set synchronization in the MIDI. This is called by the SYNCRONIZE option
-        and the command line -0 and -1 options.
+    """Set synchronization in the MIDI. This is called by the SYNCRONIZE option
+    and the command line -0 and -1 options.
     """
 
     global synctick, endsync
-    
+
     if not ln:
         error("SYNCHRONIZE: requires args END and/or START.")
 
     for a in ln:
-        if a.upper() == 'END':
+        if a.upper() == "END":
             endsync = 1
-        elif a.upper() == 'START':
+        elif a.upper() == "START":
             synctick = 1
         else:
             error("SYNCHRONIZE: expecting END or START")
-    
+
 
 def setSyncTone(ln):
-    """ Parser routine, sets tone/velocity for the -0 sync tone. """
+    """Parser routine, sets tone/velocity for the -0 sync tone."""
 
     global syncTone
-    
+
     notopts, ln = opt2pair(ln)
 
     if notopts or not ln:
@@ -79,8 +80,9 @@ def setSyncTone(ln):
             syncTone[1] = t
 
         else:
-            error("SetSyncTone: Expecting options: Tone, Velocity, Volume. Not %s"
-                  % cmd)
+            error(
+                "SetSyncTone: Expecting options: Tone, Velocity, Volume. Not %s" % cmd
+            )
 
     if neomma.MMA.debug.debug:
         dPrint("SetSyncTone: Tone=%s, Velocity=%s" % tuple(syncTone))
