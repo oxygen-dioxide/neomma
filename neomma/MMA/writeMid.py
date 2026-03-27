@@ -37,7 +37,7 @@ from neomma.MMA.common import *
 splitOutput = None
 
 
-def createMIDI(outfile):
+def createMIDI(outfile: str) -> None:
 
     fileExist = os.path.exists(outfile)
 
@@ -66,7 +66,7 @@ def createMIDI(outfile):
     out.close()
 
 
-def createOutName(name, subname):
+def createOutName(name: str, subname: str) -> str:
     if name.endswith(".mid"):
         name = name.replace(".mid", "-%s.mid" % subname)
     else:

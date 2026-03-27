@@ -569,7 +569,7 @@ def trackCopy(name, ln):
 
         for dest in ln[1:]:
             dest = dest.upper()  # Destination is 1st arg
-            neomma.MMA.alloc.trackAlloc(dest, 1)  # create dest if it doesn't exist
+            neomma.MMA.alloc.trackAlloc(dest, True)  # create dest if it doesn't exist
             trackCopyDo(dest, [src])
 
     elif ln and ln[0].upper() == "FROM":  # optional 'from' keyword

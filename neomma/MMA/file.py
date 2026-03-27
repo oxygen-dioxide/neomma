@@ -95,12 +95,13 @@ class ReadFile:
             self.data = data
             self.label = label
 
-    def __init__(self, fname):
+    def __init__(self, fname:str) -> None:
 
-        self.fdata = fdata = []
+        self.fdata: list[self.FileData] = []
+        fdata = self.fdata
         self.lastline = None
         self.lineptr = None
-        self.fname = None
+        self.fname: str | None = None
 
         self.que = []  # que for pushed lines (mainly for REPEAT)
         self.qnums = []

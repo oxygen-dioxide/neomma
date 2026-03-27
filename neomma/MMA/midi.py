@@ -59,7 +59,7 @@ def setSplitChannels(ln):
         if ch is None:
             if not a in gbl.tnames:
                 a = a.upper()
-                neomma.MMA.alloc.trackAlloc(a, 0)  # ensure that track is allocated
+                neomma.MMA.alloc.trackAlloc(a, False)  # ensure that track is allocated
             if not a in gbl.tnames:
                 error("MidiSplit: Track '%s' is not valid." % a)
             if not gbl.tnames[a].channel:

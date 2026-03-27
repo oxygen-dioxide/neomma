@@ -930,7 +930,7 @@ def setAutoSolo(ln):
     autoSoloTracks = []
     for n in ln:
         n = n.upper()
-        neomma.MMA.alloc.trackAlloc(n, 1)
+        neomma.MMA.alloc.trackAlloc(n, True)
         if gbl.tnames[n].vtype not in ("MELODY", "SOLO"):
             error(
                 "All autotracks must be Melody or Solo tracks, not %s"
@@ -977,7 +977,7 @@ def extractSolo(ln, rptcount):
         for s, trk in zip(solo, autoSoloTracks):
             if not s:
                 continue  # skip placeholder/empty tracks
-            neomma.MMA.alloc.trackAlloc(trk, 1)
+            neomma.MMA.alloc.trackAlloc(trk, True)
             t = gbl.tnames[trk]
             if t.riff:
                 error(

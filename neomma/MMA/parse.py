@@ -29,6 +29,7 @@ are completely handled here.
 """
 
 import random
+from typing import Callable
 
 from . import gbl
 from neomma.MMA.common import *
@@ -73,19 +74,22 @@ from neomma.MMA.macro import macros
 from neomma.MMA.alloc import trackAlloc
 from neomma.MMA.keysig import keySig
 
-beginData = []  # Current data set by a BEGIN statement
-beginPoints = []  # since BEGINs can be nested, we need ptrs for backing out of BEGINs
+beginData: list[str] = []  # Current data set by a BEGIN statement
+beginPoints: list[int] = []  # since BEGINs can be nested, we need ptrs for backing out of BEGINs
 
 ########################################
 # File processing. Mostly jumps to pats
 ########################################
 
+current_parse_depth: int = 0
+MAX_PARSE_DEPTH: int = 50
 
-def parseFile(n, depth=[0]):
+def parseFile(n: str) -> None:
     """Open and process a file. Errors exit."""
+    global current_parse_depth
 
-    depth[0] += 1
-    if depth[0] > 50:
+    current_parse_depth += 1
+    if current_parse_depth > MAX_PARSE_DEPTH:
         error(
             "USE/INCLUDE recursion error. "
             "Use and Include are limited to a depth of 50. "
@@ -102,10 +106,10 @@ def parseFile(n, depth=[0]):
     if neomma.MMA.debug.debug:
         dPrint("File '%s' closed." % n)
 
-    depth[0] -= 1
+    current_parse_depth -= 1
 
 
-def parse(inpath):
+def parse(inpath: neomma.MMA.file.ReadFile) -> None:
     """Process a mma input file."""
 
     global beginData, lastChord
@@ -177,7 +181,7 @@ def parse(inpath):
         """
 
         if not action in gbl.tnames:  # no track allocated?
-            trackAlloc(action, 0)  # Try to create. Always returns.
+            trackAlloc(action, False)  # Try to create. Always returns.
 
         if action in gbl.tnames:  # BASS/DRUM/APEGGIO/CHORD
             name = action
@@ -357,11 +361,11 @@ def parse(inpath):
 ##################################################################
 
 
-def allTracks(ln):
+def allTracks(ln: list[str]) -> None:
     """Apply command to all specified tracks or track types."""
 
-    types1 = ("BASS", "CHORD", "ARPEGGIO", "SCALE", "DRUM", "WALK", "PLECTRUM")
-    types2 = ("MELODY", "SOLO", "ARIA")
+    types1 = ["BASS", "CHORD", "ARPEGGIO", "SCALE", "DRUM", "WALK", "PLECTRUM"]
+    types2 = ["MELODY", "SOLO", "ARIA"]
     allTypes = types1 + types2
 
     ttypes = []
@@ -397,27 +401,27 @@ def allTracks(ln):
 # Do-nothing functions
 
 
-def comment(ln):
+def comment(ln: list[str]) -> None:
     pass
 
 
-def repeatend(ln):
+def repeatend(ln: list[str]) -> None:
     error("Repeatend/EndRepeat without Repeat")
 
 
-def repeatending(ln):
+def repeatending(ln: list[str]) -> None:
     error("Repeatending without Repeat")
 
 
-def endmset(ln):
+def endmset(ln: list[str]) -> None:
     error("EndMset/MSetEnd without Mset")
 
 
-def ifend(ln):
+def ifend(ln: list[str]) -> None:
     error("ENDIF without IF")
 
 
-def ifelse(ln):
+def ifelse(ln: list[str]) -> None:
     error("ELSE without IF")
 
 
@@ -425,7 +429,7 @@ def ifelse(ln):
 # Repeat/jumps
 
 
-def repeat(ln):
+def repeat(ln: list[str]) -> None:
     """Repeat/RepeatEnd/RepeatEnding.
 
     Read input until a RepeatEnd is found. The entire
@@ -563,19 +567,19 @@ def repeat(ln):
             error("Unexpected line in REPEAT")
 
 
-def goto(ln):
+def goto(ln: list[str]) -> None:
     if len(ln) != 1:
         error("Usage: GOTO Label")
     gbl.inpath.goto(ln[0].upper())
 
 
-def eof(ln):
+def eof(ln: list[str]) -> None:
     """Stop reading CURRENT file"""
 
     gbl.inpath.toEof()
 
 
-def forceError(ln):
+def forceError(ln: list[str]) -> None:
     """Force an error."""
 
     if len(ln) < 1:
@@ -587,7 +591,7 @@ def forceError(ln):
 # File and I/O
 
 
-def include(ln):
+def include(ln: list[str]) -> None:
     """Include a file."""
 
     global beginData
@@ -602,11 +606,12 @@ def include(ln):
 
     if not fn:
         error("Could not find include file '%s'" % ln[0])
+        return
 
     parseFile(fn)
 
 
-def usefile(ln):
+def usefile(ln: list[str]) -> None:
     """Include a library file."""
 
     global beginData
@@ -621,6 +626,7 @@ def usefile(ln):
 
     if not fn:
         error("Unable to locate library file '%s'" % ln[0])
+        return
 
     """ USE saves current state, just like defining a groove.
         Here we use a magic number which can't be created with
@@ -636,7 +642,7 @@ def usefile(ln):
 # Misc
 
 
-def rndseed(ln):
+def rndseed(ln: list[str]) -> None:
     """Reseed the random number generator."""
 
     if not ln:
@@ -648,13 +654,13 @@ def rndseed(ln):
         random.seed(stoi(ln[0]))  # predicable results.
 
 
-def lnPrint(ln):
+def lnPrint(ln: list[str]) -> None:
     """Print stuff in a "print" command."""
 
     print(" ".join(ln))
 
 
-def printActive(ln):
+def printActive(ln: list[str]) -> None:
     """Print a list of the active tracks."""
 
     print(
@@ -668,9 +674,7 @@ def printActive(ln):
         if f.sequence:
             if f.channel > 0:
                 ch = f.channel
-                ecount = 0
-                for ev in gbl.mtrks[ch].miditrk:
-                    ecount += len(gbl.mtrks[ch].miditrk[ev])
+                ecount = str(sum(len(gbl.mtrks[ch].miditrk[ev]) for ev in gbl.mtrks[ch].miditrk))
             else:
                 ch = "-"
                 ecount = ""
@@ -687,7 +691,7 @@ def printActive(ln):
 # Pattern/Groove
 
 
-def trackDefPattern(name, ln):
+def trackDefPattern(name: str, ln: list[str]) -> None:
     """Define a pattern for a track.
 
     Use the type-name for all defines.... check the track
@@ -699,7 +703,7 @@ def trackDefPattern(name, ln):
 
     name = name.split("-")[0]
 
-    trackAlloc(name, 1)
+    trackAlloc(name, True)
 
     if ln:
         pattern = ln.pop(0).upper()
@@ -719,13 +723,13 @@ def trackDefPattern(name, ln):
     gbl.tnames[name].definePattern(pattern, ln)
 
 
-def trackRiff(name, ln):
+def trackRiff(name: str, ln: list[str]) -> None:
     """Set a riff for a track."""
 
     gbl.tnames[name].setRiff(" ".join(ln))
 
 
-def trackDupRiff(name, ln):
+def trackDupRiff(name: str, ln: list[str]) -> None:
     """Set a riff for a track."""
 
     if not ln:
@@ -734,7 +738,7 @@ def trackDupRiff(name, ln):
     gbl.tnames[name].dupRiff(ln)
 
 
-def deleteTrks(ln):
+def deleteTrks(ln: list[str]) -> None:
     """Delete a track and free the MIDI track."""
 
     if not len(ln):
@@ -770,7 +774,7 @@ def deleteTrks(ln):
 # Volume
 
 
-def trackRvolume(name, ln):
+def trackRvolume(name: str, ln: list[str]) -> None:
     """Set random volume for specific track."""
 
     if not ln:
@@ -778,19 +782,19 @@ def trackRvolume(name, ln):
     gbl.tnames[name].setRVolume(ln)
 
 
-def trackSwell(name, ln):
+def trackSwell(name: str, ln: list[str]) -> None:
     gbl.tnames[name].setSwell(ln)
 
 
-def trackCresc(name, ln):
+def trackCresc(name: str, ln: list[str]) -> None:
     gbl.tnames[name].setCresc(1, ln)
 
 
-def trackDeCresc(name, ln):
+def trackDeCresc(name: str, ln: list[str]) -> None:
     gbl.tnames[name].setCresc(-1, ln)
 
 
-def trackVolume(name, ln):
+def trackVolume(name: str, ln: list[str]) -> None:
     """Set volume for specific track."""
 
     if not ln:
@@ -799,13 +803,13 @@ def trackVolume(name, ln):
     gbl.tnames[name].setVolume(ln)
 
 
-def trackChords(name, ln):
+def trackChords(name: str, ln: list[str]) -> None:
     """Set a chord line for a specific track."""
 
     gbl.tnames[name].setChords(ln)
 
 
-def trackAccent(name, ln):
+def trackAccent(name: str, ln: list[str]) -> None:
     """Set emphasis beats for track."""
 
     gbl.tnames[name].setAccent(ln)
@@ -815,7 +819,7 @@ def trackAccent(name, ln):
 # Timing
 
 
-def trackMallet(name, ln):
+def trackMallet(name: str, ln: list[str]) -> None:
     """Set repeating-mallet options for solo/melody track."""
 
     if not ln:
@@ -824,7 +828,7 @@ def trackMallet(name, ln):
     gbl.tnames[name].setMallet(ln)
 
 
-def trackRduration(name, ln):
+def trackRduration(name: str, ln: list[str]) -> None:
     """Set random duration effect for specific track."""
 
     if not ln:
@@ -833,7 +837,7 @@ def trackRduration(name, ln):
     gbl.tnames[name].setRDuration(ln)
 
 
-def trackRtime(name, ln):
+def trackRtime(name: str, ln: list[str]) -> None:
     """Set random timing for specific track."""
 
     if not ln:
@@ -842,13 +846,13 @@ def trackRtime(name, ln):
     gbl.tnames[name].setRTime(ln)
 
 
-def trackRskip(name, ln):
+def trackRskip(name: str, ln: list[str]) -> None:
     """Set random skip for specific track."""
 
     gbl.tnames[name].setRSkip(ln)
 
 
-def trackArtic(name, ln):
+def trackArtic(name: str, ln: list[str]) -> None:
     """Set articulation."""
 
     if not ln:
@@ -861,7 +865,7 @@ def trackArtic(name, ln):
 # Chord stuff
 
 
-def trackCompress(name, ln):
+def trackCompress(name: str, ln: list[str]) -> None:
     """Set (unset) compress for track."""
 
     if not ln:
@@ -870,7 +874,7 @@ def trackCompress(name, ln):
     gbl.tnames[name].setCompress(ln)
 
 
-def trackVoicing(name, ln):
+def trackVoicing(name: str, ln: list[str]) -> None:
     """Set Voicing options. Only valid for chord tracks at this time."""
 
     if not ln:
@@ -879,7 +883,7 @@ def trackVoicing(name, ln):
     gbl.tnames[name].setVoicing(ln)
 
 
-def trackDupRoot(name, ln):
+def trackDupRoot(name: str, ln: list[str]) -> None:
     """Set (unset) the root note duplication. Only applies to chord tracks."""
 
     if not ln:
@@ -888,13 +892,13 @@ def trackDupRoot(name, ln):
     gbl.tnames[name].setDupRoot(ln)
 
 
-def trackChordLimit(name, ln):
+def trackChordLimit(name: str, ln: list[str]) -> None:
     """Set (unset) ChordLimit for track."""
 
     gbl.tnames[name].setChordLimit(ln)
 
 
-def trackRange(name, ln):
+def trackRange(name: str, ln: list[str]) -> None:
     """Set (unset) Range for track. Only effects arp and scale."""
 
     if not ln:
@@ -903,7 +907,7 @@ def trackRange(name, ln):
     gbl.tnames[name].setRange(ln)
 
 
-def trackInvert(name, ln):
+def trackInvert(name: str, ln: list[str]) -> None:
     """Set invert for track."""
 
     if not ln:
@@ -912,7 +916,7 @@ def trackInvert(name, ln):
     gbl.tnames[name].setInvert(ln)
 
 
-def trackSpan(name, ln):
+def trackSpan(name: str, ln: list[str]) -> None:
     """Set midi note span for track."""
 
     if len(ln) != 2:
@@ -935,7 +939,7 @@ def trackSpan(name, ln):
     gbl.tnames[name].setSpan(start, end)
 
 
-def trackOctave(name, ln):
+def trackOctave(name: str, ln: list[str]) -> None:
     """Set octave for specific track."""
 
     if not ln:
@@ -944,7 +948,7 @@ def trackOctave(name, ln):
     gbl.tnames[name].setOctave(ln)
 
 
-def trackMOctave(name, ln):
+def trackMOctave(name: str, ln: list[str]) -> None:
     """Set midi-based octave for specific track."""
 
     if not ln:
@@ -953,7 +957,7 @@ def trackMOctave(name, ln):
     gbl.tnames[name].setMOctave(ln)
 
 
-def trackRpitch(name, ln):
+def trackRpitch(name: str, ln: list[str]) -> None:
     """Set random pitch adjustment for specific track."""
 
     if not ln:
@@ -961,7 +965,7 @@ def trackRpitch(name, ln):
     gbl.tnames[name].setRPitch(ln)
 
 
-def trackStrum(name, ln):
+def trackStrum(name: str, ln: list[str]) -> None:
     """Set all specified track strum."""
 
     if not ln:
@@ -970,7 +974,7 @@ def trackStrum(name, ln):
     gbl.tnames[name].setStrum(ln)
 
 
-def trackStrumAdd(name, ln):
+def trackStrumAdd(name: str, ln: list[str]) -> None:
     """Set all specified track strumAdd."""
 
     if not ln:
@@ -979,7 +983,7 @@ def trackStrumAdd(name, ln):
     gbl.tnames[name].setStrumAdd(ln)
 
 
-def trackSticky(name, ln):
+def trackSticky(name: str, ln: list[str]) -> None:
     """Sets a track as sticky. Ignored by groove commands."""
 
     if not ln:
@@ -988,7 +992,7 @@ def trackSticky(name, ln):
     gbl.tnames[name].setSticky(ln)
 
 
-def trackHarmony(name, ln):
+def trackHarmony(name: str, ln: list[str]) -> None:
     """Set harmony value."""
 
     if not ln:
@@ -1000,7 +1004,7 @@ def trackHarmony(name, ln):
 #    gbl.tnames[name].setHarmony(ln)
 
 
-def trackHarmonyOnly(name, ln):
+def trackHarmonyOnly(name: str, ln: list[str]) -> None:
     """Set harmony only for track."""
 
     if not ln:
@@ -1012,7 +1016,7 @@ def trackHarmonyOnly(name, ln):
 #      gbl.tnames[name].setHarmonyOnly(ln)
 
 
-def trackHarmonyVolume(name, ln):
+def trackHarmonyVolume(name: str, ln: list[str]) -> None:
     """Set harmony volume for track."""
 
     if not ln:
@@ -1028,7 +1032,7 @@ def trackHarmonyVolume(name, ln):
 # Plectrum only stuff
 
 
-def trackPlectrumTuning(name, ln):
+def trackPlectrumTuning(name: str, ln: list[str]) -> None:
     """Define the number of strings and tuning for
     for an instrument that can be played with a plectrum.
     """
@@ -1047,7 +1051,7 @@ def trackPlectrumTuning(name, ln):
         )
 
 
-def trackPlectrumCapo(name, ln):
+def trackPlectrumCapo(name: str, ln: list[str]) -> None:
     """Define the position of the capo
     (unlike a real guitar negative numbers are allowed)
     for an instrument that can be played with a plectrum.
@@ -1066,7 +1070,7 @@ def trackPlectrumCapo(name, ln):
         )
 
 
-def trackPlectrumFretNoise(name, ln):
+def trackPlectrumFretNoise(name: str, ln: list[str]) -> None:
     """Define fret noise options."""
 
     g = gbl.tnames[name]
@@ -1080,7 +1084,7 @@ def trackPlectrumFretNoise(name, ln):
         )
 
 
-def trackPlectrumShape(name, ln):
+def trackPlectrumShape(name: str, ln: list[str]) -> None:
     """Define chord shape for stringed instrument."""
 
     g = gbl.tnames[name]
@@ -1098,7 +1102,7 @@ def trackPlectrumShape(name, ln):
 # MIDI setting
 
 
-def trackChannel(name, ln):
+def trackChannel(name: str, ln: list[str]) -> None:
     """Set the midi channel for a track."""
 
     if not ln:
@@ -1107,7 +1111,7 @@ def trackChannel(name, ln):
     gbl.tnames[name].setChannel(ln[0])
 
 
-def trackChShare(name, ln):
+def trackChShare(name: str, ln: list[str]) -> None:
     """Set MIDI channel sharing."""
 
     if len(ln) != 1:
@@ -1116,7 +1120,7 @@ def trackChShare(name, ln):
     gbl.tnames[name].setChShare(ln[0])
 
 
-def trackVoice(name, ln):
+def trackVoice(name: str, ln: list[str]) -> None:
     """Set voice for specific track."""
 
     if not ln:
@@ -1125,7 +1129,7 @@ def trackVoice(name, ln):
     gbl.tnames[name].setVoice(ln)
 
 
-def trackOff(name, ln):
+def trackOff(name: str, ln: list[str]) -> None:
     """Turn a track off"""
 
     if ln:
@@ -1134,7 +1138,7 @@ def trackOff(name, ln):
     gbl.tnames[name].setOff()
 
 
-def trackOn(name, ln):
+def trackOn(name: str, ln: list[str]) -> None:
     """Turn a track on"""
 
     if ln:
@@ -1143,19 +1147,19 @@ def trackOn(name, ln):
     gbl.tnames[name].setOn()
 
 
-def trackOrnament(name, ln):
+def trackOrnament(name: str, ln: list[str]) -> None:
     """Set the ornamentation. Currently only for SCALE."""
 
     neomma.MMA.ornament.setOrnament(gbl.tnames[name], ln)
 
 
-def trackTone(name, ln):
+def trackTone(name: str, ln: list[str]) -> None:
     """Set the tone (note). Only valid in drum tracks."""
 
     gbl.tnames[name].setTone(ln)
 
 
-def trackForceOut(name, ln):
+def trackForceOut(name: str, ln: list[str]) -> None:
     """Force output of voice settings."""
 
     if len(ln):
@@ -1168,7 +1172,7 @@ def trackForceOut(name, ln):
 # Misc
 
 
-def trackArpeggiate(name, ln):
+def trackArpeggiate(name: str, ln: list[str]) -> None:
     """Set up the solo/melody arpeggiator."""
 
     if not ln:
@@ -1184,7 +1188,7 @@ def trackArpeggiate(name, ln):
         )
 
 
-def trackStretch(name, ln):
+def trackStretch(name: str, ln: list[str]) -> None:
     """Set the stretch value for solo/melody."""
 
     if not ln:
@@ -1200,7 +1204,7 @@ def trackStretch(name, ln):
         )
 
 
-def trackDelay(name, ln):
+def trackDelay(name: str, ln: list[str]) -> None:
     """Set up the solo/melody delay (echo)."""
 
     if not ln:
@@ -1209,7 +1213,7 @@ def trackDelay(name, ln):
     gbl.tnames[name].setDelay(ln)
 
 
-def trackDrumType(name, ln):
+def trackDrumType(name: str, ln: list[str]) -> None:
     """Set a melody or solo track to be a drum solo track."""
 
     tr = gbl.tnames[name]
@@ -1221,7 +1225,7 @@ def trackDrumType(name, ln):
     tr.setDrumType()
 
 
-def trackDirection(name, ln):
+def trackDirection(name: str, ln: list[str]) -> None:
     """Set scale/arp direction."""
 
     if not ln:
@@ -1230,7 +1234,7 @@ def trackDirection(name, ln):
     gbl.tnames[name].setDirection(ln)
 
 
-def trackScaletype(name, ln):
+def trackScaletype(name: str, ln: list[str]) -> None:
     """Set the scale type."""
 
     if not ln:
@@ -1239,7 +1243,7 @@ def trackScaletype(name, ln):
     gbl.tnames[name].setScaletype(ln)
 
 
-def trackUnify(name, ln):
+def trackUnify(name: str, ln: list[str]) -> None:
     """Set UNIFY for track."""
 
     if not len(ln):
@@ -1262,7 +1266,7 @@ def trackUnify(name, ln):
 
 """
 
-simpleFuncs = {
+simpleFuncs: dict[str, Callable[[list[str]], None]] = {
     "ADJUSTVOLUME": neomma.MMA.volume.adjvolume,
     "AFTER": neomma.MMA.after.create,
     "ALLGROOVES": neomma.MMA.grooves.allgrooves,
@@ -1367,7 +1371,7 @@ simpleFuncs = {
     "TRANSPOSE": neomma.MMA.keysig.transpose,
 }
 
-trackFuncs = {
+trackFuncs: dict[str, Callable[[str, list[str]], None]] = {
     "ACCENT": trackAccent,
     "ARPEGGIATE": trackArpeggiate,
     "ARTICULATE": trackArtic,

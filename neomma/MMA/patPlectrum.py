@@ -202,7 +202,7 @@ class Plectrum(PC):
                         o.strings.append(i)
 
             elif cmd == "TRACK":
-                neomma.MMA.alloc.trackAlloc(opt, 1)
+                neomma.MMA.alloc.trackAlloc(opt, True)
                 if gbl.tnames[opt].vtype != "BASS":
                     error(
                         "%s FretNoise Track must be a BASS track, not %s."

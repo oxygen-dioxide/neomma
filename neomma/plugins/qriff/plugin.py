@@ -72,11 +72,11 @@ def setTuning(trk):
 
     if not tuningSet:
         if not fTrack.upper() in neomma.MMA.gbl.tnames:
-            neomma.MMA.alloc.trackAlloc("%s" % fTrack, 0)
+            neomma.MMA.alloc.trackAlloc("%s" % fTrack, False)
             pu.addCommand("%s Copy %s" % (fTrack, trk))
 
         if not sTrack.upper() in neomma.MMA.gbl.tnames:
-            neomma.MMA.alloc.trackAlloc("%s" % sTrack, 0)
+            neomma.MMA.alloc.trackAlloc("%s" % sTrack, False)
             pu.addCommand("%s Copy %s" % (sTrack, trk))
 
         pu.addCommand("%s MidiNote PB 0 -2048" % fTrack)

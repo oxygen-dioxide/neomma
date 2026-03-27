@@ -50,7 +50,7 @@ vols: dict[str, float] = {
 }
 
 volume = vols["M"]  # default global volume
-nextVolume = None  # main parser sets this to the next volume
+nextVolume: None | float = None  # main parser sets this to the next volume
 # when future volumes are stacked. It's used
 # by the volume adjust to smooth out (de)crescendos.
 lastVolume = volume

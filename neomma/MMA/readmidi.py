@@ -24,7 +24,7 @@ Bob's quick and dirty functions to read a midi file.
   The entire file is read into memory and then parsed
   into different events.
 
-This should work with any midi file. Python 2/3 compatible.
+This should work with any midi file.
 
 Note that many midi events are NOT read. The code here just
   skips over them since they are not useful to MMA.

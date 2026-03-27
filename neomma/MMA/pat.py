@@ -503,7 +503,7 @@ class PC:
 
         sc = ln.upper()
 
-        neomma.MMA.alloc.trackAlloc(sc, 1)
+        neomma.MMA.alloc.trackAlloc(sc, True)
 
         if not sc in gbl.tnames:
             error("Channel '%s' does not exist. No such name" % sc)

@@ -38,14 +38,14 @@ from neomma.MMA.safe_eval import safeEnv
 
 outfile = ""
 
-libPath = []
-libDirs = []
-incPath = []
-plugPaths = []
+libPath: list[str] = []
+libDirs: list[str] = []
+incPath: list[str] = []
+plugPaths: list[str] = []
 
-mmaStart = []
-mmaEnd = []
-mmaRC = None
+mmaStart: list[str] = []
+mmaEnd: list[str] = []
+mmaRC: str | None = None
 
 
 def init():
@@ -126,7 +126,7 @@ def mmaend(ln):
         dPrint("MMAend set to: %s" % gbl.mmaEnd)
 
 
-def setRC(f):
+def setRC(f) -> None:
     """Set a rc file from the command line."""
 
     global mmaRC
@@ -138,7 +138,7 @@ def setRC(f):
 # process the RC, mmastart and mmaend files. Called from main.py
 
 
-def readRC():
+def readRC() -> None:
     """Process all RC files."""
 
     docOption = gbl.createDocs  # Disable doc printing for RC file
@@ -147,14 +147,14 @@ def readRC():
     if mmaRC:
         rcfiles = [mmaRC]
     else:
-        rcfiles = (
+        rcfiles = [
             "mmarc",
             "c:\\mma\\mmarc",
             "~/.config/mma/mmarc",
             "~/.mmarc",
             "/usr/local/etc/mmarc",
             "/etc/mmarc",
-        )
+        ]
 
     readDone = 0
     for i in rcfiles:
@@ -176,7 +176,7 @@ def readRC():
     gbl.createDocs = docOption  # Restore doc options
 
 
-def dommaStart():
+def dommaStart() -> None:
     """Process all the mma start files."""
 
     for f in mmaStart:
@@ -188,7 +188,7 @@ def dommaStart():
         gbl.lineno = -1  # reset for real code
 
 
-def dommaEnd():
+def dommaEnd() -> None:
     """Process all the mma end files."""
 
     for f in mmaStart:
@@ -204,7 +204,7 @@ def dommaEnd():
 # Search the paths for a file.
 
 
-def findIncFile(fn):
+def findIncFile(fn: str) -> str | None:
     """Find an INC file. Returns complete path or NULL."""
 
     global incPath
@@ -217,7 +217,7 @@ def findIncFile(fn):
     return None
 
 
-def findLibFile(fn):
+def findLibFile(fn: str) -> str | None:
     """Find a LIB file. Returns complete path or NULL."""
 
     global libDirs
@@ -237,7 +237,7 @@ def findLibFile(fn):
 # Set up the lib/inc paths
 
 
-def setLibPath(ln, user=1):
+def setLibPath(ln: list[str], user: bool = True) -> None:
     """Set the LibPath variable."""
 
     global libPath, libDirs
@@ -254,7 +254,7 @@ def setLibPath(ln, user=1):
         dPrint("LibPath set: %s" % " ".join(libPath))
 
 
-def expandLib(user=0):
+def expandLib(user: bool = False) -> None:
     """Expand the library paths from the list in libdir."""
 
     global libPath, libDirs
@@ -287,7 +287,7 @@ def expandLib(user=0):
         dPrint("LibPath expansion set to: %s" % " ".join(libDirs))
 
 
-def setIncPath(ln):
+def setIncPath(ln: list[str]) -> None:
     """Set the IncPath variable."""
 
     global incPath
@@ -357,7 +357,7 @@ def createOutfileName(extension):
 # Set up the plugin paths
 
 
-def setPlugPath(ln):
+def setPlugPath(ln: list[str]) -> None:
     """Set the plugPath variable."""
 
     global plugPaths

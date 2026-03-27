@@ -61,7 +61,7 @@ timeTable: dict[str, tuple[float, tuple[float, ...]]] = {
 }
 
 
-def setTime(ln: list) -> None:
+def setTime(ln: list[str]) -> None:
     """Set the 'time' value. This is NOT a time sig, it
     is the number of quarters/beat.
 
@@ -137,7 +137,7 @@ def setTime(ln: list) -> None:
             a.clearSequence()
 
     if not tabList:
-        tabList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12][: int(gbl.QperBar)]
+        tabList = [1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.][: int(gbl.QperBar)]
 
     # need to do this after setting time.
     if (tabList[-1] - 1) * gbl.BperQ >= gbl.barLen:

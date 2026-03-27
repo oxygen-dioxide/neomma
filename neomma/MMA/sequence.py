@@ -97,7 +97,7 @@ def trackSequence(name, ln):
         ids += 1
 
         trk = name.split("-")[0]
-        trackAlloc(trk, 1)
+        trackAlloc(trk, True)
 
         # We need to mung the plectrum classes. Problem is that we define all
         # patterns in the base class (plectrum-banjo is created in PLECTRUM)
